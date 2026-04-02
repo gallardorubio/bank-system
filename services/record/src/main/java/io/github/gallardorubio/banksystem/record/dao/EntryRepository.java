@@ -1,0 +1,13 @@
+package io.github.gallardorubio.banksystem.record.dao;
+
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import io.github.gallardorubio.banksystem.record.entity.EntryEntity;
+
+@Repository
+public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
+    
+}

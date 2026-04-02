@@ -1,0 +1,68 @@
+package io.github.gallardorubio.banksystem.record.service;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
+
+import io.github.gallardorubio.banksystem.record.dao.AccountRepository;
+import io.github.gallardorubio.banksystem.record.dao.EntryRepository;
+import io.github.gallardorubio.banksystem.record.dto.AccountCreateRequest;
+import io.github.gallardorubio.banksystem.record.entity.AccountEntity;
+import io.github.gallardorubio.banksystem.record.entity.EntryEntity;
+import io.github.gallardorubio.banksystem.record.entity.Side;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class RecordService {
+
+    private final AccountRepository accountRepository;
+
+    private final EntryRepository entryRepository;
+
+    @Transactional
+    public void processDoubleEntry(UUID operationId, 
+                                   UUID debitAccountId, 
+                                   UUID creditAccountId, 
+                                   BigDecimal amount) {
+        
+        AccountEntity debitAccount = accountRepository.findByIdForUpdate(debitAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta de débito no encontrada: " + debitAccountId));
+                
+        AccountEntity creditAccount = accountRepository.findByIdForUpdate(creditAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta de crédito no encontrada: " + creditAccountId));
+
+        debitAccount.apply(amount, Side.DEBIT);
+        creditAccount.apply(amount, Side.CREDIT);
+
+        EntryEntity debitEntry = new EntryEntity(
+                debitAccount, 
+                amount,
+                Side.DEBIT,
+                operationId
+        );
+
+        EntryEntity creditEntry = new EntryEntity(
+                creditAccount,
+                amount,
+                Side.CREDIT,
+                operationId
+        );
+
+        entryRepository.save(debitEntry);
+        entryRepository.save(creditEntry);
+    }
+
+    @Transactional
+    public UUID createAccount(AccountCreateRequest request) {
+        AccountEntity account = new AccountEntity(
+                request.ownerId(),
+                request.type(),
+                request.currency()
+        );
+        
+        return accountRepository.save(account).getId();
+    }
+    
+}
