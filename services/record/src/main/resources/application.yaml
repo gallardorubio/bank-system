@@ -3,3 +3,24 @@ spring:
     name: record
   datasource:
     password: ${db-password}
+  # We need to kwnow where the kafka broker is
+  # We cannot send java classes as it is, kafka store data in binary
+  # We have to serialize keys and values
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: record-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      # We don't want to blindly convert the json data into some java object
+      # We only want to deserialize the json data for the classes which are comming
+      # under this particular package
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: io.github.gallardorubio.banksystem.record.dto

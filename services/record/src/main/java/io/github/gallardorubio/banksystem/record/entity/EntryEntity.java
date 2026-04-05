@@ -2,9 +2,6 @@ package io.github.gallardorubio.banksystem.record.entity;
 
 import java.util.UUID;
 
-import io.github.gallardorubio.banksystem.record.dto.DTO;
-import io.github.gallardorubio.banksystem.record.dto.Entry;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,7 +15,7 @@ import lombok.*;
 @Getter
 @Entity
 @Table(name = "entry")
-public class EntryEntity implements Serializable, DTO<Entry> {
+public class EntryEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -42,22 +39,23 @@ public class EntryEntity implements Serializable, DTO<Entry> {
     @NotNull
     @Column(name = "operation_id", nullable = false, updatable = false)
     private UUID operationId;
+
+    @NonNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "operation_type", nullable = false, updatable = false)
+    private OperationType operationType;
     
     @NotNull
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public EntryEntity(AccountEntity account, BigDecimal amount, Side side, UUID operationId) {
+    public EntryEntity(AccountEntity account, BigDecimal amount, Side side, UUID operationId, OperationType operationType) {
         this.account = account;
         this.amount = amount;
         this.side = side;
         this.operationId = operationId;
+        this.operationType = operationType;
         this.createdAt = Instant.now();
-    }
-
-    @Override
-    public Entry toDto() {
-        throw new UnsupportedOperationException("Unimplemented method 'toDto'");
     }
     
 }

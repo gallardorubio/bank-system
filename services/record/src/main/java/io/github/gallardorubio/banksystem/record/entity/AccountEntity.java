@@ -2,8 +2,6 @@ package io.github.gallardorubio.banksystem.record.entity;
 
 import java.util.UUID;
 
-import io.github.gallardorubio.banksystem.record.dto.*;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -17,7 +15,7 @@ import lombok.*;
 @Getter
 @Entity
 @Table(name = "account")
-public class AccountEntity implements Serializable, DTO<Account> {
+public class AccountEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -59,12 +57,6 @@ public class AccountEntity implements Serializable, DTO<Account> {
                 ? this.balance.add(amount) 
                 : this.balance.subtract(amount);
         }
-    }
-
-    @Override
-    public Account toDto() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'toDto'");
     }
     
 }
