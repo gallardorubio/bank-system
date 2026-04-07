@@ -1,9 +1,9 @@
 services:
-  record:
-    image: record
+  core:
+    image: core
     build: 
       context: .
-    container_name: record
+    container_name: core
     ports:
       - "8080:8080"
     environment:
@@ -19,7 +19,7 @@ services:
 
   db:
     image: postgres:alpine
-    container_name: record-db
+    container_name: core-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD_FILE: /run/secrets/db-password

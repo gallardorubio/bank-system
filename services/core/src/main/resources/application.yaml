@@ -1,6 +1,6 @@
 spring:
   application:
-    name: record
+    name: core
   datasource:
     password: ${db-password}
   # We need to kwnow where the kafka broker is
