@@ -1,4 +1,4 @@
-package io.github.gallardorubio.banksystem.record.entity;
+package io.github.gallardorubio.banksystem.core.record.entity;
 
 public enum AccountType {
     ASSET,

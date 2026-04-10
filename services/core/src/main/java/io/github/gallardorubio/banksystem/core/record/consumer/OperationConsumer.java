@@ -1,14 +1,11 @@
-package io.github.gallardorubio.banksystem.record.consumer;
+package io.github.gallardorubio.banksystem.core.record.consumer;
 
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import io.github.gallardorubio.banksystem.record.dto.OperationApproved;
-import io.github.gallardorubio.banksystem.record.dto.OperationCompleted;
-import io.github.gallardorubio.banksystem.record.dto.OperationRejected;
-import io.github.gallardorubio.banksystem.record.producer.OperationProducer;
-import io.github.gallardorubio.banksystem.record.service.RecordService;
+import io.github.gallardorubio.banksystem.core.record.dto.OperationApproved;
+import io.github.gallardorubio.banksystem.core.record.producer.OperationProducer;
+import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
 
 @Component

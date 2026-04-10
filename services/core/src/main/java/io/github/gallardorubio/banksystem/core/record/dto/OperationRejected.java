@@ -1,4 +1,4 @@
-package io.github.gallardorubio.banksystem.record.dto;
+package io.github.gallardorubio.banksystem.core.record.dto;
 
 import java.util.UUID;
 

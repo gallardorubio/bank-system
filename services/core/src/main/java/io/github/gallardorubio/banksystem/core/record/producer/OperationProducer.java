@@ -1,12 +1,12 @@
-package io.github.gallardorubio.banksystem.record.producer;
+package io.github.gallardorubio.banksystem.core.record.producer;
 
 import java.util.UUID;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import io.github.gallardorubio.banksystem.record.dto.OperationCompleted;
-import io.github.gallardorubio.banksystem.record.dto.OperationRejected;
+import io.github.gallardorubio.banksystem.core.record.dto.OperationCompleted;
+import io.github.gallardorubio.banksystem.core.record.dto.OperationRejected;
 import lombok.RequiredArgsConstructor;
 
 @Component

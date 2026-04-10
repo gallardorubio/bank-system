@@ -1,9 +1,9 @@
-package io.github.gallardorubio.banksystem.record.dto;
+package io.github.gallardorubio.banksystem.core.record.dto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import io.github.gallardorubio.banksystem.record.entity.OperationType;
+import io.github.gallardorubio.banksystem.core.record.entity.OperationType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 

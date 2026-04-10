@@ -1,4 +1,4 @@
-package io.github.gallardorubio.banksystem.record.dao;
+package io.github.gallardorubio.banksystem.core.record.dao;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import io.github.gallardorubio.banksystem.record.entity.AccountEntity;
+import io.github.gallardorubio.banksystem.core.record.entity.AccountEntity;
 import jakarta.persistence.LockModeType;
 
 @Repository

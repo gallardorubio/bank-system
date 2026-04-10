@@ -1,17 +1,16 @@
-package io.github.gallardorubio.banksystem.record.service;
+package io.github.gallardorubio.banksystem.core.record.service;
 
 import java.math.BigDecimal;
-import java.rmi.server.Operation;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import io.github.gallardorubio.banksystem.record.dao.AccountRepository;
-import io.github.gallardorubio.banksystem.record.dao.EntryRepository;
-import io.github.gallardorubio.banksystem.record.entity.AccountEntity;
-import io.github.gallardorubio.banksystem.record.entity.EntryEntity;
-import io.github.gallardorubio.banksystem.record.entity.OperationType;
-import io.github.gallardorubio.banksystem.record.entity.Side;
+import io.github.gallardorubio.banksystem.core.record.dao.AccountRepository;
+import io.github.gallardorubio.banksystem.core.record.dao.EntryRepository;
+import io.github.gallardorubio.banksystem.core.record.entity.AccountEntity;
+import io.github.gallardorubio.banksystem.core.record.entity.EntryEntity;
+import io.github.gallardorubio.banksystem.core.record.entity.OperationType;
+import io.github.gallardorubio.banksystem.core.record.entity.Side;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
