@@ -11,7 +11,7 @@ import io.github.gallardorubio.banksystem.core.record.dao.EntryRepository;
 import io.github.gallardorubio.banksystem.core.record.entity.AccountEntity;
 import io.github.gallardorubio.banksystem.core.record.entity.EntryEntity;
 import io.github.gallardorubio.banksystem.core.record.entity.Side;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 public class RecordService {
 
     private final AccountRepository accountRepository;
-
     private final EntryRepository entryRepository;
 
     @Transactional
@@ -56,6 +55,13 @@ public class RecordService {
 
         entryRepository.save(debitEntry);
         entryRepository.save(creditEntry);
-    } 
+    }
+
+    @Transactional(readOnly = true)
+    public void checkAccountExists(UUID accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new IllegalArgumentException("Account not found: " + accountId);
+        }
+    }
 
 }

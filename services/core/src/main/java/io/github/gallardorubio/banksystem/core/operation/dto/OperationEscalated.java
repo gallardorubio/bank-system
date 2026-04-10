@@ -1,5 +1,19 @@
 package io.github.gallardorubio.banksystem.core.operation.dto;
 
-public class OperationEscalated {
-    
-}
+import java.util.UUID;
+
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
+import jakarta.validation.constraints.NotNull;
+
+public record OperationEscalated(
+
+    @NotNull 
+    UUID operationId,
+
+    @NotNull
+    OperationType operationType,
+
+    @NotNull
+    String reason
+
+) {}

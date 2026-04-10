@@ -5,9 +5,9 @@ import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.operation.producer.OperationProducer;
 import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
+import io.github.gallardorubio.banksystem.core.transfer.dto.TransferDetails;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +25,9 @@ public class TransferService {
 
     @Transactional
     public UUID initiatePendingTransfer(TransferRequest transferRequest) {
+        recordService.checkAccountExists(transferRequest.debitAccountId());
+        recordService.checkAccountExists(transferRequest.creditAccountId());
+
         TransferEntity transferEntity = new TransferEntity(
             transferRequest.debitAccountId(),
             transferRequest.creditAccountId(),
@@ -33,12 +36,16 @@ public class TransferService {
 
         transferRepository.save(transferEntity);
 
-        OperationPending operationPending = new OperationPending(
-            transferEntity.getId(),
+        TransferDetails transferDetails = new TransferDetails(
             transferEntity.getDebitAccountId(),
-            transferEntity.getCreditAccountId(),
+            transferEntity.getCreditAccountId()
+        );
+
+        OperationPending<TransferDetails> operationPending = new OperationPending<>(
+            transferEntity.getId(),
             transferEntity.getAmount(),
-            OperationType.TRANSFER
+            OperationType.TRANSFER,
+            transferDetails
         );
 
         operationProducer.sendOperationPending(operationPending);
@@ -68,6 +75,24 @@ public class TransferService {
             transferEntity.reject("");
         }
 
+        transferRepository.save(transferEntity);
+    }
+
+    @Transactional
+    public void processDeniedTransfer(UUID id, String reason) {
+        TransferEntity transferEntity = transferRepository.findById(id)
+            .orElseThrow(IllegalArgumentException::new);
+        
+        transferEntity.deny(reason);
+        transferRepository.save(transferEntity);
+    }
+
+    @Transactional
+    public void processEscalatedTransfer(UUID id, String reason) {
+        TransferEntity transferEntity = transferRepository.findById(id)
+            .orElseThrow(IllegalArgumentException::new);
+        
+        transferEntity.escalate(reason);
         transferRepository.save(transferEntity);
     }
 }

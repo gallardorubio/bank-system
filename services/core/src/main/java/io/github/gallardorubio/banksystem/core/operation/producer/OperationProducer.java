@@ -12,8 +12,8 @@ public class OperationProducer {
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendOperationPending(OperationPending event) {
-        kafkaTemplate.send("operation-pending", event);
+    public void sendOperationPending(OperationPending<?> operationPending) {
+        kafkaTemplate.send("operation-pending", operationPending);
     }
     
 }

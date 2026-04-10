@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record TransferRequest(
-        @NotNull UUID debitAccountId,
-        @NotNull UUID creditAccountId,
-        @NotNull @Positive BigDecimal amount
+    @NotNull UUID debitAccountId,
+    @NotNull UUID creditAccountId,
+    @NotNull @Positive BigDecimal amount
 ) {}
