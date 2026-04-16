@@ -26,14 +26,14 @@ public class TransferController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approveTransfer(@PathVariable UUID transferId) {
+    public ResponseEntity<Void> approveTransfer(@PathVariable("id") UUID transferId) {
         transferService.processApprovedTransfer(transferId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/deny")
-    public ResponseEntity<Void> denyTransfer(@PathVariable UUID transferId, 
+    public ResponseEntity<Void> denyTransfer(@PathVariable("id") UUID transferId, 
                                      @Valid @RequestBody TransferResolutionRequest transferResolutionRequest) {
         transferService.processDeniedTransfer(transferId, transferResolutionRequest.reason());
 

@@ -25,14 +25,14 @@ public class DepositController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approveDeposit(@PathVariable UUID depositId) {
+    public ResponseEntity<Void> approveDeposit(@PathVariable("id") UUID depositId) {
         depositService.processApprovedDeposit(depositId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/deny")
-    public ResponseEntity<Void> denyDeposit(@PathVariable UUID depositId, 
+    public ResponseEntity<Void> denyDeposit(@PathVariable("id") UUID depositId, 
                                      @Valid @RequestBody DepositResolutionRequest depositResolutionRequest) {
         depositService.processDeniedDeposit(depositId, depositResolutionRequest.reason());
 

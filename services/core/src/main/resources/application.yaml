@@ -24,3 +24,10 @@ spring:
           json:
             trusted:
               packages: io.github.gallardorubio.banksystem.record.dto
+
+app:
+  loan:
+    rates:
+      fixed: 6.50
+      margin: 1.50
+      euribor: 2.00
