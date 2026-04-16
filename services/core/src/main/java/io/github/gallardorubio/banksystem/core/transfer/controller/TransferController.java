@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*;   
 
 import java.util.UUID;
 
@@ -26,14 +26,14 @@ public class TransferController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approve(@PathVariable UUID transferId) {
+    public ResponseEntity<Void> approveTransfer(@PathVariable UUID transferId) {
         transferService.processApprovedTransfer(transferId);
 
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/deny")
-    public ResponseEntity<Void> deny(@PathVariable UUID transferId, 
+    public ResponseEntity<Void> denyTransfer(@PathVariable UUID transferId, 
                                      @Valid @RequestBody TransferResolutionRequest transferResolutionRequest) {
         transferService.processDeniedTransfer(transferId, transferResolutionRequest.reason());
 
