@@ -49,6 +49,12 @@ public class LoanEntity extends OperationEntity {
     @Column(name = "maturity_date")
     private Instant maturityDate;
 
+    @Column(name = "next_installment_date")
+    private Instant nextInstallmentDate;
+
+    @Column(name = "installments_paid", nullable = false)
+    private Integer installmentsPaid = 0;
+
     public LoanEntity(UUID targetAccountId, BigDecimal amount, Integer termPeriods, InstallmentFrequency installmentFrequency, BigDecimal interestRate) {
         super(amount);
         this.targetAccountId = targetAccountId;
@@ -58,11 +64,24 @@ public class LoanEntity extends OperationEntity {
         this.paidAmount = BigDecimal.ZERO;
     }
 
-    public void startLoan(BigDecimal totalInstallment, BigDecimal principalComponent, BigDecimal interestComponent, Instant maturityDate) {
+    public void startLoan(BigDecimal totalInstallment, BigDecimal principalComponent, BigDecimal interestComponent, Instant maturityDate, Instant firstInstallmentDate) {
         this.nextInstallmentAmount = totalInstallment;
         this.nextInstallmentPrincipal = principalComponent;
         this.nextInstallmentInterest = interestComponent;
         this.maturityDate = maturityDate;
+        this.nextInstallmentDate = firstInstallmentDate;
+        this.installmentsPaid = 0;
+    }
+
+    public void registerInstallmentPayment(Instant nextDate) {
+        this.paidAmount = this.paidAmount.add(this.nextInstallmentAmount);
+        this.installmentsPaid++;
+        
+        if (this.installmentsPaid.equals(this.termPeriods)) {
+            this.nextInstallmentDate = null;
+        } else {
+            this.nextInstallmentDate = nextDate;
+        }
     }
     
 }

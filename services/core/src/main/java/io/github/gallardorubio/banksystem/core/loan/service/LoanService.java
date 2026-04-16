@@ -125,9 +125,10 @@ public class LoanService {
                 case ANNUAL -> 365L;
             };
 
+            Instant firstInstallmentDate = Instant.now().plus(daysToAdd, ChronoUnit.DAYS);
             Instant maturityDate = Instant.now().plus(daysToAdd * loanEntity.getTermPeriods(), ChronoUnit.DAYS);
 
-            loanEntity.startLoan(installmentTotal, firstPrincipal, firstInterest, maturityDate);
+            loanEntity.startLoan(installmentTotal, firstPrincipal, firstInterest, maturityDate, firstInstallmentDate);
 
             recordService.processDoubleEntry(
                 loanEntity.getId(),
