@@ -1,8 +1,9 @@
 package io.github.gallardorubio.banksystem.users.service;
 
 import io.github.gallardorubio.banksystem.users.dao.UserRepository;
-import io.github.gallardorubio.banksystem.users.dto.UserRegistered;
+import io.github.gallardorubio.banksystem.users.dto.ClientRegistered;
 import io.github.gallardorubio.banksystem.users.dto.UserRequest;
+import io.github.gallardorubio.banksystem.users.entity.Role;
 import io.github.gallardorubio.banksystem.users.entity.SecurityQuestion;
 import io.github.gallardorubio.banksystem.users.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
@@ -48,11 +49,13 @@ public class UserService {
 
         userRepository.save(userEntity);
 
-        UserRegistered userRegistered = new UserRegistered(
-            userEntity.getId()
-        );
+        if (userRequest.role() == Role.CLIENT) {
+            ClientRegistered clientRegistered = new ClientRegistered(
+                userEntity.getId()
+            );
 
-        applicationEventPublisher.publishEvent(userRegistered);
+            applicationEventPublisher.publishEvent(clientRegistered);
+        }
 
         return userEntity.getId();
     }

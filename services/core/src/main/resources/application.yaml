@@ -12,9 +12,10 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      group-id: record-group
+      group-id: core-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      
 
       # We don't want to blindly convert the json data into some java object
       # We only want to deserialize the json data for the classes which are comming
@@ -23,7 +24,7 @@ spring:
         spring:
           json:
             trusted:
-              packages: io.github.gallardorubio.banksystem.record.dto
+              packages: "*"
 
 app:
   loan:
