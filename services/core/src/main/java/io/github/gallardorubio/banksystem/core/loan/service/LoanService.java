@@ -8,12 +8,12 @@ import io.github.gallardorubio.banksystem.core.loan.entity.InterestType;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.producer.OperationProducer;
 import io.github.gallardorubio.banksystem.core.record.dao.AccountRepository;
 import io.github.gallardorubio.banksystem.core.record.entity.AccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +31,7 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final RecordService recordService;
     private final AccountRepository accountRepository;
-    private final OperationProducer operationProducer;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private static final UUID VAULT_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
@@ -75,7 +75,7 @@ public class LoanService {
             loanDetails
         );
 
-        operationProducer.sendOperationPending(operationPending);
+        applicationEventPublisher.publishEvent(operationPending);
 
         return loanEntity.getId();
     }

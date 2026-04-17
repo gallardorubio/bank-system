@@ -2,12 +2,13 @@ package io.github.gallardorubio.banksystem.core.transfer.service;
 
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.producer.OperationProducer;
 import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferDetails;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
+
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +22,7 @@ public class TransferService {
 
     private final TransferRepository transferRepository;
     private final RecordService recordService;
-    private final OperationProducer operationProducer;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public UUID initiatePendingTransfer(TransferRequest transferRequest) {
@@ -48,7 +49,7 @@ public class TransferService {
             transferDetails
         );
 
-        operationProducer.sendOperationPending(operationPending);
+        applicationEventPublisher.publishEvent(operationPending);
 
         return transferEntity.getId();
     }

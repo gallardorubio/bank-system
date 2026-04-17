@@ -6,9 +6,9 @@ import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.producer.OperationProducer;
 import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,7 @@ public class DepositService {
 
     private final DepositRepository depositRepository;
     private final RecordService recordService;
-    private final OperationProducer operationProducer;
+    private final ApplicationEventPublisher applicationEventPublisher;
     private static final UUID VAULT_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Transactional
@@ -43,7 +43,7 @@ public class DepositService {
             depositDetails
         );
 
-        operationProducer.sendOperationPending(operationPending);
+        applicationEventPublisher.publishEvent(operationPending);
 
         return depositEntity.getId();
     }
