@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "banksystem-agentic"
+version = "0.0.1.dev0"
+description = "Microservicio Agentic AI (Crédito, Fraude, Seguridad) para BankSystem"
+readme = "README.md"
+authors = [
+    { name = "gallardorubio" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    "langgraph>=0.0.60",
+    "langchain>=0.2.0",
+    "langchain-community>=0.2.0",
+    "pydantic>=2.7.0",
+    "confluent-kafka>=2.4.0",
+    "requests>=2.31.0"
+]
+
+[project.urls]
+Repository = "https://github.com/gallardorubio/banksystem"
