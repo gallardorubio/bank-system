@@ -3,15 +3,23 @@ package io.github.gallardorubio.banksystem.core.deposit.service;
 import io.github.gallardorubio.banksystem.core.deposit.dao.DepositRepository;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositDetails;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
+import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
+import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
 import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,22 +31,61 @@ public class DepositService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private static final UUID VAULT_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    @Transactional
-    public UUID initiatePendingDeposit(DepositRequest depositRequest) {
-        recordService.checkAccountExists(depositRequest.targetAccountId());
+    @Transactional(readOnly = true)
+    public DepositResponse getDeposit(UUID depositId, UUID clientId) {
+        return depositRepository.findByIdAndClientId(depositId, clientId)
+            .map(deposit -> new DepositResponse(
+                deposit.getAmount(),
+                deposit.getStatus(),
+                deposit.getStatusHistory(),
+                deposit.getOrigin(),
+                deposit.getCreatedAt()
+            ))
+            .orElseThrow(() -> new ResourceNotFoundException("Deposit not found with id: " + depositId));
+    }
 
-        DepositEntity depositEntity = new DepositEntity(
-            depositRequest.targetAccountId(),
-            depositRequest.amount()
-        );
+    @Transactional(readOnly = true)
+    public List<DepositResponse> getAllDeposits(UUID clientId) {
+        return depositRepository.findAll().stream()
+            .filter(deposit -> deposit.getClientId().equals(clientId))
+            .map(deposit -> new DepositResponse(
+                deposit.getAmount(),
+                deposit.getStatus(),
+                deposit.getStatusHistory(),
+                deposit.getOrigin(),
+                deposit.getCreatedAt()
+            ))
+            .toList();
+    }
+
+    @Transactional
+    public UUID initiatePendingDeposit(DepositRequest depositRequest, UUID clientId, RequestOrigin origin) {
+        DepositEntity depositEntity = DepositEntity.builder()
+            .clientId(clientId)
+            .clientBankAccountId(depositRequest.bankAccountId())
+            .amount(depositRequest.amount())
+            .status(OperationStatus.PENDING)
+            .statusHistory(List.of(new StatusEntry(OperationStatus.PENDING, LocalDateTime.now(), "Created")))
+            .origin(origin)
+            .createdAt(LocalDateTime.now())
+            .build();
 
         depositRepository.save(depositEntity);
 
-        DepositDetails depositDetails = new DepositDetails(depositEntity.getTargetAccountId());
+        DepositDetails depositDetails = new DepositDetails(
+            depositEntity.getId(),
+            depositEntity.getClientId(),
+            depositEntity.getClientBankAccountId(),
+            depositEntity.getTargetBankAccountId(),
+            depositEntity.getAmount(),
+            depositEntity.getStatus(),
+            depositEntity.getStatusHistory(),
+            depositEntity.getOrigin(),
+            depositEntity.getCreatedAt()
+        );
 
         OperationPending<DepositDetails> operationPending = new OperationPending<>(
             depositEntity.getId(),
-            depositEntity.getAmount(),
             OperationType.DEPOSIT,
             depositDetails
         );

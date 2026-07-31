@@ -25,6 +25,11 @@ spring:
           json:
             trusted:
               packages: "*"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}
 
 app:
   loan:

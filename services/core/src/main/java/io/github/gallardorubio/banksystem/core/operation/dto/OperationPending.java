@@ -14,10 +14,6 @@ public record OperationPending<T>(
     UUID operationId,
 
     @NotNull 
-    @Positive 
-    BigDecimal amount,
-
-    @NotNull 
     OperationType operationType,
 
     @Valid 

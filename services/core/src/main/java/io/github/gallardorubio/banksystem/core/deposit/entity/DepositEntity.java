@@ -5,23 +5,21 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Setter
+@SuperBuilder
 @Entity
 @Table(name = "deposit", schema = "core")
 public class DepositEntity extends OperationEntity {
 
-    @Column(name = "target_account_id", nullable = false, updatable = false)
-    private UUID targetAccountId;
-
-    public DepositEntity(UUID targetAccountId, BigDecimal amount) {
-        super(amount);
-        this.targetAccountId = targetAccountId;
-    }
 }

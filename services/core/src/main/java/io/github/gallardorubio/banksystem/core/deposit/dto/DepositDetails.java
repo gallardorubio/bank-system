@@ -1,8 +1,22 @@
 package io.github.gallardorubio.banksystem.core.deposit.dto;
 
-import jakarta.validation.constraints.NotNull;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
+import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public record DepositDetails(
-    @NotNull UUID targetAccountId
+    UUID id,
+    UUID clientId,
+    UUID clientBankAccountId,
+    UUID targetBankAccountId,
+    BigDecimal amount,
+    OperationStatus status,
+    List<StatusEntry> statusHistory,
+    RequestOrigin origin,
+    Instant createdAt
 ) {}
