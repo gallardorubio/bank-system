@@ -29,6 +29,11 @@ public class OperationConsumer {
         }
     }
 
+    /*
+        arreglar para que si falla se llame a:
+        depositEntity.reject("Bookkeeping failed");
+         */
+
     @KafkaListener(topics = "operation-denied", groupId = "core-group")
     public void listenOperationDenied(OperationDenied operationDenied) {
         switch (operationDenied.operationType()) {

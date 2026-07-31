@@ -62,7 +62,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.APPROVED;
-        this.statusHistory.add(new StatusEntry(this.status, LocalDateTime.now(), reason));
+        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
     }
 
     public void deny(String reason) {
@@ -70,7 +70,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.DENIED;
-        this.statusHistory.add(new StatusEntry(this.status, LocalDateTime.now(), reason));
+        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
     }
 
     public void escalate(String reason) {
@@ -78,7 +78,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.ESCALATED;
-        this.statusHistory.add(new StatusEntry(this.status, LocalDateTime.now(), reason));
+        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
     }
 
     public void complete(String reason) {
@@ -86,7 +86,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.COMPLETED;
-        this.statusHistory.add(new StatusEntry(this.status, LocalDateTime.now(), reason));
+        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
     }
 
     public void reject(String reason) {
@@ -94,7 +94,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.REJECTED;
-        this.statusHistory.add(new StatusEntry(this.status, LocalDateTime.now(), reason));
+        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
     }
 
 }

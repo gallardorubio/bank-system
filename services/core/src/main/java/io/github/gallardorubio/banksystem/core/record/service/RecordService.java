@@ -1,16 +1,15 @@
 package io.github.gallardorubio.banksystem.core.record.service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.record.dao.AccountRepository;
+import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.dao.EntryRepository;
-import io.github.gallardorubio.banksystem.core.record.entity.AccountEntity;
+import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.entity.EntryEntity;
-import io.github.gallardorubio.banksystem.core.record.entity.Side;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -18,50 +17,34 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RecordService {
 
-    private final AccountRepository accountRepository;
+    private final BankAccountRepository bankAccountRepository;
     private final EntryRepository entryRepository;
 
     @Transactional
-    public void processDoubleEntry(UUID operationId, 
-                                   UUID debitAccountId, 
-                                   UUID creditAccountId, 
-                                   BigDecimal amount,
-                                   OperationType operationType) {
+    public void processEntry(
+        UUID operationId,
+        UUID debitBankAccountId,
+        UUID creditBankAccountId,
+        BigDecimal amount
+    ) {
+        BankAccountEntity debitAccountEntity = bankAccountRepository.findByIdForUpdate(debitBankAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta de débito (vault) no encontrada: " + debitBankAccountId));
         
-        AccountEntity debitAccount = accountRepository.findByIdForUpdate(debitAccountId)
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta de débito no encontrada: " + debitAccountId));
-                
-        AccountEntity creditAccount = accountRepository.findByIdForUpdate(creditAccountId)
-                .orElseThrow(() -> new IllegalArgumentException("Cuenta de crédito no encontrada: " + creditAccountId));
+        BankAccountEntity creditAccountEntity = bankAccountRepository.findByIdForUpdate(creditBankAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta de crédito no encontrada: " + creditBankAccountId));
 
-        debitAccount.apply(amount, Side.DEBIT);
-        creditAccount.apply(amount, Side.CREDIT);
+        debitAccountEntity.withdraw(amount);
+        creditAccountEntity.deposit(amount);
 
-        EntryEntity debitEntry = new EntryEntity(
-                debitAccount, 
-                amount,
-                Side.DEBIT,
-                operationId,
-                operationType
-        );
+        EntryEntity entry = EntryEntity.builder()
+                .debitBankAccountId(debitBankAccountId)
+                .creditBankAccountId(creditBankAccountId)
+                .amount(amount)
+                .operationId(operationId)
+                .createdAt(Instant.now())
+                .build();
 
-        EntryEntity creditEntry = new EntryEntity(
-                creditAccount,
-                amount,
-                Side.CREDIT,
-                operationId,
-                operationType
-        );
-
-        entryRepository.save(debitEntry);
-        entryRepository.save(creditEntry);
-    }
-
-    @Transactional(readOnly = true)
-    public void checkAccountExists(UUID accountId) {
-        if (!accountRepository.existsById(accountId)) {
-            throw new IllegalArgumentException("Account not found: " + accountId);
-        }
+        entryRepository.save(entry);
     }
 
 }

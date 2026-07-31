@@ -1,18 +1,20 @@
 package io.github.gallardorubio.banksystem.core.deposit.controller;
 
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
-import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResolutionRequest;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.service.DepositService;
 import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -33,13 +35,13 @@ public class DepositController {
     }
 
     @GetMapping
-    pubic ResponseEntity<List<DepositResponse>> getAllDeposits(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<List<DepositResponse>> getAllDeposits(@AuthenticationPrincipal Jwt jwt) {
         List<DepositResponse> deposits = depositService.getAllDeposits(UUID.fromString(jwt.getSubject()));
 
         return ResponseEntity.ok(deposits);
     }
 
-    @PostMappping
+    @PostMapping
     public ResponseEntity<DepositResponse> createDeposit(
         @Valid @RequestBody DepositRequest depositRequest,
         @AuthenticationPrincipal Jwt jwt,
@@ -51,29 +53,11 @@ public class DepositController {
             UUID.fromString(jwt.getSubject()),
             origin
         );
-        return ResponseEntity.status(HTTPStatus.CREATED).body(depositResponse);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(depositResponse);
     }
 
-    @PostMapping
-    public ResponseEntity<UUID> createDeposit(@Valid @RequestBody DepositRequest depositRequest) {
-        UUID depositId = depositService.initiatePendingDeposit(depositRequest);
-
-        return ResponseEntity.status(202).body(depositId);
-    }
-
-    @PostMapping("/{id}/approve")
-    public ResponseEntity<Void> approveDeposit(@PathVariable("id") UUID depositId) {
-        depositService.processApprovedDeposit(depositId);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{id}/deny")
-    public ResponseEntity<Void> denyDeposit(@PathVariable("id") UUID depositId, 
-                                     @Valid @RequestBody DepositResolutionRequest depositResolutionRequest) {
-        depositService.processDeniedDeposit(depositId, depositResolutionRequest.reason());
-
-        return ResponseEntity.noContent().build();
-    }
-
+    
 }
+
+//PATCH deposit by operator

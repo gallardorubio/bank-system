@@ -18,7 +18,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,8 +49,7 @@ public class DepositService {
 
     @Transactional(readOnly = true)
     public List<DepositResponse> getAllDeposits(UUID clientId) {
-        return depositRepository.findAll().stream()
-            .filter(deposit -> deposit.getClientId().equals(clientId))
+        return depositRepository.findAllByClientId(clientId).stream()
             .map(deposit -> new DepositResponse(
                 deposit.getAmount(),
                 deposit.getStatus(),
@@ -59,18 +61,18 @@ public class DepositService {
     }
 
     @Transactional
-    public UUID initiatePendingDeposit(DepositRequest depositRequest, UUID clientId, RequestOrigin origin) {
+    public DepositResponse initiatePendingDeposit(DepositRequest depositRequest, UUID clientId, RequestOrigin origin) {
         DepositEntity depositEntity = DepositEntity.builder()
             .clientId(clientId)
             .clientBankAccountId(depositRequest.bankAccountId())
             .amount(depositRequest.amount())
             .status(OperationStatus.PENDING)
-            .statusHistory(List.of(new StatusEntry(OperationStatus.PENDING, LocalDateTime.now(), "Created")))
+            .statusHistory(List.of(new StatusEntry(OperationStatus.PENDING, Instant.now(), "Created")))
             .origin(origin)
-            .createdAt(LocalDateTime.now())
+            .createdAt(Instant.now())
             .build();
 
-        depositRepository.save(depositEntity);
+        depositEntity = depositRepository.save(depositEntity);
 
         DepositDetails depositDetails = new DepositDetails(
             depositEntity.getId(),
@@ -90,51 +92,74 @@ public class DepositService {
             depositDetails
         );
 
-        applicationEventPublisher.publishEvent(operationPending);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                applicationEventPublisher.publishEvent(operationPending);
+            }
+        });
 
-        return depositEntity.getId();
+        return new DepositResponse(
+            depositEntity.getAmount(),
+            depositEntity.getStatus(),
+            depositEntity.getStatusHistory(),
+            depositEntity.getOrigin(),
+            depositEntity.getCreatedAt()
+        );
     }
 
     @Transactional
-    public void processApprovedDeposit(UUID id) {
-        DepositEntity depositEntity = depositRepository.findById(id)
-            .orElseThrow(IllegalArgumentException::new);
+    public void processApprovedDeposit(UUID depositId, String reason) {
+        DepositEntity depositEntity = depositRepository.findById(depositId)
+            .orElseThrow(() -> new IllegalArgumentException("Depósito no encontrado: " + depositId));
 
-        depositEntity.approve();
+        depositEntity.approve(reason);
 
-        try {
-            recordService.processDoubleEntry(
-                depositEntity.getId(),
-                depositEntity.getTargetAccountId(),
-                VAULT_ACCOUNT_ID,
-                depositEntity.getAmount(),
-                OperationType.DEPOSIT
-            );
-            
-            depositEntity.complete();
-        } catch (Exception e) {
-            depositEntity.reject("");
+        recordService.processEntry(
+            depositEntity.getId(),
+            VAULT_ACCOUNT_ID,
+            depositEntity.getClientBankAccountId(),
+            depositEntity.getAmount()
+        );
+
+        depositEntity.complete("Bookkeeping completed");
+    }
+
+    @Transactional
+    public void processDeniedDeposit(UUID depositId, String reason) {
+        DepositEntity depositEntity = depositRepository.findById(depositId)
+            .orElseThrow(() -> new IllegalArgumentException("Depósito no encontrado: " + depositId));
+
+        depositEntity.deny(reason);
+    }
+
+    @Transactional
+    public void processEscalatedDeposit(UUID depositId, String reason) {
+        DepositEntity depositEntity = depositRepository.findById(depositId)
+            .orElseThrow(() -> new IllegalArgumentException("Depósito no encontrado: " + depositId));
+
+        depositEntity.escalate(reason);
+    }
+
+    @Transactional
+    public DepositResponse resolveDeposit(UUID depositId, String action, String reason) {
+        switch (action.toUpperCase()) {
+            case "APPROVE" -> processApprovedDeposit(depositId, reason);
+            case "DENY" -> processDeniedDeposit(depositId, reason);
+            case "ESCALATE" -> processEscalatedDeposit(depositId, reason);
+            default -> throw new IllegalArgumentException("Acción no soportada: " + action);
         }
 
-        depositRepository.save(depositEntity);
-    }
+        DepositEntity deposit = depositRepository.findById(depositId)
+            .orElseThrow(() -> new ResourceNotFoundException("Depósito no encontrado: " + depositId));
 
-    @Transactional
-    public void processDeniedDeposit(UUID id, String reason) {
-        DepositEntity depositEntity = depositRepository.findById(id)
-            .orElseThrow(IllegalArgumentException::new);
-        
-        depositEntity.deny(reason);
-        depositRepository.save(depositEntity);
-    }
-
-    @Transactional
-    public void processEscalatedDeposit(UUID id, String reason) {
-        DepositEntity depositEntity = depositRepository.findById(id)
-            .orElseThrow(IllegalArgumentException::new);
-        
-        depositEntity.escalate(reason);
-        depositRepository.save(depositEntity);
+        return new DepositResponse(
+            deposit.getAmount(),
+            deposit.getStatus(),
+            deposit.getStatusHistory(),
+            deposit.getOrigin(),
+            deposit.getCreatedAt()
+        );
     }
 
 }
