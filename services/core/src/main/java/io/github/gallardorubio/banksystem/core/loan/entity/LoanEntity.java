@@ -1,27 +1,31 @@
 package io.github.gallardorubio.banksystem.core.loan.entity;
 
+import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
+import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@SuperBuilder
 @Table(name = "loan", schema = "core")
 public class LoanEntity extends OperationEntity {
-
-    @Column(name = "target_account_id", nullable = false, updatable = false)
-    private UUID targetAccountId;
 
     @Column(name = "term_periods", nullable = false, updatable = false)
     private Integer termPeriods;
@@ -30,50 +34,40 @@ public class LoanEntity extends OperationEntity {
     @Column(name = "installmentFrequency", nullable = false, updatable = false)
     private InstallmentFrequency installmentFrequency;
 
-    // TIN
     @Column(name = "interest_rate", nullable = false, updatable = false, precision = 5, scale = 2)
     private BigDecimal interestRate;
 
     @Column(name = "paid_amount", nullable = false, precision = 19, scale = 4)
-    private BigDecimal paidAmount;
+    @Builder.Default
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
+    @Column(name = "installments_paid", nullable = false)
+    @Builder.Default
+    private Integer installmentsPaid = 0;
 
     @Column(name = "next_installment_amount", precision = 19, scale = 4)
-    private BigDecimal nextInstallmentAmount;
-
-    @Column(name = "next_installment_principal", precision = 19, scale = 4)
-    private BigDecimal nextInstallmentPrincipal;
-
-    @Column(name = "next_installment_interest", precision = 19, scale = 4)
-    private BigDecimal nextInstallmentInterest;
-
-    @Column(name = "maturity_date")
-    private Instant maturityDate;
+    private BigDecimal nextInstallmentAmount;    
 
     @Column(name = "next_installment_date")
     private Instant nextInstallmentDate;
 
-    @Column(name = "installments_paid", nullable = false)
-    private Integer installmentsPaid = 0;
+    @Column(name = "maturity_date")
+    private Instant maturityDate;
 
-    public LoanEntity(UUID targetAccountId, BigDecimal amount, Integer termPeriods, InstallmentFrequency installmentFrequency, BigDecimal interestRate) {
-        super(amount);
-        this.targetAccountId = targetAccountId;
-        this.termPeriods = termPeriods;
-        this.installmentFrequency = installmentFrequency;
-        this.interestRate = interestRate;
-        this.paidAmount = BigDecimal.ZERO;
+    public static LoanEntity fromDto(LoanRequest dto, UUID clientId, RequestOrigin origin) {
+        return LoanEntity.builder()
+            .clientId(clientId)
+            .clientBankAccountId(dto.clientBankAccountId())
+            .amount(dto.amount())
+            .termPeriods(dto.termPeriods())
+            .installmentFrequency(dto.installmentFrequency())
+            .interestRate(dto.interestRate())
+            .origin(origin)
+            .createdAt(Instant.now())
+            .build();
     }
 
-    public void startLoan(BigDecimal totalInstallment, BigDecimal principalComponent, BigDecimal interestComponent, Instant maturityDate, Instant firstInstallmentDate) {
-        this.nextInstallmentAmount = totalInstallment;
-        this.nextInstallmentPrincipal = principalComponent;
-        this.nextInstallmentInterest = interestComponent;
-        this.maturityDate = maturityDate;
-        this.nextInstallmentDate = firstInstallmentDate;
-        this.installmentsPaid = 0;
-    }
-
-    public void registerInstallmentPayment(Instant nextDate) {
+    public void registerNextInstallment(Instant nextDate) {
         this.paidAmount = this.paidAmount.add(this.nextInstallmentAmount);
         this.installmentsPaid++;
         
@@ -82,6 +76,23 @@ public class LoanEntity extends OperationEntity {
         } else {
             this.nextInstallmentDate = nextDate;
         }
+    }
+
+    public void registerFirstInstallment() {
+        BigDecimal annualRateDecimal = this.interestRate.divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
+        BigDecimal years = BigDecimal.valueOf(this.termPeriods)
+                .divide(BigDecimal.valueOf(this.installmentFrequency.getPeriodsPerYear()), 8, RoundingMode.HALF_UP);
+        
+        BigDecimal totalInterest = this.getAmount().multiply(annualRateDecimal).multiply(years);
+        BigDecimal totalToPay = this.getAmount().add(totalInterest);
+
+        this.nextInstallmentAmount = totalToPay.divide(BigDecimal.valueOf(this.termPeriods), 4, RoundingMode.HALF_UP);
+
+        Instant now = Instant.now();
+        this.nextInstallmentDate = now.plus(this.installmentFrequency.getDaysToAdd(), ChronoUnit.DAYS);
+
+        long totalDays = (long) this.installmentFrequency.getDaysToAdd() * this.termPeriods;
+        this.maturityDate = now.plus(totalDays, ChronoUnit.DAYS);
     }
     
 }

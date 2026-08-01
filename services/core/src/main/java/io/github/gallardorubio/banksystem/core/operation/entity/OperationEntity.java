@@ -2,13 +2,11 @@ package io.github.gallardorubio.banksystem.core.operation.entity;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,9 +35,6 @@ public abstract class OperationEntity {
     @Column(name = "client_bank_account_id", nullable = false, updatable = false)
     private UUID clientBankAccountId;
 
-    @Column(name = "target_bank_account_id", nullable = false, updatable = false)
-    private UUID targetBankAccountId;
-
     @Column(name = "amount", nullable = false, updatable = false, precision = 19, scale = 4)
     private BigDecimal amount;
 
@@ -48,14 +43,22 @@ public abstract class OperationEntity {
     private OperationStatus status;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "status_history", nullable = false)
+    @Builder.Default
     private List<StatusEntry> statusHistory = new ArrayList<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "origin", nullable = false, updatable = false)
     private RequestOrigin origin;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    public void pending(String reason) {
+        this.status = OperationStatus.PENDING;
+        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+    }
 
     public void approve(String reason) {
         if (this.status != OperationStatus.PENDING && this.status != OperationStatus.ESCALATED) {

@@ -11,9 +11,9 @@ public class InstallmentScheduler {
 
     private final InstallmentService installmentService;
 
-    // Se ejecuta cada día a las 02:00 AM
     @Scheduled(cron = "0 0 2 * * ?")
     public void runBatch() {
         installmentService.processDailyInstallments();
     }
+
 }

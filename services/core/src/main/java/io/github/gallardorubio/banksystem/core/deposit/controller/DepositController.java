@@ -1,6 +1,7 @@
 package io.github.gallardorubio.banksystem.core.deposit.controller;
 
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
+import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResolutionRequest;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.service.DepositService;
 import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
@@ -57,7 +58,26 @@ public class DepositController {
         return ResponseEntity.status(HttpStatus.CREATED).body(depositResponse);
     }
 
-    
-}
+    @PatchMapping("/{id}")
+    public ResponseEntity<DepositResponse> resolveDeposit(
+        @PathVariable("id") UUID depositId,
+        @Valid @RequestBody DepositResolutionRequest resolutionRequest,
+        @AuthenticationPrincipal Jwt jwt
+    )
+    {
+        List<String> groups = jwt.getClaimAsStringList("cognito:groups");
+        if(groups == null || !groups.contains("operator")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-//PATCH deposit by operator
+        DepositResponse depositResponse = depositService.resolveDeposit(
+            depositId, 
+            resolutionRequest.action(), 
+            resolutionRequest.reason()
+        );
+
+        return ResponseEntity.ok(depositResponse);
+        
+    }
+
+}

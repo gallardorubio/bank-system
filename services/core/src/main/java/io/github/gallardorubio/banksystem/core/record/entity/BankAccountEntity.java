@@ -31,6 +31,8 @@ public class BankAccountEntity implements Serializable {
     @Column(name = "balance", nullable = false, precision = 19, scale = 4)
     private BigDecimal balance;
 
+    public static final UUID VAULT_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
     public void deposit(BigDecimal amount) {
         this.balance = this.balance.add(amount);
     }

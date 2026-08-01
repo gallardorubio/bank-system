@@ -3,26 +3,25 @@ package io.github.gallardorubio.banksystem.core.loan.service;
 import io.github.gallardorubio.banksystem.core.loan.dao.LoanRepository;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanDetails;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
-import io.github.gallardorubio.banksystem.core.loan.entity.InstallmentFrequency;
-import io.github.gallardorubio.banksystem.core.loan.entity.InterestType;
+import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.record.dao.AccountRepository;
-import io.github.gallardorubio.banksystem.core.record.entity.AccountEntity;
+import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.RecordService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
+
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
@@ -30,129 +29,75 @@ public class LoanService {
 
     private final LoanRepository loanRepository;
     private final RecordService recordService;
-    private final AccountRepository accountRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    private static final UUID VAULT_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    @Transactional(readOnly = true)
+    public LoanResponse getLoan(UUID loanId, UUID clientId) {
+        return loanRepository.findByIdAndClientId(loanId, clientId)
+            .map(loan -> new LoanResponse(loan))
+            .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + loanId));
+    }
 
-    @Value("${app.loan.rates.fixed}")
-    private BigDecimal fixedRate;
-
-    @Value("${app.loan.rates.margin}")
-    private BigDecimal margin;
-
-    @Value("${app.loan.rates.euribor}")
-    private BigDecimal euribor;
+    @Transactional(readOnly = true)
+    public List<LoanResponse> getAllLoans(UUID clientId) {
+        return loanRepository.findAllByClientId(clientId).stream()
+            .map(loan -> new LoanResponse(loan))
+            .toList();
+    }
 
     @Transactional
-    public UUID initiatePendingLoan(LoanRequest loanRequest) {
-        AccountEntity targetAccount = accountRepository.findById(loanRequest.targetAccountId())
-            .orElseThrow(IllegalArgumentException::new);
+    public LoanResponse initiatePendingLoan(LoanRequest loanRequest, UUID clientId, RequestOrigin origin) {
+        LoanEntity loanEntity = LoanEntity.fromDto(loanRequest, clientId, origin);
 
-        BigDecimal appliedInterestRate = calculateInterest(loanRequest.interestType());
+        loanEntity.pending("Préstamo pendiente de aprobación");
 
-        LoanEntity loanEntity = new LoanEntity(
-            loanRequest.targetAccountId(),
-            loanRequest.amount(),
-            loanRequest.termPeriods(),
-            loanRequest.installmentFrequency(),
-            appliedInterestRate
-        );
-
-        loanRepository.save(loanEntity);
-
-        LoanDetails loanDetails = new LoanDetails(
-            targetAccount.getOwnerId(),
-            loanEntity.getTargetAccountId(),
-            loanEntity.getTermPeriods(),
-            loanEntity.getInterestRate()
-        );
+        LoanDetails loanDetails = new LoanDetails(loanEntity);
 
         OperationPending<LoanDetails> operationPending = new OperationPending<>(
             loanEntity.getId(),
-            loanEntity.getAmount(),
             OperationType.LOAN,
             loanDetails
         );
 
-        applicationEventPublisher.publishEvent(operationPending);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                applicationEventPublisher.publishEvent(operationPending);
+            }
+        });
 
-        return loanEntity.getId();
+        return new LoanResponse(loanEntity);
     }
 
     @Transactional
-    public void processApprovedLoan(UUID id) {
-        LoanEntity loanEntity = loanRepository.findById(id)
-            .orElseThrow(IllegalArgumentException::new);
+    public void processApprovedLoan(UUID loanId, String reason) {
+        LoanEntity loanEntity = loanRepository.findById(loanId)
+            .orElseThrow(() -> new IllegalArgumentException("Loan not found: " + loanId));
 
-        loanEntity.approve();
+        loanEntity.approve(reason);
 
         try {
-            MathContext mc = MathContext.DECIMAL128; // Alta precisión para cálculos intermedios
-
-            int periodsPerYear = getPeriodsPerYear(loanEntity.getInstallmentFrequency());
-            
-            BigDecimal annualDecimalRate = loanEntity.getInterestRate().divide(BigDecimal.valueOf(100), mc);
-            BigDecimal periodicRate = annualDecimalRate.divide(BigDecimal.valueOf(periodsPerYear), mc);
-
-            BigDecimal installmentTotal;
-            BigDecimal firstInterest;
-            BigDecimal firstPrincipal;
-
-            if (periodicRate.compareTo(BigDecimal.ZERO) == 0) {
-                installmentTotal = loanEntity.getAmount().divide(BigDecimal.valueOf(loanEntity.getTermPeriods()), 4, RoundingMode.HALF_UP);
-                firstInterest = BigDecimal.ZERO;
-                firstPrincipal = installmentTotal;
-            } else {
-                // Cuota = Capital * (i / (1 - (1+i)^-n))
-                BigDecimal onePlusI = BigDecimal.ONE.add(periodicRate, mc);
-                // (1+i)^n
-                BigDecimal onePlusIToN = onePlusI.pow(loanEntity.getTermPeriods(), mc);
-                // 1 - (1 / (1+i)^n)
-                BigDecimal denominator = BigDecimal.ONE.subtract(BigDecimal.ONE.divide(onePlusIToN, mc), mc);
-                
-                // (Capital * i) / denominador
-                BigDecimal numerator = loanEntity.getAmount().multiply(periodicRate, mc);
-                installmentTotal = numerator.divide(denominator, 4, RoundingMode.HALF_UP);
-
-                firstInterest = loanEntity.getAmount().multiply(periodicRate).setScale(4, RoundingMode.HALF_UP);
-                firstPrincipal = installmentTotal.subtract(firstInterest);
-            }
-
-            long daysToAdd = switch (loanEntity.getInstallmentFrequency()) {
-                case MONTHLY -> 30L;
-                case SEMI_ANNUAL -> 180L;
-                case ANNUAL -> 365L;
-            };
-
-            Instant firstInstallmentDate = Instant.now().plus(daysToAdd, ChronoUnit.DAYS);
-            Instant maturityDate = Instant.now().plus(daysToAdd * loanEntity.getTermPeriods(), ChronoUnit.DAYS);
-
-            loanEntity.startLoan(installmentTotal, firstPrincipal, firstInterest, maturityDate, firstInstallmentDate);
-
-            recordService.processDoubleEntry(
+            recordService.processEntry(
                 loanEntity.getId(),
-                VAULT_ACCOUNT_ID,
-                loanEntity.getTargetAccountId(),
-                loanEntity.getAmount(),
-                OperationType.LOAN
+                BankAccountEntity.VAULT_ACCOUNT_ID,
+                loanEntity.getClientBankAccountId(),
+                loanEntity.getAmount()
             );
 
-            loanEntity.complete();
-        } catch (Exception e) {
-            loanEntity.reject("");
-        }
+            loanEntity.registerFirstInstallment();
 
-        loanRepository.save(loanEntity);
+            loanEntity.complete("Apunte contable de préstamo completado");
+        } catch (Exception e) {
+            loanEntity.reject("Error en apunte contable de préstamo: " + e.getMessage());
+        }
     }
 
     @Transactional
-    public void processDeniedLoan(UUID id, String reason) {
-        LoanEntity loanEntity = loanRepository.findById(id)
-            .orElseThrow(IllegalArgumentException::new);
+    public void processDeniedLoan(UUID loanId, String reason) {
+        LoanEntity loanEntity = loanRepository.findById(loanId)
+            .orElseThrow(() -> new IllegalArgumentException("Loan not found: " + loanId));
 
         loanEntity.deny(reason);
-        loanRepository.save(loanEntity);
     }
 
     @Transactional
@@ -164,20 +109,18 @@ public class LoanService {
         loanRepository.save(loanEntity);
     }
 
-    private BigDecimal calculateInterest(InterestType interestType) {
-        return switch (interestType) {
-            case FIXED -> fixedRate;
-            case VARIABLE -> euribor.add(margin);
-            case MIXED -> fixedRate.add(euribor).divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
-        };
-    }
+    @Transactional
+    public LoanResponse resolveLoan(UUID loanId, String action, String reason) {
+        switch (action.toUpperCase()) {
+            case "APPROVE" -> processApprovedLoan(loanId, reason);
+            case "DENY" -> processDeniedLoan(loanId, reason);
+            default -> throw new IllegalArgumentException("Action not supported: " + action);
+        }
 
-    private int getPeriodsPerYear(InstallmentFrequency installmentFrequency) {
-        return switch (installmentFrequency) {
-            case MONTHLY -> 12;
-            case SEMI_ANNUAL -> 2;
-            case ANNUAL -> 1;
-        };
+        LoanEntity loan = loanRepository.findById(loanId)
+            .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + loanId));
+
+        return new LoanResponse(loan);
     }
 
 }

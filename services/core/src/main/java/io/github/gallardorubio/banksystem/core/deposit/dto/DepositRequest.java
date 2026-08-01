@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record DepositRequest(
-    @NotNull @Positive BigDecimal amount,
-    @NotNull UUID bankAccountId
+    @NotNull UUID clientBankAccountId,
+    @NotNull @Positive BigDecimal amount
+    
 ) {}

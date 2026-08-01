@@ -1,6 +1,6 @@
 package io.github.gallardorubio.banksystem.core.config;
 
-import io.github.gallardorubio.banksystem.core.record.service.AccountService;
+import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,9 +9,10 @@ import org.springframework.context.annotation.Configuration;
 public class BankInitializationConfig {
 
     @Bean
-    public CommandLineRunner initializeBankInfrastructure(AccountService accountService) {
+    public CommandLineRunner initializeBankInfrastructure(BankAccountService bankAccountService) {
         return args -> {
-            accountService.initializeVaultAccount();
+            bankAccountService.initializeVaultAccount();
         };
     }
+
 }
