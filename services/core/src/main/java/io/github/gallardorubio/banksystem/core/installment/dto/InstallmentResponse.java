@@ -1,27 +1,26 @@
-package io.github.gallardorubio.banksystem.core.transfer.dto;
+package io.github.gallardorubio.banksystem.core.installment.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import io.github.gallardorubio.banksystem.core.installment.entity.InstallmentEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 
-public record TransferResponse(
+public record InstallmentResponse(
     UUID id,
     UUID clientBankAccountId,
     BigDecimal amount,
     OperationStatus status,
     List<OperationStatusPhase> statusHistory,
     Instant createdAt,
-    UUID targetBankAccountId,
-    String concept
+    UUID loanId
 ) implements OperationResponse {
-    public TransferResponse(TransferEntity entity) {
+    public InstallmentResponse(InstallmentEntity entity) {
         this(
             entity.getId(),
             entity.getClientBankAccountId(),
@@ -29,13 +28,12 @@ public record TransferResponse(
             entity.getStatus(),
             entity.getStatusHistory(),
             entity.getCreatedAt(),
-            entity.getTargetBankAccountId(),
-            entity.getConcept()
+            entity.getLoanId()
         );
     }
 
     @Override
     public OperationType operationType() {
-        return OperationType.TRANSFER;
+        return OperationType.INSTALLMENT;
     }
 }

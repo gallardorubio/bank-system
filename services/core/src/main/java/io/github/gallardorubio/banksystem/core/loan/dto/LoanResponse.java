@@ -7,15 +7,17 @@ import java.util.UUID;
 
 import io.github.gallardorubio.banksystem.core.loan.entity.InstallmentFrequency;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 
 public record LoanResponse(
     UUID id,
     UUID clientBankAccountId,
     BigDecimal amount,
     OperationStatus status,
-    List<StatusEntry> statusHistory,
+    List<OperationStatusPhase> statusHistory,
     Instant createdAt,
     Integer termPeriods,
     InstallmentFrequency installmentFrequency,
@@ -25,7 +27,7 @@ public record LoanResponse(
     BigDecimal nextInstallmentAmount,
     Instant nextInstallmentDate,
     Instant MaturityDate
-) {
+) implements OperationResponse {
     public LoanResponse(LoanEntity entity) {
         this(
             entity.getId(),
@@ -43,5 +45,10 @@ public record LoanResponse(
             entity.getNextInstallmentDate(),
             entity.getMaturityDate()
         );
+    }
+
+    @Override
+    public OperationType operationType() {
+        return OperationType.LOAN;
     }
 }

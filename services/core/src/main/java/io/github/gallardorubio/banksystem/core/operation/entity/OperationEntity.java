@@ -45,7 +45,7 @@ public abstract class OperationEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "status_history", nullable = false)
     @Builder.Default
-    private List<StatusEntry> statusHistory = new ArrayList<>();
+    private List<OperationStatusPhase> statusHistory = new ArrayList<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "origin", nullable = false, updatable = false)
@@ -57,7 +57,7 @@ public abstract class OperationEntity {
 
     public void pending(String reason) {
         this.status = OperationStatus.PENDING;
-        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+        this.statusHistory.add(new OperationStatusPhase(this.status, Instant.now(), reason));
     }
 
     public void approve(String reason) {
@@ -65,7 +65,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.APPROVED;
-        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+        this.statusHistory.add(new OperationStatusPhase(this.status, Instant.now(), reason));
     }
 
     public void deny(String reason) {
@@ -73,7 +73,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.DENIED;
-        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+        this.statusHistory.add(new OperationStatusPhase(this.status, Instant.now(), reason));
     }
 
     public void escalate(String reason) {
@@ -81,7 +81,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.ESCALATED;
-        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+        this.statusHistory.add(new OperationStatusPhase(this.status, Instant.now(), reason));
     }
 
     public void complete(String reason) {
@@ -89,7 +89,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.COMPLETED;
-        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+        this.statusHistory.add(new OperationStatusPhase(this.status, Instant.now(), reason));
     }
 
     public void reject(String reason) {
@@ -97,7 +97,7 @@ public abstract class OperationEntity {
             throw new IllegalStateException();
         }
         this.status = OperationStatus.REJECTED;
-        this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
+        this.statusHistory.add(new OperationStatusPhase(this.status, Instant.now(), reason));
     }
 
     public abstract OperationType getOperationType();

@@ -9,7 +9,7 @@ import io.github.gallardorubio.banksystem.core.loan.entity.InstallmentFrequency;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
-import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
 
 public record LoanDetails(
     UUID id,
@@ -17,7 +17,7 @@ public record LoanDetails(
     UUID clientBankAccountId,
     BigDecimal amount,
     OperationStatus status,
-    List<StatusEntry> statusHistory,
+    List<OperationStatusPhase> statusHistory,
     OperationRequestOrigin origin,
     Instant createdAt,
     Integer termPeriods,

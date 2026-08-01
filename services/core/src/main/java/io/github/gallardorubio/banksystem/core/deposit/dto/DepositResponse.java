@@ -6,17 +6,19 @@ import java.util.List;
 import java.util.UUID;
 
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 
 public record DepositResponse (
     UUID id,
     UUID clientBankAccountId,
     BigDecimal amount,
     OperationStatus status,
-    List<StatusEntry> statusHistory,
+    List<OperationStatusPhase> statusHistory,
     Instant createdAt
-) {
+) implements OperationResponse {
     public DepositResponse(DepositEntity entity) {
         this(
             entity.getId(),
@@ -26,5 +28,10 @@ public record DepositResponse (
             entity.getStatusHistory(),
             entity.getCreatedAt()
         );
+    }
+
+    @Override
+    public OperationType operationType() {
+        return OperationType.DEPOSIT;
     }
 }

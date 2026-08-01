@@ -3,7 +3,7 @@ package io.github.gallardorubio.banksystem.core.deposit.dto;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
-import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,7 +16,7 @@ public record DepositDetails(
     UUID clientBankAccountId,
     BigDecimal amount,
     OperationStatus status,
-    List<StatusEntry> statusHistory,
+    List<OperationStatusPhase> statusHistory,
     OperationRequestOrigin origin,
     Instant createdAt
 ) {

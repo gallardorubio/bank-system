@@ -4,7 +4,7 @@ import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
-public record OperationAgenticResponse(
+public record OperationEventResolution(
     @NotNull UUID operationId,
     @NotNull OperationType operationType,
     String reason

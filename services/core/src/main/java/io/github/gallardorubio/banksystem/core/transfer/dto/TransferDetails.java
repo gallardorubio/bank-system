@@ -2,7 +2,7 @@ package io.github.gallardorubio.banksystem.core.transfer.dto;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
-import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 
 import java.math.BigDecimal;
@@ -16,7 +16,7 @@ public record TransferDetails(
     UUID clientBankAccountId,
     BigDecimal amount,
     OperationStatus status,
-    List<StatusEntry> statusHistory,
+    List<OperationStatusPhase> statusHistory,
     OperationRequestOrigin origin,
     Instant createdAt,
     UUID targetBankAccountId,

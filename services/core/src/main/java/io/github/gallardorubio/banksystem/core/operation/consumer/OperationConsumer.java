@@ -2,7 +2,7 @@ package io.github.gallardorubio.banksystem.core.operation.consumer;
 
 import io.github.gallardorubio.banksystem.core.deposit.service.DepositService;
 import io.github.gallardorubio.banksystem.core.loan.service.LoanService;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationResolution;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationEventResolution;
 import io.github.gallardorubio.banksystem.core.transfer.service.TransferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,7 +17,7 @@ public class OperationConsumer {
     private final LoanService loanService;
 
     @KafkaListener(topics = "operation-approved", groupId = "core-group")
-    public void listenOperationApproved(OperationResolution res) {
+    public void listenOperationApproved(OperationEventResolution res) {
         switch (res.operationType()) {
             case TRANSFER -> transferService.processApprovedTransfer(res.operationId(), res.reason());
             case DEPOSIT  -> depositService.processApprovedDeposit(res.operationId(), res.reason());
@@ -27,7 +27,7 @@ public class OperationConsumer {
     }
 
     @KafkaListener(topics = "operation-denied", groupId = "core-group")
-    public void listenOperationDenied(OperationResolution res) {
+    public void listenOperationDenied(OperationEventResolution res) {
         switch (res.operationType()) {
             case TRANSFER -> transferService.processDeniedTransfer(res.operationId(), res.reason());
             case DEPOSIT  -> depositService.processDeniedDeposit(res.operationId(), res.reason());
@@ -37,7 +37,7 @@ public class OperationConsumer {
     }
 
     @KafkaListener(topics = "operation-escalated", groupId = "core-group")
-    public void listenOperationEscalated(OperationResolution res) {
+    public void listenOperationEscalated(OperationEventResolution res) {
         switch (res.operationType()) {
             case DEPOSIT -> depositService.processEscalatedDeposit(res.operationId(), res.reason());
             case LOAN    -> loanService.processEscalatedLoan(res.operationId(), res.reason());
