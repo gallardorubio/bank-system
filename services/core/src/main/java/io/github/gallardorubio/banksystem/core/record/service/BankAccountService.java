@@ -9,6 +9,8 @@ import io.github.gallardorubio.banksystem.core.record.dto.ClientRegistered;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -36,12 +38,22 @@ public class BankAccountService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BankAccountEntryResponse> getAllBankAccountEntries(UUID clientId, Pageable pageable) {
+    public Page<BankAccountEntryResponse> getAllBankAccountEntriesFiltered(
+        UUID clientId,
+        String concept,
+        String targetClientName,
+        Instant createdAt,
+        UUID targetBankAccountId,
+        BigDecimal amount,
+        Pageable pageable
+    ) {
         UUID bankAccountId = bankAccountRepository.findByClientId(clientId)
             .map(BankAccountEntity::getId)
             .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
 
-        return entryRepository.findAllByBankAccountIdOrderByCreatedAtDesc(bankAccountId, pageable)
+        return entryRepository.findFilteredEntries(
+                bankAccountId, concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
+            )
             .map(entry -> {
                 OperationEntity operationEntity = operationRepository.findById(entry.getOperationId()).orElse(null);
                 return new BankAccountEntryResponse(entry, bankAccountId, operationEntity);

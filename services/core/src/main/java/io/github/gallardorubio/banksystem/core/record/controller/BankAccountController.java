@@ -1,21 +1,25 @@
 package io.github.gallardorubio.banksystem.core.record.controller;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
 import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -25,14 +29,20 @@ public class BankAccountController {
     private final BankAccountService bankAccountService;
 
     @GetMapping("/entries")
-    public ResponseEntity<Page<BankAccountEntryResponse>> getAllBankAccountEntries(
-        @PathVariable("bank_account_id") UUID bankAccountId,
+    public ResponseEntity<Page<BankAccountEntryResponse>> getEntries(
         @AuthenticationPrincipal Jwt jwt,
+        @RequestParam(required = false) String concept,
+        @RequestParam(value = "target_client_name", required = false) String targetClientName,
+        @RequestParam(value = "created_at", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAt,
+        @RequestParam(value = "target_bank_account_id", required = false) UUID targetBankAccountId,
+        @RequestParam(required = false) BigDecimal amount,
         @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<BankAccountEntryResponse> entries = bankAccountService.getAllBankAccountEntries(UUID.fromString(jwt.getSubject()), pageable);
+        Page<BankAccountEntryResponse> entries = bankAccountService.getAllBankAccountEntriesFiltered(
+            UUID.fromString(jwt.getSubject()), concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
+        );
 
         return ResponseEntity.ok(entries);
-    }
+    }    
     
 }
