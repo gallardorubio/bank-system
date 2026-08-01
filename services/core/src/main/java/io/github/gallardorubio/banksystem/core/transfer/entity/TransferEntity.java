@@ -1,28 +1,36 @@
 package io.github.gallardorubio.banksystem.core.transfer.entity;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
+import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
+@SuperBuilder
 @Table(name = "transfer", schema = "core")
 public class TransferEntity extends OperationEntity {
 
-    @Column(name = "debit_account_id", nullable = false, updatable = false)
-    private UUID debitAccountId;
+    @Column(name = "target_bank_account_id", nullable = false, updatable = false)
+    private UUID targetBankAccountId;
 
-    @Column(name = "credit_account_id", nullable = false, updatable = false)
-    private UUID creditAccountId;
+    @Column(name = "concept", nullable = false, updatable = false)
+    private String concept;
 
-    public TransferEntity(UUID debitAccountId, UUID creditAccountId, BigDecimal amount) {
-        super(amount);
-        this.debitAccountId = debitAccountId;
-        this.creditAccountId = creditAccountId;
+    public static TransferEntity fromDto(TransferRequest dto, UUID clientId, RequestOrigin origin) {
+        return TransferEntity.builder()
+                .clientId(clientId)
+                .clientBankAccountId(dto.clientBankAccountId())
+                .amount(dto.amount())
+                .origin(origin)
+                .targetBankAccountId(dto.targetBankAccountId())
+                .concept(dto.concept())
+                .build();
     }
 
 }
