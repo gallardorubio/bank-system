@@ -5,7 +5,7 @@ import io.github.gallardorubio.banksystem.core.installment.entity.InstallmentEnt
 import io.github.gallardorubio.banksystem.core.loan.dao.LoanRepository;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
-import io.github.gallardorubio.banksystem.core.record.service.RecordService;
+import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -20,7 +20,7 @@ import java.util.List;
 public class InstallmentService {
 
     private final LoanRepository loanRepository;
-    private final RecordService recordService;
+    private final EntryService recordService;
     private final InstallmentRepository installmentRepository;
 
     @Transactional

@@ -1,7 +1,7 @@
 package io.github.gallardorubio.banksystem.core.transfer.dto;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 
@@ -17,7 +17,7 @@ public record TransferDetails(
     BigDecimal amount,
     OperationStatus status,
     List<StatusEntry> statusHistory,
-    RequestOrigin origin,
+    OperationRequestOrigin origin,
     Instant createdAt,
     UUID targetBankAccountId,
     String concept

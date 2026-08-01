@@ -2,8 +2,8 @@ package io.github.gallardorubio.banksystem.core.transfer.service;
 
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
-import io.github.gallardorubio.banksystem.core.record.service.RecordService;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferDetails;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
@@ -26,7 +26,7 @@ import java.util.UUID;
 public class TransferService {
 
     private final TransferRepository transferRepository;
-    private final RecordService recordService;
+    private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
@@ -44,7 +44,7 @@ public class TransferService {
     }
 
     @Transactional
-    public TransferResponse initiatePendingTransfer(TransferRequest transferRequest, UUID clientId, RequestOrigin origin) {
+    public TransferResponse initiatePendingTransfer(TransferRequest transferRequest, UUID clientId, OperationRequestOrigin origin) {
         TransferEntity transferEntity = TransferEntity.fromDto(transferRequest, clientId, origin);
         
         transferEntity.pending("Transferencia pendiente de aprobación");

@@ -4,13 +4,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-public record RequestOrigin(
+public record OperationRequestOrigin(
     String ip, 
     String userAgent, 
     String country, 
     String city
 ) {
-    public static RequestOrigin fromRequestAndJwt(HttpServletRequest request, Jwt jwt) {
+    public static OperationRequestOrigin fromRequestAndJwt(HttpServletRequest request, Jwt jwt) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
@@ -30,6 +30,6 @@ public record RequestOrigin(
             city = jwt.getClaimAsString("custom:city");
         }
 
-        return new RequestOrigin(ip, userAgent, country, city);
+        return new OperationRequestOrigin(ip, userAgent, country, city);
     }
 }

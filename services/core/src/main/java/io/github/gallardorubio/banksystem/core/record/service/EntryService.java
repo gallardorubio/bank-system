@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class RecordService {
+public class EntryService {
 
     private final BankAccountRepository bankAccountRepository;
     private final EntryRepository entryRepository;

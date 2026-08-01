@@ -4,7 +4,7 @@ import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResolutionRequest;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.service.LoanService;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class LoanController {
         @AuthenticationPrincipal Jwt jwt,
         HttpServletRequest request
     ) {
-        RequestOrigin origin = RequestOrigin.fromRequestAndJwt(request, jwt);
+        OperationRequestOrigin origin = OperationRequestOrigin.fromRequestAndJwt(request, jwt);
         LoanResponse loanResponse = loanService.initiatePendingLoan(
             loanRequest, 
             UUID.fromString(jwt.getSubject()),

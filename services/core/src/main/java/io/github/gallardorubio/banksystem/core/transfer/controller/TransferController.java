@@ -1,6 +1,6 @@
 package io.github.gallardorubio.banksystem.core.transfer.controller;
 
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
 import io.github.gallardorubio.banksystem.core.transfer.service.TransferService;
@@ -47,7 +47,7 @@ public class TransferController {
         @AuthenticationPrincipal Jwt jwt,
         HttpServletRequest request
     ) {
-        RequestOrigin origin = RequestOrigin.fromRequestAndJwt(request, jwt);
+        OperationRequestOrigin origin = OperationRequestOrigin.fromRequestAndJwt(request, jwt);
         TransferResponse transferResponse = transferService.initiatePendingTransfer(
             transferRequest, 
             UUID.fromString(jwt.getSubject()),

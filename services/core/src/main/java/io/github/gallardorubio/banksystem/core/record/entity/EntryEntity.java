@@ -2,14 +2,12 @@ package io.github.gallardorubio.banksystem.core.record.entity;
 
 import java.util.UUID;
 
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 

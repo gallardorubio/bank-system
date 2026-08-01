@@ -24,4 +24,6 @@ public interface BankAccountRepository extends JpaRepository<BankAccountEntity, 
                    "ON CONFLICT DO NOTHING", nativeQuery = true)
     void ensureVaultAccountExists();
 
+    Optional<BankAccountEntity> findByClientId(UUID clientId);
+
 }

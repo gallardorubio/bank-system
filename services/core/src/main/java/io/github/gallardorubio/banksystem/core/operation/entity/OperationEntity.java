@@ -49,7 +49,7 @@ public abstract class OperationEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "origin", nullable = false, updatable = false)
-    private RequestOrigin origin;
+    private OperationRequestOrigin origin;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -99,5 +99,8 @@ public abstract class OperationEntity {
         this.status = OperationStatus.REJECTED;
         this.statusHistory.add(new StatusEntry(this.status, Instant.now(), reason));
     }
+
+    public abstract OperationType getOperationType();
+    public abstract String buildDescription();
 
 }

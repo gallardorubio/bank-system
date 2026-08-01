@@ -8,7 +8,7 @@ import java.util.UUID;
 import io.github.gallardorubio.banksystem.core.loan.entity.InstallmentFrequency;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.StatusEntry;
 
 public record LoanDetails(
@@ -18,7 +18,7 @@ public record LoanDetails(
     BigDecimal amount,
     OperationStatus status,
     List<StatusEntry> statusHistory,
-    RequestOrigin origin,
+    OperationRequestOrigin origin,
     Instant createdAt,
     Integer termPeriods,
     InstallmentFrequency installmentFrequency,

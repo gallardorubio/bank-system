@@ -4,7 +4,7 @@ import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResolutionRequest;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.service.DepositService;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class DepositController {
         @AuthenticationPrincipal Jwt jwt,
         HttpServletRequest request
     ) {
-        RequestOrigin origin = RequestOrigin.fromRequestAndJwt(request, jwt);
+        OperationRequestOrigin origin = OperationRequestOrigin.fromRequestAndJwt(request, jwt);
         DepositResponse depositResponse = depositService.initiatePendingDeposit(
             depositRequest, 
             UUID.fromString(jwt.getSubject()),

@@ -2,7 +2,8 @@ package io.github.gallardorubio.banksystem.core.loan.entity;
 
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -54,7 +55,7 @@ public class LoanEntity extends OperationEntity {
     @Column(name = "maturity_date")
     private Instant maturityDate;
 
-    public static LoanEntity fromDto(LoanRequest dto, UUID clientId, RequestOrigin origin) {
+    public static LoanEntity fromDto(LoanRequest dto, UUID clientId, OperationRequestOrigin origin) {
         return LoanEntity.builder()
             .clientId(clientId)
             .clientBankAccountId(dto.clientBankAccountId())
@@ -94,5 +95,15 @@ public class LoanEntity extends OperationEntity {
         long totalDays = (long) this.installmentFrequency.getDaysToAdd() * this.termPeriods;
         this.maturityDate = now.plus(totalDays, ChronoUnit.DAYS);
     }
-    
+
+    @Override
+    public OperationType getOperationType() {
+        return OperationType.LOAN;
+    }
+
+    @Override
+    public String buildDescription() {
+        return "Préstamo en cuenta";
+    }
+
 }

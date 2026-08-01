@@ -3,7 +3,8 @@ package io.github.gallardorubio.banksystem.core.transfer.entity;
 import java.util.UUID;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import jakarta.persistence.*;
 import lombok.*;
@@ -22,7 +23,7 @@ public class TransferEntity extends OperationEntity {
     @Column(name = "concept", nullable = false, updatable = false)
     private String concept;
 
-    public static TransferEntity fromDto(TransferRequest dto, UUID clientId, RequestOrigin origin) {
+    public static TransferEntity fromDto(TransferRequest dto, UUID clientId, OperationRequestOrigin origin) {
         return TransferEntity.builder()
                 .clientId(clientId)
                 .clientBankAccountId(dto.clientBankAccountId())
@@ -31,6 +32,16 @@ public class TransferEntity extends OperationEntity {
                 .targetBankAccountId(dto.targetBankAccountId())
                 .concept(dto.concept())
                 .build();
+    }
+
+    @Override
+    public OperationType getOperationType() {
+        return OperationType.TRANSFER;
+    }
+
+    @Override
+    public String buildDescription() {
+        return (concept != null ? concept : "Transferencia sin concepto");
     }
 
 }

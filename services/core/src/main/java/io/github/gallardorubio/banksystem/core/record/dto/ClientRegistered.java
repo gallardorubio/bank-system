@@ -5,6 +5,6 @@ import java.util.UUID;
 import jakarta.validation.constraints.NotNull;
 
 public record ClientRegistered(
-    @NotNull
-    UUID clientId
+    @NotNull UUID clientId,
+    @NotNull String clientName
 ) {}

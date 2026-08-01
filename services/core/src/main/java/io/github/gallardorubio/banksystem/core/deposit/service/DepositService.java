@@ -7,9 +7,9 @@ import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
-import io.github.gallardorubio.banksystem.core.record.service.RecordService;
+import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
@@ -28,7 +28,7 @@ import java.util.UUID;
 public class DepositService {
 
     private final DepositRepository depositRepository;
-    private final RecordService recordService;
+    private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
@@ -46,7 +46,7 @@ public class DepositService {
     }
 
     @Transactional
-    public DepositResponse initiatePendingDeposit(DepositRequest depositRequest, UUID clientId, RequestOrigin origin) {
+    public DepositResponse initiatePendingDeposit(DepositRequest depositRequest, UUID clientId, OperationRequestOrigin origin) {
         DepositEntity depositEntity = DepositEntity.fromDto(depositRequest, clientId, origin);
         
         depositEntity.pending("Depósito pendiente de aprobación");

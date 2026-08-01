@@ -1,6 +1,7 @@
 package io.github.gallardorubio.banksystem.core.installment.entity;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -20,5 +21,15 @@ public class InstallmentEntity extends OperationEntity {
 
     @Column(name = "loan_id", nullable = false, updatable = false)
     private UUID loanId;
+
+    @Override
+    public OperationType getOperationType() {
+        return OperationType.INSTALLMENT;
+    }
+
+    @Override
+    public String buildDescription() {
+        return "Pago de cuota de préstamo";
+    }
 
 }

@@ -2,7 +2,8 @@ package io.github.gallardorubio.banksystem.core.deposit.entity;
 
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -21,7 +22,7 @@ import java.util.UUID;
 @Table(name = "deposit", schema = "core")
 public class DepositEntity extends OperationEntity {
 
-    public static DepositEntity fromDto(DepositRequest dto, UUID clientId, RequestOrigin origin) {
+    public static DepositEntity fromDto(DepositRequest dto, UUID clientId, OperationRequestOrigin origin) {
         return DepositEntity.builder()
                 .clientId(clientId)
                 .clientBankAccountId(dto.clientBankAccountId())
@@ -29,4 +30,15 @@ public class DepositEntity extends OperationEntity {
                 .origin(origin)
                 .build();
     }
+
+    @Override
+    public OperationType getOperationType() {
+        return OperationType.DEPOSIT;
+    }
+
+    @Override
+    public String buildDescription() {
+        return "Depósito en cuenta";
+    }
+    
 }

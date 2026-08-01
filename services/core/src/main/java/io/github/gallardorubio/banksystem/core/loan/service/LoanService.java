@@ -7,9 +7,9 @@ import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.entity.RequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
-import io.github.gallardorubio.banksystem.core.record.service.RecordService;
+import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
@@ -28,7 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class LoanService {
 
     private final LoanRepository loanRepository;
-    private final RecordService recordService;
+    private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional(readOnly = true)
@@ -46,7 +46,7 @@ public class LoanService {
     }
 
     @Transactional
-    public LoanResponse initiatePendingLoan(LoanRequest loanRequest, UUID clientId, RequestOrigin origin) {
+    public LoanResponse initiatePendingLoan(LoanRequest loanRequest, UUID clientId, OperationRequestOrigin origin) {
         LoanEntity loanEntity = LoanEntity.fromDto(loanRequest, clientId, origin);
 
         loanEntity.pending("Préstamo pendiente de aprobación");
