@@ -1,51 +1,47 @@
 package io.github.gallardorubio.banksystem.core.operation.consumer;
 
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
-
 import io.github.gallardorubio.banksystem.core.deposit.service.DepositService;
 import io.github.gallardorubio.banksystem.core.loan.service.LoanService;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationApproved;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationDenied;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationEscalated;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationResolution;
 import io.github.gallardorubio.banksystem.core.transfer.service.TransferService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class OperationConsumer {
-    
+
     private final TransferService transferService;
     private final DepositService depositService;
     private final LoanService loanService;
 
     @KafkaListener(topics = "operation-approved", groupId = "core-group")
-    public void listenOperationApproved(OperationApproved operationApproved) {
-        switch (operationApproved.operationType()) {
-            case TRANSFER -> transferService.processApprovedTransfer(operationApproved.operationId());
-            case DEPOSIT -> depositService.processApprovedDeposit(operationApproved.operationId());
-            case LOAN -> loanService.processApprovedLoan(operationApproved.operationId());
-            default -> throw new UnsupportedOperationException();
+    public void listenOperationApproved(OperationResolution res) {
+        switch (res.operationType()) {
+            case TRANSFER -> transferService.processApprovedTransfer(res.operationId(), res.reason());
+            case DEPOSIT  -> depositService.processApprovedDeposit(res.operationId(), res.reason());
+            case LOAN     -> loanService.processApprovedLoan(res.operationId(), res.reason());
+            default      -> throw new UnsupportedOperationException("Operation not supported: " + res.operationType());
         }
     }
 
     @KafkaListener(topics = "operation-denied", groupId = "core-group")
-    public void listenOperationDenied(OperationDenied operationDenied) {
-        switch (operationDenied.operationType()) {
-            case TRANSFER -> transferService.processDeniedTransfer(operationDenied.operationId(), operationDenied.reason());
-            case DEPOSIT -> depositService.processDeniedDeposit(operationDenied.operationId(), operationDenied.reason());
-            case LOAN -> loanService.processDeniedLoan(operationDenied.operationId(), operationDenied.reason());
-            default -> throw new UnsupportedOperationException();
+    public void listenOperationDenied(OperationResolution res) {
+        switch (res.operationType()) {
+            case TRANSFER -> transferService.processDeniedTransfer(res.operationId(), res.reason());
+            case DEPOSIT  -> depositService.processDeniedDeposit(res.operationId(), res.reason());
+            case LOAN     -> loanService.processDeniedLoan(res.operationId(), res.reason());
+            default      -> throw new UnsupportedOperationException("Operation not supported: " + res.operationType());
         }
     }
 
     @KafkaListener(topics = "operation-escalated", groupId = "core-group")
-    public void listenOperationEscalated(OperationEscalated operationEscalated) {
-        switch (operationEscalated.operationType()) {
-            case TRANSFER -> transferService.processEscalatedTransfer(operationEscalated.operationId(), operationEscalated.reason());
-            case DEPOSIT -> depositService.processEscalatedDeposit(operationEscalated.operationId(), operationEscalated.reason());
-            case LOAN -> loanService.processEscalatedLoan(operationEscalated.operationId(), operationEscalated.reason());
-            default -> throw new UnsupportedOperationException();
+    public void listenOperationEscalated(OperationResolution res) {
+        switch (res.operationType()) {
+            case DEPOSIT -> depositService.processEscalatedDeposit(res.operationId(), res.reason());
+            case LOAN    -> loanService.processEscalatedLoan(res.operationId(), res.reason());
+            default      -> throw new UnsupportedOperationException("Operation not supported: " + res.operationType());
         }
     }
 
