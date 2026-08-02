@@ -15,7 +15,7 @@ public record OperationRequestOrigin(
         if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         } else if (ip.contains(",")) {
-            ip = ip.split(",")[0].trim(); // Primera IP de la cadena (el cliente original)
+            ip = ip.split(",")[0].trim();
         }
 
         String userAgent = request.getHeader("User-Agent");

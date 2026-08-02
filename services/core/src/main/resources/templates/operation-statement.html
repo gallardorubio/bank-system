@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body { font-family: Arial, sans-serif; color: #1e293b; margin: 30px; font-size: 13px; }
+        .header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 24px; }
+        .header h1 { margin: 0; color: #0f172a; font-size: 22px; }
+        .badge { background-color: #e2e8f0; color: #334155; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .status-APPROVED, .status-COMPLETED { background-color: #dcfce7; color: #15803d; }
+        .status-DENIED, .status-REJECTED { background-color: #fee2e2; color: #b91c1c; }
+        .status-PENDING, .status-ESCALATED { background-color: #fef3c7; color: #b45309; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 8px; background-color: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
+        .amount { font-size: 18px; font-weight: bold; color: #0f172a; }
+        .section-title { font-size: 14px; font-weight: bold; margin-top: 24px; color: #334155; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
+        .footer { margin-top: 50px; font-size: 10px; text-align: center; color: #6c757d; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Informe de operación</h1>
+        <p style="margin: 4px 0 0 0; color: #64748b;">Bank System Core Service</p>
+    </div>
+
+    <table>
+        <tr>
+            <th>ID Operación</th>
+            <td th:text="${op.id}">-</td>
+            <th>Tipo</th>
+            <td><span class="badge" th:text="${op.operationType()}">TYPE</span></td>
+        </tr>
+        <tr>
+            <th>Cuenta cliente</th>
+            <td th:text="${op.clientBankAccountId}">-</td>
+            <th>Estado</th>
+            <td><span class="badge" th:classappend="'status-' + ${op.status}" th:text="${op.status}">STATUS</span></td>
+        </tr>
+        <tr>
+            <th>Fecha creación</th>
+            <td th:text="${op.createdAt}">-</td>
+            <th>Cuantía</th>
+            <td class="amount" th:text="${op.amount + '€'}">0.00€</td>
+        </tr>
+    </table>
+
+    <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse)}">
+        <div class="section-title">Detalles de la transferencia</div>
+        <table>
+            <tr>
+                <th>Cuenta destino</th>
+                <td th:text="${op.targetBankAccountId}">-</td>
+            </tr>
+            <tr>
+                <th>Concepto</th>
+                <td th:text="${op.concept}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse)}">
+        <div class="section-title">Detalles del préstamo</div>
+        <table>
+            <tr>
+                <th>Plazo</th>
+                <td th:text="${op.termPeriods + ' períodos (' + op.installmentFrequency + ')'}">-</td>
+                <th>Tasa de interés</th>
+                <td th:text="${op.interestRate + '%'}">-</td>
+            </tr>
+            <tr>
+                <th>Cuotas pagadas</th>
+                <td th:text="${op.installmentsPaid + ' de ' + op.termPeriods}">-</td>
+                <th>Monto pagado</th>
+                <td th:text="${op.paidAmount + '€'}">0.00€</td>
+            </tr>
+            <tr>
+                <th>Próxima cuota</th>
+                <td th:text="${op.nextInstallmentAmount != null ? op.nextInstallmentAmount + '€' : 'N/A'}">-</td>
+                <th>Vencimiento cuota</th>
+                <td th:text="${op.nextInstallmentDate != null ? op.nextInstallmentDate : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.installment.dto.InstallmentResponse)}">
+        <div class="section-title">Detalles del pago de cuota</div>
+        <table>
+            <tr>
+                <th>ID del préstamo asociado</th>
+                <td th:text="${op.loanId}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section-title">Historial de cambios de estado</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Razón</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="phase : ${op.statusHistory}">
+                <td><span class="badge" th:classappend="'status-' + ${phase.status}" th:text="${phase.status}">-</span></td>
+                <td th:text="${phase.createAt}">-</td>
+                <td th:text="${phase.reason != null ? phase.reason : 'N/A'}">-</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Este documento es un comprobante oficial de la operación. Generado automáticamente.
+    </div>
+
+</body>
+</html>

@@ -11,6 +11,6 @@ public interface OperationRepository extends JpaRepository<OperationEntity, UUID
     
     public Optional<OperationEntity> findById(UUID id);
 
-    public Optional<OperationEntity> findByIdAndClientId(String id, UUID clientId);
+    public Optional<OperationEntity> findByIdAndClientId(UUID id, UUID clientId);
 
 }
