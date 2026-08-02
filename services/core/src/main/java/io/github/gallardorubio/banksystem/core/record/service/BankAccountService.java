@@ -4,6 +4,7 @@ import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.dao.EntryRepository;
+import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.ClientRegistered;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
@@ -58,6 +59,17 @@ public class BankAccountService {
                 OperationEntity operationEntity = operationRepository.findById(entry.getOperationId()).orElse(null);
                 return new BankAccountEntryResponse(entry, bankAccountId, operationEntity);
             });
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getBankAccountBalance(UUID clientId) {
+        return bankAccountRepository.findBankAccountBalanceByClientId(clientId)
+                .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
+    }
+
+    @Transactional(readOnly = true)
+    public BankAccountAnalyticsResponse getBankAnalytics() {
+        return bankAccountRepository.getBankAnalytics(BankAccountEntity.VAULT_ACCOUNT_ID);
     }
 
 }

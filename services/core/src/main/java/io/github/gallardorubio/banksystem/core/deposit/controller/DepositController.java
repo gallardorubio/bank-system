@@ -76,8 +76,7 @@ public class DepositController {
             resolutionRequest.reason()
         );
 
-        return ResponseEntity.ok(depositResponse);
-        
+        return ResponseEntity.ok(depositResponse); 
     }
 
 }

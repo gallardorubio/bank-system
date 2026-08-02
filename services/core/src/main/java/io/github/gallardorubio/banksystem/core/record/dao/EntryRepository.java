@@ -19,10 +19,8 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
         LEFT JOIN BankAccountEntity bDebit ON e.debitBankAccountId = bDebit.id
         LEFT JOIN BankAccountEntity bCredit ON e.creditBankAccountId = bCredit.id
         WHERE (e.debitBankAccountId = :bankAccountId OR e.creditBankAccountId = :bankAccountId)
-          -- Filtros globales (Aplican a Deposit, Transfer, Loan, Installment)
           AND (:amount IS NULL OR e.amount = :amount)
           AND (:createdAt IS NULL OR e.createdAt >= :createdAt)
-          -- Filtros exclusivos de Transferencia
           AND (:concept IS NULL OR (t.id IS NOT NULL AND LOWER(t.concept) LIKE LOWER(CONCAT('%', :concept, '%'))))
           AND (:targetBankAccountId IS NULL OR (t.id IS NOT NULL AND (
                (e.debitBankAccountId = :bankAccountId AND e.creditBankAccountId = :targetBankAccountId) OR
