@@ -1,8 +1,8 @@
 package io.github.gallardorubio.banksystem.core.deposit.entity;
 
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

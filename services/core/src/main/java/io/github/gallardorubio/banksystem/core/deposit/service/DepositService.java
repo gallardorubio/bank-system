@@ -5,9 +5,9 @@ import io.github.gallardorubio.banksystem.core.deposit.dto.DepositDetails;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositRequest;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class DepositService {
 
         DepositDetails depositDetails = new DepositDetails(depositEntity);
 
-        OperationPending<DepositDetails> operationPending = new OperationPending<>(
+        OperationPendingEvent<DepositDetails> operationPending = new OperationPendingEvent<>(
             depositEntity.getId(),
             OperationType.DEPOSIT,
             depositDetails

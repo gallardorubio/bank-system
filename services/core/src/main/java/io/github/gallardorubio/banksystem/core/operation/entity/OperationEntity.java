@@ -17,6 +17,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationStatusPhase;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter

@@ -1,8 +1,8 @@
 package io.github.gallardorubio.banksystem.core.loan.entity;
 
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

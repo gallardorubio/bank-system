@@ -4,13 +4,14 @@ import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResolutionRequest;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.service.LoanService;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -58,18 +59,13 @@ public class LoanController {
         return ResponseEntity.status(HttpStatus.CREATED).body(loanResponse);
     }
 
+    @PreAuthorize("hasRole('operator')")
     @PatchMapping("/{id}")
     public ResponseEntity<LoanResponse> resolveLoan(
         @PathVariable("id") UUID loanId,
-        @Valid @RequestBody LoanResolutionRequest resolutionRequest,
-        @AuthenticationPrincipal Jwt jwt
+        @Valid @RequestBody LoanResolutionRequest resolutionRequest
     )
     {
-        List<String> groups = jwt.getClaimAsStringList("cognito:groups");
-        if(groups == null || !groups.contains("operator")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
         LoanResponse loanResponse = loanService.resolveLoan(
             loanId, 
             resolutionRequest.action(), 

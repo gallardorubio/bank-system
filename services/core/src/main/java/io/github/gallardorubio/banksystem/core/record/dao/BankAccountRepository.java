@@ -1,6 +1,7 @@
 package io.github.gallardorubio.banksystem.core.record.dao;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import jakarta.persistence.LockModeType;
@@ -41,5 +43,15 @@ public interface BankAccountRepository extends JpaRepository<BankAccountEntity, 
         FROM BankAccountEntity a
         """)
     BankAccountAnalyticsResponse getBankAnalytics(@Param("vaultId") UUID vaultId);
+
+    @Query("""
+    SELECT new io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse(
+        b.id,
+        b.clientName
+    )
+    FROM BankAccountEntity b
+    WHERE b.id IN :accountIds
+    """)
+    List<TrustedBankAccountResponse> findClientNamesByAccountIds(@Param("accountIds") List<UUID> accountIds);
 
 }

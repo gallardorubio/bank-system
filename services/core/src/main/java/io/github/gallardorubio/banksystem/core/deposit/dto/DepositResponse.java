@@ -7,8 +7,8 @@ import java.util.UUID;
 
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationStatusPhase;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 
 public record DepositResponse (

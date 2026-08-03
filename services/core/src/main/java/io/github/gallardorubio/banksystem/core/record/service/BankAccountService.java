@@ -1,17 +1,18 @@
 package io.github.gallardorubio.banksystem.core.record.service;
 
+import io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.dao.EntryRepository;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
-import io.github.gallardorubio.banksystem.core.record.dto.ClientRegistered;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -28,9 +29,8 @@ public class BankAccountService {
     private final OperationRepository operationRepository;
 
     @Transactional
-    public void createClientAccount(ClientRegistered event) {
-        BankAccountEntity bankAccountEntity = BankAccountEntity.fromDto(event);
-        bankAccountRepository.save(bankAccountEntity);
+    public BankAccountEntity createClientAccount(UUID clientId, String clientName) {
+        return bankAccountRepository.save(BankAccountEntity.createForClient(clientId, clientName));
     }
 
     @Transactional
@@ -70,6 +70,14 @@ public class BankAccountService {
     @Transactional(readOnly = true)
     public BankAccountAnalyticsResponse getBankAnalytics() {
         return bankAccountRepository.getBankAnalytics(BankAccountEntity.VAULT_ACCOUNT_ID);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrustedBankAccountResponse> getClientNamesByAccountIds(List<UUID> accountIds) {
+        if (accountIds == null || accountIds.isEmpty()) {
+            return List.of();
+        }
+        return bankAccountRepository.findClientNamesByAccountIds(accountIds);
     }
 
 }

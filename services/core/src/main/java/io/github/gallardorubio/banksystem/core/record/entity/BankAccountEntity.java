@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import io.github.gallardorubio.banksystem.core.record.dto.ClientRegistered;
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -38,10 +37,10 @@ public class BankAccountEntity implements Serializable {
 
     public static final UUID VAULT_ACCOUNT_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    public static BankAccountEntity fromDto(ClientRegistered dto) {
+    public static BankAccountEntity createForClient(UUID clientId, String clientName) {
         return BankAccountEntity.builder()
-                .clientId(dto.clientId())
-                .clientName(dto.clientName())
+                .clientId(clientId)
+                .clientName(clientName)
                 .build();
     }
 

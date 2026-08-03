@@ -8,8 +8,8 @@ import java.util.UUID;
 import io.github.gallardorubio.banksystem.core.loan.entity.InstallmentFrequency;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationStatusPhase;
 
 public record LoanDetails(
     UUID id,

@@ -10,5 +10,10 @@ public record TransferRequest(
     @NotNull UUID clientBankAccountId,
     @NotNull @Positive BigDecimal amount,
     @NotNull UUID targetBankAccountId,
-    @NotBlank String concept
-) {}
+    @NotBlank String concept,
+    Boolean saveAsTrusted
+) {
+    public boolean shouldSaveAsTrusted() {
+        return Boolean.TRUE.equals(saveAsTrusted);
+    }
+}

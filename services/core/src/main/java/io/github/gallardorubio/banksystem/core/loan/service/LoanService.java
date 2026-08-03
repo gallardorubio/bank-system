@@ -5,9 +5,9 @@ import io.github.gallardorubio.banksystem.core.loan.dto.LoanDetails;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanRequest;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class LoanService {
 
         LoanDetails loanDetails = new LoanDetails(loanEntity);
 
-        OperationPending<LoanDetails> operationPending = new OperationPending<>(
+        OperationPendingEvent<LoanDetails> operationPending = new OperationPendingEvent<>(
             loanEntity.getId(),
             OperationType.LOAN,
             loanDetails

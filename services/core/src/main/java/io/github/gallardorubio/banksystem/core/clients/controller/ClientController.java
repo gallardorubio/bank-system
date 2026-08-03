@@ -1,0 +1,89 @@
+package io.github.gallardorubio.banksystem.core.clients.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import io.github.gallardorubio.banksystem.core.clients.dto.ClientPersonalUpdateRequest;
+import io.github.gallardorubio.banksystem.core.clients.dto.ClientRequest;
+import io.github.gallardorubio.banksystem.core.clients.dto.ClientResponse;
+import io.github.gallardorubio.banksystem.core.clients.dto.SecurityAnswersRequest;
+import io.github.gallardorubio.banksystem.core.clients.dto.SecurityQuestion;
+import io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse;
+import io.github.gallardorubio.banksystem.core.clients.service.ClientService;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+
+
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/clients")
+public class ClientController {
+
+    private final ClientService clientService;
+
+    @PostMapping
+    public ResponseEntity<Void> createClient(@Valid @RequestBody ClientRequest clientRequest) {
+        clientService.createClient(clientRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/security-questions")
+    public ResponseEntity<List<SecurityQuestion>> getSecurityQuestions(
+        @AuthenticationPrincipal Jwt jwt
+    ) {
+        List<SecurityQuestion> questions = clientService.getAllSecurityQuestions(UUID.fromString(jwt.getSubject()));
+
+        return ResponseEntity.ok(questions);
+    }
+
+    @PatchMapping("/unlock")
+    public ResponseEntity<Void> unlockAccount(
+        @AuthenticationPrincipal Jwt jwt,
+        @Valid @RequestBody SecurityAnswersRequest securityAnswersRequest
+    ) {
+        clientService.verifyAndUnlockClient(UUID.fromString(jwt.getSubject()), securityAnswersRequest);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ClientResponse> getClientPersonal(@AuthenticationPrincipal Jwt jwt) {
+        ClientResponse clientResponse = clientService.getClientPersonal(UUID.fromString(jwt.getSubject()));
+
+        return ResponseEntity.ok(clientResponse);
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<ClientResponse> updateClientPersonal(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody ClientPersonalUpdateRequest clientPersonalUpdateRequest) {
+        
+        ClientResponse updatedClient = clientService.updateClientPersonal(
+            UUID.fromString(jwt.getSubject()), 
+            clientPersonalUpdateRequest
+        );
+        
+        return ResponseEntity.ok(updatedClient);
+    }
+
+    @GetMapping("/me/trusted-accounts")
+    public ResponseEntity<List<TrustedBankAccountResponse>> getTrustedBankAccounts(
+        @AuthenticationPrincipal Jwt jwt
+    ) {
+        List<TrustedBankAccountResponse> trustedAccounts = clientService.getTrustedBankAccounts(
+            UUID.fromString(jwt.getSubject())
+        );
+        return ResponseEntity.ok(trustedAccounts);
+    }
+
+}

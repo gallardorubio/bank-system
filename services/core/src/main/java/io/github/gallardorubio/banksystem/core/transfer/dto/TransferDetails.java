@@ -1,8 +1,8 @@
 package io.github.gallardorubio.banksystem.core.transfer.dto;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatusPhase;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationStatusPhase;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 
 import java.math.BigDecimal;

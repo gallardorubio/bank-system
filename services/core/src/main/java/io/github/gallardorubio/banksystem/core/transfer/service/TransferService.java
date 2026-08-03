@@ -1,8 +1,9 @@
 package io.github.gallardorubio.banksystem.core.transfer.service;
 
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationPending;
+import io.github.gallardorubio.banksystem.core.clients.service.ClientService;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferDetails;
@@ -28,6 +29,7 @@ public class TransferService {
     private final TransferRepository transferRepository;
     private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final ClientService clientService;
 
     @Transactional(readOnly = true)
     public TransferResponse getTransfer(UUID transferId, UUID clientId) {
@@ -46,12 +48,16 @@ public class TransferService {
     @Transactional
     public TransferResponse initiatePendingTransfer(TransferRequest transferRequest, UUID clientId, OperationRequestOrigin origin) {
         TransferEntity transferEntity = TransferEntity.fromDto(transferRequest, clientId, origin);
+
+        if (transferRequest.shouldSaveAsTrusted()) {
+            clientService.addTrustedAccount(clientId, transferRequest.targetBankAccountId());
+        }
         
         transferEntity.pending("Transferencia pendiente de aprobación");
 
         TransferDetails transferDetails = new TransferDetails(transferEntity);
 
-        OperationPending<TransferDetails> operationPending = new OperationPending<>(
+        OperationPendingEvent<TransferDetails> operationPending = new OperationPendingEvent<>(
             transferEntity.getId(),
             OperationType.TRANSFER,
             transferDetails

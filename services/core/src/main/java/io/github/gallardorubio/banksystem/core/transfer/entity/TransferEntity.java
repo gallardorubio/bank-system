@@ -2,8 +2,8 @@ package io.github.gallardorubio.banksystem.core.transfer.entity;
 
 import java.util.UUID;
 
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import jakarta.persistence.*;

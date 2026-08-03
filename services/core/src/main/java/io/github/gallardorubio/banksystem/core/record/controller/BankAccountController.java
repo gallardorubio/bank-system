@@ -2,15 +2,14 @@ package io.github.gallardorubio.banksystem.core.record.controller;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,15 +55,9 @@ public class BankAccountController {
         return ResponseEntity.ok(balance);
     }
 
+    @PreAuthorize("hasRole('operator')")
     @GetMapping("/analytics")
-    public ResponseEntity<BankAccountAnalyticsResponse> getAnalytics(
-        @AuthenticationPrincipal Jwt jwt
-    ) {
-        List<String> groups = jwt.getClaimAsStringList("cognito:groups");
-        if(groups == null || !groups.contains("operator")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-  
+    public ResponseEntity<BankAccountAnalyticsResponse> getAnalytics() {
         BankAccountAnalyticsResponse analytics = bankAccountService.getBankAnalytics();
 
         return ResponseEntity.ok(analytics);

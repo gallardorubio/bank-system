@@ -1,6 +1,6 @@
 package io.github.gallardorubio.banksystem.core.transfer.controller;
 
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferRequest;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
 import io.github.gallardorubio.banksystem.core.transfer.service.TransferService;
