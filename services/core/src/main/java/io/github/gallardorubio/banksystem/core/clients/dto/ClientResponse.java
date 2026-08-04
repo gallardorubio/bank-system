@@ -11,9 +11,10 @@ public record ClientResponse(
     String nationality,
     LocalDate birthDate,
     String email,
-    String taxId
+    String taxId,
+    boolean mfaEnabled
 ) {
-    public ClientResponse(ClientEntity entity) {
+    public ClientResponse(ClientEntity entity, boolean mfaEnabled) {
         this(
             entity.getName(),
             entity.getPhone(),
@@ -21,7 +22,8 @@ public record ClientResponse(
             entity.getNationality(),
             entity.getBirthDate(),
             entity.getEmail(),
-            entity.getTaxId()
+            entity.getTaxId(),
+            mfaEnabled
         );
     }
 }

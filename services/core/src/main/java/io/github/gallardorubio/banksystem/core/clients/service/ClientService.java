@@ -2,11 +2,7 @@ package io.github.gallardorubio.banksystem.core.clients.service;
 
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminAddUserToGroupRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserRequest;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AdminCreateUserResponse;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType;
-import software.amazon.awssdk.services.cognitoidentityprovider.model.MessageActionType;
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +16,7 @@ import io.github.gallardorubio.banksystem.core.clients.dao.ClientRepository;
 import io.github.gallardorubio.banksystem.core.clients.dto.ClientAccountBlockEvent;
 import io.github.gallardorubio.banksystem.core.clients.dto.ClientPersonalUpdateRequest;
 import io.github.gallardorubio.banksystem.core.clients.dto.ClientResponse;
+import io.github.gallardorubio.banksystem.core.clients.dto.MfaSetupResponse;
 import io.github.gallardorubio.banksystem.core.clients.dto.ClientRequest;
 import io.github.gallardorubio.banksystem.core.clients.dto.SecurityAnswersRequest;
 import io.github.gallardorubio.banksystem.core.clients.dto.SecurityQuestion;
@@ -122,9 +119,11 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientResponse getClientPersonal(UUID clientId) {
-        return clientRepository.findById(clientId)
-            .map(client -> new ClientResponse(client))
+        ClientEntity clientEntity = clientRepository.findById(clientId)
             .orElseThrow(() -> new ResourceNotFoundException("Client not found: " + clientId));
+
+        boolean mfaActive = isMfaEnabled(clientEntity.getEmail());
+        return new ClientResponse(clientEntity, mfaActive);
     }
 
     @Transactional
@@ -143,7 +142,21 @@ public class ClientService {
 
         clientEntity.updateClientPersonalData(clientPersonalUpdateRequest);
 
-        return new ClientResponse(clientEntity);
+        boolean mfaActive = isMfaEnabled(clientEntity.getEmail());
+
+        return new ClientResponse(clientEntity, mfaActive);
+    }
+
+    public boolean isMfaEnabled(String email) {
+        AdminGetUserRequest request = AdminGetUserRequest.builder()
+                .userPoolId(userPoolId)
+                .username(email)
+                .build();
+
+        AdminGetUserResponse response = cognitoClient.adminGetUser(request);
+        
+        return response.userMFASettingList() != null && 
+            response.userMFASettingList().contains("SOFTWARE_TOKEN_MFA");
     }
 
     @Transactional
@@ -166,5 +179,49 @@ public class ClientService {
 
         return bankAccountService.getClientNamesByAccountIds(trustedBankAccountIds);
     }
+
+    public MfaSetupResponse setupMfa(String accessToken) {
+        AssociateSoftwareTokenRequest request = AssociateSoftwareTokenRequest.builder()
+                .accessToken(accessToken)
+                .build();
+
+        AssociateSoftwareTokenResponse response = cognitoClient.associateSoftwareToken(request);
+        return new MfaSetupResponse(response.secretCode());
+    }
+
+    public void enableMfa(String accessToken, String totpCode) {
+        VerifySoftwareTokenRequest verifyRequest = VerifySoftwareTokenRequest.builder()
+                .accessToken(accessToken)
+                .userCode(totpCode)
+                .build();
+
+        VerifySoftwareTokenResponse verifyResponse = cognitoClient.verifySoftwareToken(verifyRequest);
+
+        if (verifyResponse.status() != VerifySoftwareTokenResponseType.SUCCESS) {
+            throw new IllegalArgumentException("Código TOTP inválido");
+        }
+
+        SetUserMfaPreferenceRequest preferenceRequest = SetUserMfaPreferenceRequest.builder()
+                .accessToken(accessToken)
+                .softwareTokenMfaSettings(SoftwareTokenMfaSettingsType.builder()
+                        .enabled(true)
+                        .preferredMfa(true)
+                        .build())
+                .build();
+
+        cognitoClient.setUserMFAPreference(preferenceRequest);
+    }
+
+    public void disableMfa(String accessToken) {
+        SetUserMfaPreferenceRequest preferenceRequest = SetUserMfaPreferenceRequest.builder()
+                .accessToken(accessToken)
+                .softwareTokenMfaSettings(SoftwareTokenMfaSettingsType.builder()
+                        .enabled(false)
+                        .preferredMfa(false)
+                        .build())
+                .build();
+
+        cognitoClient.setUserMFAPreference(preferenceRequest);
+    }    
 
 }

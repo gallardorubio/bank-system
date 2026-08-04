@@ -20,6 +20,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.openpdf.pdf.ITextRenderer;
+import java.io.ByteArrayOutputStream;
+
 @Service
 @RequiredArgsConstructor
 public class BankAccountService {
@@ -27,6 +32,7 @@ public class BankAccountService {
     private final BankAccountRepository bankAccountRepository;
     private final EntryRepository entryRepository;
     private final OperationRepository operationRepository;
+    private final TemplateEngine templateEngine;
 
     @Transactional
     public BankAccountEntity createClientAccount(UUID clientId, String clientName) {
@@ -78,6 +84,47 @@ public class BankAccountService {
             return List.of();
         }
         return bankAccountRepository.findClientNamesByAccountIds(accountIds);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] getBankAccountStatementPdf(UUID bankAccountId, Instant startDate, Instant endDate) {
+        BankAccountEntity account = bankAccountRepository.findById(bankAccountId)
+            .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + bankAccountId));
+
+        List<BankAccountEntryResponse> entries = entryRepository.findEntriesForStatement(bankAccountId, startDate, endDate)
+            .stream()
+            .map(entry -> {
+                OperationEntity op = operationRepository.findById(entry.getOperationId()).orElse(null);
+                return new BankAccountEntryResponse(entry, bankAccountId, op);
+            })
+            .toList();
+
+        Context context = new Context();
+        context.setVariable("account", account);
+        context.setVariable("entries", entries);
+        
+        String period = (startDate != null ? startDate.toString() : "Inicio") + " - " + (endDate != null ? endDate.toString() : "Hoy");
+        context.setVariable("period", period);
+
+        String htmlContent = templateEngine.process("bank-account-statement", context);
+
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ITextRenderer renderer = new ITextRenderer();
+            renderer.setDocumentFromString(htmlContent);
+            renderer.layout();
+            renderer.createPDF(out);
+
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating PDF statement for bank account: " + bankAccountId, e);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public UUID getAccountIdByClientId(UUID clientId) {
+        return bankAccountRepository.findByClientId(clientId)
+            .map(BankAccountEntity::getId)
+            .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
     }
 
 }

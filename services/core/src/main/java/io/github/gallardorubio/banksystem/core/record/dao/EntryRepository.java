@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
@@ -40,6 +41,19 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
         @Param("targetBankAccountId") UUID targetBankAccountId,
         @Param("amount") BigDecimal amount,
         Pageable pageable
+    );
+
+    @Query("""
+    SELECT e FROM EntryEntity e
+    WHERE (e.debitBankAccountId = :bankAccountId OR e.creditBankAccountId = :bankAccountId)
+      AND (:startDate IS NULL OR e.createdAt >= :startDate)
+      AND (:endDate IS NULL OR e.createdAt <= :endDate)
+    ORDER BY e.createdAt DESC
+    """)
+    List<EntryEntity> findEntriesForStatement(
+        @Param("bankAccountId") UUID bankAccountId,
+        @Param("startDate") Instant startDate,
+        @Param("endDate") Instant endDate
     );
     
 }

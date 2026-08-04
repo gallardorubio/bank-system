@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,6 +23,8 @@ import io.github.gallardorubio.banksystem.core.record.service.BankAccountService
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 @RequiredArgsConstructor
 @RestController
@@ -61,6 +64,36 @@ public class BankAccountController {
         BankAccountAnalyticsResponse analytics = bankAccountService.getBankAnalytics();
 
         return ResponseEntity.ok(analytics);
+    }
+
+    @GetMapping("/me/statement")
+    public ResponseEntity<byte[]> getMyBankAccountStatement(
+        @AuthenticationPrincipal Jwt jwt,
+        @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
+        @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate
+    ) {
+        UUID bankAccountId = bankAccountService.getAccountIdByClientId(UUID.fromString(jwt.getSubject()));
+        byte[] pdfBytes = bankAccountService.getBankAccountStatementPdf(bankAccountId, startDate, endDate);
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bank-account-statement-" + bankAccountId + ".pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(pdfBytes);
+    }
+
+    @PreAuthorize("hasRole('operator')")
+    @GetMapping("/{id}/statement")
+    public ResponseEntity<byte[]> getBankAccountStatement(
+        @PathVariable("id") UUID bankAccountId,
+        @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
+        @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate
+    ) {
+        byte[] pdfBytes = bankAccountService.getBankAccountStatementPdf(bankAccountId, startDate, endDate);
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bank-account-statement-" + bankAccountId + ".pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(pdfBytes);
     }
 
 }

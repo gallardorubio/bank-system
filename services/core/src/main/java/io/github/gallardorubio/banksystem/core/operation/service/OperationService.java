@@ -19,6 +19,8 @@ import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
+import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
+import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class OperationService {
 
     private final OperationRepository operationRepository;
     private final TemplateEngine templateEngine;
+    private final BankAccountRepository bankAccountRepository;
 
     @Transactional(readOnly = true)
     public OperationResponse getOperation(UUID operationId, UUID clientId) {
@@ -47,8 +50,13 @@ public class OperationService {
     public byte[] getOperationStatement(UUID operationId, UUID clientId) {
         OperationResponse operationResponse = getOperation(operationId, clientId);
 
+        String currency = bankAccountRepository.findByClientId(clientId)
+            .map(BankAccountEntity::getCurrency)
+            .orElse("EUR");
+
         Context context = new Context();
         context.setVariable("op", operationResponse);
+        context.setVariable("currency", currency);
 
         String htmlContent = templateEngine.process("operation-statement", context);
 
