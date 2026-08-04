@@ -7,6 +7,7 @@ import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
@@ -121,6 +122,13 @@ public class LoanService {
             .orElseThrow(() -> new ResourceNotFoundException("Loan not found: " + loanId));
 
         return new LoanResponse(loan);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LoanResponse> getEscalatedLoans() {
+        return loanRepository.findAllByStatus(OperationStatus.ESCALATED).stream()
+            .map(LoanResponse::new)
+            .toList();
     }
 
 }

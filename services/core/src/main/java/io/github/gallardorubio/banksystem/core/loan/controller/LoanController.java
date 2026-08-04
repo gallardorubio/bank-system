@@ -75,4 +75,12 @@ public class LoanController {
         return ResponseEntity.ok(loanResponse);        
     }
 
+    @PreAuthorize("hasRole('operator')")
+    @GetMapping("/escalated")
+    public ResponseEntity<List<LoanResponse>> getEscalatedLoans() {
+        List<LoanResponse> loans = loanService.getEscalatedLoans();
+        
+        return ResponseEntity.ok(loans);
+    }
+
 }

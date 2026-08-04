@@ -7,6 +7,7 @@ import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
@@ -118,6 +119,13 @@ public class DepositService {
             .orElseThrow(() -> new ResourceNotFoundException("Deposit not found: " + depositId));
 
         return new DepositResponse(deposit);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DepositResponse> getEscalatedDeposits() {
+        return depositRepository.findAllByStatus(OperationStatus.ESCALATED).stream()
+            .map(DepositResponse::new)
+            .toList();
     }
 
 }

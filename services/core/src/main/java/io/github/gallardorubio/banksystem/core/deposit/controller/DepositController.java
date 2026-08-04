@@ -75,4 +75,12 @@ public class DepositController {
         return ResponseEntity.ok(depositResponse); 
     }
 
+    @PreAuthorize("hasRole('operator')")
+    @GetMapping("/escalated")
+    public ResponseEntity<List<DepositResponse>> getEscalatedDeposits() {
+        List<DepositResponse> deposits = depositService.getEscalatedDeposits();
+        
+        return ResponseEntity.ok(deposits);
+    }
+
 }

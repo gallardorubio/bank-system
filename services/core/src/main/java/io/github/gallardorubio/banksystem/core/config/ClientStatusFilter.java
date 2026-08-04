@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.github.gallardorubio.banksystem.core.client.dao.ClientRepository;
+import io.github.gallardorubio.banksystem.core.client.entity.ClientAccountStatus;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +18,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.io.IOException;
 import java.util.UUID;
-
-import io.github.gallardorubio.banksystem.core.clients.dao.ClientRepository;
-import io.github.gallardorubio.banksystem.core.clients.entity.ClientAccountStatus;
 
 @Component
 @RequiredArgsConstructor

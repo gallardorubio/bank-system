@@ -1,6 +1,6 @@
 package io.github.gallardorubio.banksystem.core.transfer.service;
 
-import io.github.gallardorubio.banksystem.core.clients.service.ClientService;
+import io.github.gallardorubio.banksystem.core.client.service.ClientService;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;

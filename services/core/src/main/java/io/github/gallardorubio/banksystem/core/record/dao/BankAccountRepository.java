@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse;
+import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import jakarta.persistence.LockModeType;

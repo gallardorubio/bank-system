@@ -1,6 +1,8 @@
 package io.github.gallardorubio.banksystem.core.loan.dao;
 
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,5 +20,7 @@ public interface LoanRepository extends JpaRepository<LoanEntity, UUID> {
     List<LoanEntity> findAllByClientId(UUID clientId);
 
     Optional<LoanEntity> findByIdAndClientId(UUID loanId, UUID clientId);
+
+    List<LoanEntity> findAllByStatus(OperationStatus operationStatus);
 
 }

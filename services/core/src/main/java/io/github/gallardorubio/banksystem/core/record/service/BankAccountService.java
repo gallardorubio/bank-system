@@ -1,6 +1,6 @@
 package io.github.gallardorubio.banksystem.core.record.service;
 
-import io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse;
+import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;

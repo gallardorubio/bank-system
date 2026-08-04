@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  
+  /* Tonos Azul Noche / Pizarra profunda */
+  --color-bg-base: #0B1121; 
+  --color-bg-surface: #151E32;
+  --color-bg-elevated: #1F2A40;
+  
+  /* Textos más suaves para no cansar la vista */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  
+  /* Colores semánticos estilo banca */
+  --color-success: #10B981; /* Esmeralda */
+  --color-danger: #EF4444;
+  --color-accent: #0EA5E9; /* Azul celeste / CaixaBank style */
+  
+  /* Bordes integrados */
+  --color-border-subtle: #1F2A40;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-base text-text-primary antialiased font-sans selection:bg-accent/30;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-bg-surface/80 backdrop-blur-xl border border-border-subtle shadow-xl;
+  }
+  
+  /* Utilidad global para elementos interactivos */
+  .interactive-item {
+    @apply cursor-pointer hover:bg-bg-elevated active:scale-[0.98] transition-all duration-200;
+  }
+}
