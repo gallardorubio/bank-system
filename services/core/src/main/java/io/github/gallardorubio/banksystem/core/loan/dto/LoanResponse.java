@@ -26,7 +26,7 @@ public record LoanResponse(
     Integer installmentsPaid,
     BigDecimal nextInstallmentAmount,
     Instant nextInstallmentDate,
-    Instant MaturityDate
+    Instant maturityDate
 ) implements OperationResponse {
     public LoanResponse(LoanEntity entity) {
         this(

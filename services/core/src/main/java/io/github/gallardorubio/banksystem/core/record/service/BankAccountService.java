@@ -57,7 +57,7 @@ public class BankAccountService {
         UUID bankAccountId = bankAccountRepository.findByClientId(clientId)
             .map(BankAccountEntity::getId)
             .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
-
+            
         return entryRepository.findFilteredEntries(
                 bankAccountId, concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
             )

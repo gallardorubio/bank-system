@@ -35,7 +35,7 @@ public class OperationController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{id}/statement")
+    @GetMapping(value ="/{id}/statement", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getOperationStatement(
         @PathVariable("id") UUID operationId,
         @AuthenticationPrincipal Jwt jwt

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,7 +45,8 @@ public class DepositController {
     }
 
     @PostMapping
-    public ResponseEntity<DepositResponse> createDeposit(
+    @ResponseStatus(HttpStatus.CREATED)
+    public DepositResponse createDeposit(
         @Valid @RequestBody DepositRequest depositRequest,
         @AuthenticationPrincipal Jwt jwt,
         HttpServletRequest request
@@ -56,7 +58,7 @@ public class DepositController {
             origin
         );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(depositResponse);
+        return depositResponse;
     }
 
     @PreAuthorize("hasRole('operator')")

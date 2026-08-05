@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
 import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -33,6 +36,7 @@ public class BankAccountController {
 
     private final BankAccountService bankAccountService;
 
+    @PageableAsQueryParam
     @GetMapping("/me/entries")
     public ResponseEntity<Page<BankAccountEntryResponse>> getEntries(
         @AuthenticationPrincipal Jwt jwt,
@@ -41,7 +45,7 @@ public class BankAccountController {
         @RequestParam(value = "created_at", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAt,
         @RequestParam(value = "target_bank_account_id", required = false) UUID targetBankAccountId,
         @RequestParam(required = false) BigDecimal amount,
-        @PageableDefault(size = 20) Pageable pageable
+        @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable
     ) {
         Page<BankAccountEntryResponse> entries = bankAccountService.getAllBankAccountEntriesFiltered(
             UUID.fromString(jwt.getSubject()), concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
@@ -66,7 +70,7 @@ public class BankAccountController {
         return ResponseEntity.ok(analytics);
     }
 
-    @GetMapping("/me/statement")
+    @GetMapping(value = "/me/statement", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getMyBankAccountStatement(
         @AuthenticationPrincipal Jwt jwt,
         @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
@@ -82,7 +86,7 @@ public class BankAccountController {
     }
 
     @PreAuthorize("hasRole('operator')")
-    @GetMapping("/{id}/statement")
+    @GetMapping(value = "/{id}/statement", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getBankAccountStatement(
         @PathVariable("id") UUID bankAccountId,
         @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,

@@ -12,27 +12,45 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
-    
-    @Query("""
-        SELECT e FROM EntryEntity e
-        LEFT JOIN TransferEntity t ON e.operationId = t.id
-        LEFT JOIN BankAccountEntity bDebit ON e.debitBankAccountId = bDebit.id
-        LEFT JOIN BankAccountEntity bCredit ON e.creditBankAccountId = bCredit.id
-        WHERE (e.debitBankAccountId = :bankAccountId OR e.creditBankAccountId = :bankAccountId)
+public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {    
+    @Query(value = """
+        SELECT e.* FROM entry e
+        LEFT JOIN core.transfer t ON e.operation_id = t.id
+        LEFT JOIN account b_debit ON e.debit_bank_account_id = b_debit.account_id
+        LEFT JOIN account b_credit ON e.credit_bank_account_id = b_credit.account_id
+        WHERE (e.debit_bank_account_id = :bankAccountId OR e.credit_bank_account_id = :bankAccountId)
           AND (:amount IS NULL OR e.amount = :amount)
-          AND (:createdAt IS NULL OR e.createdAt >= :createdAt)
-          AND (:concept IS NULL OR (t.id IS NOT NULL AND LOWER(t.concept) LIKE LOWER(CONCAT('%', :concept, '%'))))
+          AND (CAST(:createdAt AS timestamp) IS NULL OR e.created_at >= CAST(:createdAt AS timestamp))
+          AND (CAST(:concept AS text) IS NULL OR (t.id IS NOT NULL AND LOWER(t.concept) LIKE LOWER(CONCAT('%', CAST(:concept AS text), '%'))))
           AND (:targetBankAccountId IS NULL OR (t.id IS NOT NULL AND (
-               (e.debitBankAccountId = :bankAccountId AND e.creditBankAccountId = :targetBankAccountId) OR
-               (e.creditBankAccountId = :bankAccountId AND e.debitBankAccountId = :targetBankAccountId)
+               (e.debit_bank_account_id = :bankAccountId AND e.credit_bank_account_id = :targetBankAccountId) OR
+               (e.credit_bank_account_id = :bankAccountId AND e.debit_bank_account_id = :targetBankAccountId)
           )))
-          AND (:targetClientName IS NULL OR (t.id IS NOT NULL AND (
-               (e.debitBankAccountId = :bankAccountId AND LOWER(bCredit.clientName) LIKE LOWER(CONCAT('%', :targetClientName, '%'))) OR
-               (e.creditBankAccountId = :bankAccountId AND LOWER(bDebit.clientName) LIKE LOWER(CONCAT('%', :targetClientName, '%')))
+          AND (CAST(:targetClientName AS text) IS NULL OR (t.id IS NOT NULL AND (
+               (e.debit_bank_account_id = :bankAccountId AND LOWER(b_credit.client_name) LIKE LOWER(CONCAT('%', CAST(:targetClientName AS text), '%'))) OR
+               (e.credit_bank_account_id = :bankAccountId AND LOWER(b_debit.client_name) LIKE LOWER(CONCAT('%', CAST(:targetClientName AS text), '%')))
           )))
-        ORDER BY e.createdAt DESC
-    """)
+        ORDER BY e.created_at DESC
+        """,
+        countQuery = """
+        SELECT count(e.entry_id) FROM entry e
+        LEFT JOIN core.transfer t ON e.operation_id = t.id
+        LEFT JOIN account b_debit ON e.debit_bank_account_id = b_debit.account_id
+        LEFT JOIN account b_credit ON e.credit_bank_account_id = b_credit.account_id
+        WHERE (e.debit_bank_account_id = :bankAccountId OR e.credit_bank_account_id = :bankAccountId)
+          AND (:amount IS NULL OR e.amount = :amount)
+          AND (CAST(:createdAt AS timestamp) IS NULL OR e.created_at >= CAST(:createdAt AS timestamp))
+          AND (CAST(:concept AS text) IS NULL OR (t.id IS NOT NULL AND LOWER(t.concept) LIKE LOWER(CONCAT('%', CAST(:concept AS text), '%'))))
+          AND (:targetBankAccountId IS NULL OR (t.id IS NOT NULL AND (
+               (e.debit_bank_account_id = :bankAccountId AND e.credit_bank_account_id = :targetBankAccountId) OR
+               (e.credit_bank_account_id = :bankAccountId AND e.debit_bank_account_id = :targetBankAccountId)
+          )))
+          AND (CAST(:targetClientName AS text) IS NULL OR (t.id IS NOT NULL AND (
+               (e.debit_bank_account_id = :bankAccountId AND LOWER(b_credit.client_name) LIKE LOWER(CONCAT('%', CAST(:targetClientName AS text), '%'))) OR
+               (e.credit_bank_account_id = :bankAccountId AND LOWER(b_debit.client_name) LIKE LOWER(CONCAT('%', CAST(:targetClientName AS text), '%')))
+          )))
+        """,
+        nativeQuery = true)
     Page<EntryEntity> findFilteredEntries(
         @Param("bankAccountId") UUID bankAccountId,
         @Param("concept") String concept,
@@ -46,8 +64,8 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
     @Query("""
     SELECT e FROM EntryEntity e
     WHERE (e.debitBankAccountId = :bankAccountId OR e.creditBankAccountId = :bankAccountId)
-      AND (:startDate IS NULL OR e.createdAt >= :startDate)
-      AND (:endDate IS NULL OR e.createdAt <= :endDate)
+      AND (CAST(:startDate AS timestamp) IS NULL OR e.createdAt >= CAST(:startDate AS timestamp))
+      AND (CAST(:endDate AS timestamp) IS NULL OR e.createdAt <= CAST(:endDate AS timestamp))
     ORDER BY e.createdAt DESC
     """)
     List<EntryEntity> findEntriesForStatement(

@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.*;
 
 import io.github.gallardorubio.banksystem.core.client.dto.ClientPersonalUpdateRequest;
@@ -33,10 +34,9 @@ public class ClientController {
     private final ClientService clientService;
 
     @PostMapping
-    public ResponseEntity<Void> createClient(@Valid @RequestBody ClientRequest clientRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createClient(@Valid @RequestBody ClientRequest clientRequest) {
         clientService.createClient(clientRequest);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/security-questions")

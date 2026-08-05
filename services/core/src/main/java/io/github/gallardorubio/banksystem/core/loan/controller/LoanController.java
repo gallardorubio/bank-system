@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,7 +45,8 @@ public class LoanController {
     }
 
     @PostMapping
-    public ResponseEntity<LoanResponse> createLoan(
+    @ResponseStatus(HttpStatus.CREATED)
+    public LoanResponse createLoan(
         @Valid @RequestBody LoanRequest loanRequest,
         @AuthenticationPrincipal Jwt jwt,
         HttpServletRequest request
@@ -56,7 +58,7 @@ public class LoanController {
             origin
         );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(loanResponse);
+        return loanResponse;
     }
 
     @PreAuthorize("hasRole('operator')")

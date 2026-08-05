@@ -46,7 +46,6 @@ public class ClientService {
                         AttributeType.builder().name("email").value(clientRequest.email()).build(),
                         AttributeType.builder().name("email_verified").value("true").build()
                 )
-                .temporaryPassword(clientRequest.password())
                 .messageAction(MessageActionType.SUPPRESS)
                 .build();
 
@@ -57,6 +56,15 @@ public class ClientService {
                 .findFirst()
                 .map(AttributeType::value)
                 .orElseThrow(() -> new IllegalStateException("Cognito SUB not generated"));
+
+        AdminSetUserPasswordRequest setPasswordRequest = AdminSetUserPasswordRequest.builder()
+            .userPoolId(userPoolId)
+            .username(clientRequest.email())
+            .password(clientRequest.password())
+            .permanent(true)
+            .build();
+
+        cognitoClient.adminSetUserPassword(setPasswordRequest);
 
         UUID clientId = UUID.fromString(cognitoSub);
 

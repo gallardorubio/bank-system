@@ -6,6 +6,6 @@ import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 
 public record OperationStatusPhase(
     OperationStatus status,
-    Instant createAt,
+    Instant createdAt,
     String reason
 ) {}

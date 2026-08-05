@@ -29,7 +29,8 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/springwolf/**",
-                    "/springwolf/asyncapi-ui.html"
+                    "/springwolf/asyncapi-ui.html",
+                    "/api/v1/clients"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

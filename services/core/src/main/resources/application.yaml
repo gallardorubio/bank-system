@@ -30,7 +30,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}
+          issuer-uri: https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${COGNITO_USER_POOL_ID}
+springdoc:
+  default-produces-media-type: application/json
+  paths-to-exclude:
+    - /springwolf/**
 springwolf:
   docket:
     base-package: io.github.gallardorubio.banksystem.core

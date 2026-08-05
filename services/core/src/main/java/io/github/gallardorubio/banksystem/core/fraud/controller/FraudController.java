@@ -3,6 +3,8 @@ package io.github.gallardorubio.banksystem.core.fraud.controller;
 import io.github.gallardorubio.banksystem.core.fraud.entity.FraudEntity;
 import io.github.gallardorubio.banksystem.core.fraud.service.FraudService;
 import lombok.RequiredArgsConstructor;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,7 +24,7 @@ public class FraudController {
     @PreAuthorize("hasRole('operator')")
     @GetMapping
     public ResponseEntity<Page<FraudEntity>> getFraudRecords(
-        @PageableDefault(size = 20) Pageable pageable
+        @ParameterObject @PageableDefault(size = 20) Pageable pageable
     ) {
         Page<FraudEntity> records = fraudService.getAllFraudRecords(pageable);
 
