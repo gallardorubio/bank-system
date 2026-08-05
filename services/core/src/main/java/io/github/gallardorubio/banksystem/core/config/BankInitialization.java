@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class BankInitializationConfig {
+public class BankInitialization {
 
     @Bean
     public CommandLineRunner initializeBankInfrastructure(BankAccountService bankAccountService) {

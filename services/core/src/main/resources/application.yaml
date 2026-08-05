@@ -1,6 +1,13 @@
 spring:
   application:
     name: core
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      jakarta:
+        persistence:
+          create-database-schemas: true  
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
@@ -24,11 +31,13 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://cognito-idp.{REGION}.amazonaws.com/{USER_POOL_ID}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      jakarta:
-        persistence:
-          create-database-schemas: true
-      
+springwolf:
+  docket:
+    base-package: io.github.gallardorubio.banksystem.core
+    info:
+      title: Bank System Core AsyncAPI
+      version: 0.0.1
+    servers:
+      kafka-server:
+        protocol: kafka
+        host: localhost:9092

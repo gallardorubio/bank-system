@@ -45,7 +45,7 @@ public interface BankAccountRepository extends JpaRepository<BankAccountEntity, 
     BankAccountAnalyticsResponse getBankAnalytics(@Param("vaultId") UUID vaultId);
 
     @Query("""
-    SELECT new io.github.gallardorubio.banksystem.core.clients.dto.TrustedBankAccountResponse(
+    SELECT new io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse(
         b.id,
         b.clientName
     )

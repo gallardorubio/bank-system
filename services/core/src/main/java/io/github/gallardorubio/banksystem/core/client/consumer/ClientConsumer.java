@@ -11,11 +11,11 @@ import io.github.gallardorubio.banksystem.core.client.service.ClientService;
 @RequiredArgsConstructor
 public class ClientConsumer {
 
-    private final ClientService userService;
+    private final ClientService clientService;
 
     @KafkaListener(topics = "client-blocked", groupId = "users-group")
     public void listenClientAccountBlocked(ClientAccountBlockEvent clientAccountBlockedEvent) {
-        userService.resolveClientAccountBlocked(clientAccountBlockedEvent);
+        clientService.resolveClientAccountBlocked(clientAccountBlockedEvent);
     }
 
 }

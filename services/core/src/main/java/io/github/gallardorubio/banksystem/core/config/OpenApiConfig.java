@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
     info = @Info(
         title = "Bank System Core API",
         version = "0.0.1",
-        description = "Documentación de la API del Core Bancario"
+        description = "Documentación de la API REST del Core Bancario"
     ),
     security = @SecurityRequirement(name = "BearerAuth")
 )

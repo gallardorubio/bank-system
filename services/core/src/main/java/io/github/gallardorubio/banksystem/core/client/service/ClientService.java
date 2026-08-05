@@ -34,7 +34,7 @@ public class ClientService {
     private final BankAccountService bankAccountService;
     private final CognitoIdentityProviderClient cognitoClient;
 
-    @Value("${aws.cognito.user-pool-id}")
+    @Value("#{'${spring.security.oauth2.resourceserver.jwt.issuer-uri}'.substring('${spring.security.oauth2.resourceserver.jwt.issuer-uri}'.lastIndexOf('/') + 1)}")
     private String userPoolId;
 
     @Transactional
