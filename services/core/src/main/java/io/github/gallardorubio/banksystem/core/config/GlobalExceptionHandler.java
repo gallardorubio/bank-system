@@ -13,6 +13,13 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.UsernameExi
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(BusinessException.class)
+    public ProblemDetail handleBusinessException(BusinessException ex) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+        problem.setTitle(ex.getStatus().getReasonPhrase());
+        return problem;
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleNotFound(ResourceNotFoundException ex) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, 

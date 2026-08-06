@@ -49,6 +49,10 @@ public class BankAccountEntity implements Serializable {
     }
 
     public void withdraw(BigDecimal amount) {
+        if (!this.id.equals(VAULT_ACCOUNT_ID) && this.balance.compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient funds in bank account: " + this.id);
+        }
+        
         this.balance = this.balance.subtract(amount);
     }
 }

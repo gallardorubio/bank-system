@@ -1,6 +1,7 @@
 package io.github.gallardorubio.banksystem.core.transfer.service;
 
 import io.github.gallardorubio.banksystem.core.client.service.ClientService;
+import io.github.gallardorubio.banksystem.core.config.BusinessException;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
@@ -13,13 +14,13 @@ import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 import lombok.RequiredArgsConstructor;
 
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class TransferService {
     public TransferResponse getTransfer(UUID transferId, UUID clientId) {
         return transferRepository.findByIdAndClientId(transferId, clientId)
             .map(TransferResponse::new)
-            .orElseThrow(() -> new ResourceNotFoundException("Transfer not found: " + transferId));
+            .orElseThrow(() -> new BusinessException("Transferencia no encontrada: " + transferId));
     }
 
     @Transactional(readOnly = true)
@@ -50,6 +51,16 @@ public class TransferService {
     @Transactional
     public TransferResponse initiatePendingTransfer(TransferRequest transferRequest, UUID clientId, OperationRequestOrigin origin) {
         UUID clientBankAccountId = bankAccountService.getAccountIdByClientId(clientId);
+
+        if (clientBankAccountId.equals(transferRequest.targetBankAccountId())) {
+            throw new BusinessException("No puedes realizar una transferencia a tu propia cuenta bancaria");
+        }
+
+        BigDecimal currentBalance = bankAccountService.getBankAccountBalance(clientId);
+
+        if (currentBalance.compareTo(transferRequest.amount()) < 0) {
+            throw new BusinessException("Saldo insuficiente para realizar la transferencia");
+        }
 
         TransferEntity transferEntity = TransferEntity.fromDto(transferRequest, clientId, clientBankAccountId, origin);
 
