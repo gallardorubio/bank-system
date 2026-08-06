@@ -14,10 +14,10 @@ import java.util.UUID;
 
 public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {    
     @Query(value = """
-        SELECT e.* FROM entry e
+        SELECT e.* FROM core.entry e
         LEFT JOIN core.transfer t ON e.operation_id = t.id
-        LEFT JOIN account b_debit ON e.debit_bank_account_id = b_debit.account_id
-        LEFT JOIN account b_credit ON e.credit_bank_account_id = b_credit.account_id
+        LEFT JOIN core.account b_debit ON e.debit_bank_account_id = b_debit.account_id
+        LEFT JOIN core.account b_credit ON e.credit_bank_account_id = b_credit.account_id
         WHERE (e.debit_bank_account_id = :bankAccountId OR e.credit_bank_account_id = :bankAccountId)
           AND (:amount IS NULL OR e.amount = :amount)
           AND (CAST(:createdAt AS timestamp) IS NULL OR e.created_at >= CAST(:createdAt AS timestamp))
@@ -33,10 +33,10 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
         ORDER BY e.created_at DESC
         """,
         countQuery = """
-        SELECT count(e.entry_id) FROM entry e
+        SELECT count(e.entry_id) FROM core.entry e
         LEFT JOIN core.transfer t ON e.operation_id = t.id
-        LEFT JOIN account b_debit ON e.debit_bank_account_id = b_debit.account_id
-        LEFT JOIN account b_credit ON e.credit_bank_account_id = b_credit.account_id
+        LEFT JOIN core.account b_debit ON e.debit_bank_account_id = b_debit.account_id
+        LEFT JOIN core.account b_credit ON e.credit_bank_account_id = b_credit.account_id
         WHERE (e.debit_bank_account_id = :bankAccountId OR e.credit_bank_account_id = :bankAccountId)
           AND (:amount IS NULL OR e.amount = :amount)
           AND (CAST(:createdAt AS timestamp) IS NULL OR e.created_at >= CAST(:createdAt AS timestamp))

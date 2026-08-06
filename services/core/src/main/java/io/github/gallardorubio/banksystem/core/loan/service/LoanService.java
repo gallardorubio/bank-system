@@ -22,9 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 @Service
 @RequiredArgsConstructor
 public class LoanService {
@@ -54,6 +51,8 @@ public class LoanService {
 
         LoanEntity loanEntity = LoanEntity.fromDto(loanRequest, clientId, clientBankAccountId, origin);
 
+        loanEntity = loanRepository.saveAndFlush(loanEntity);
+
         loanEntity.pending("Préstamo pendiente de aprobación");
 
         LoanDetails loanDetails = new LoanDetails(loanEntity);
@@ -64,12 +63,7 @@ public class LoanService {
             loanDetails
         );
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                applicationEventPublisher.publishEvent(operationPending);
-            }
-        });
+        applicationEventPublisher.publishEvent(operationPending);
 
         return new LoanResponse(loanEntity);
     }

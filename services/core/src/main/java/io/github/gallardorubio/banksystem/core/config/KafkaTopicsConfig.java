@@ -9,6 +9,11 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicsConfig {
 
     @Bean
+    public NewTopic operationPendingTopic() {
+        return TopicBuilder.name("operation-pending").partitions(1).replicas(1).build();
+    }
+
+    @Bean
     public NewTopic fraudDetectedTopic() {
         return TopicBuilder.name("fraud-detected").partitions(1).replicas(1).build();
     }

@@ -13,7 +13,7 @@ import lombok.*;
 @Builder
 @Getter
 @Entity
-@Table(name = "account")
+@Table(name = "account", schema = "core")
 public class BankAccountEntity implements Serializable {
 
     @Id

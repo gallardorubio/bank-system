@@ -16,7 +16,7 @@ import lombok.*;
 @Getter
 @Entity
 @Builder
-@Table(name = "entry")
+@Table(name = "entry", schema = "core")
 public class EntryEntity implements Serializable {
 
     @Id

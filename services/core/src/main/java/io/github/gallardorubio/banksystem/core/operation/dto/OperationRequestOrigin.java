@@ -25,9 +25,17 @@ public record OperationRequestOrigin(
             country = jwt.getClaimAsString("custom:country");
         }
 
+        if (country == null) {
+            country = "ES"; 
+        }
+
         String city = request.getHeader("CloudFront-Viewer-City");
         if (city == null && jwt != null && jwt.hasClaim("custom:city")) {
             city = jwt.getClaimAsString("custom:city");
+        }
+
+        if (city == null) {
+            city = "Local"; 
         }
 
         return new OperationRequestOrigin(ip, userAgent, country, city);

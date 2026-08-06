@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record TransferDetails(
-    UUID id,
     UUID clientId,
     UUID clientBankAccountId,
     BigDecimal amount,
@@ -24,7 +23,6 @@ public record TransferDetails(
 ) {
     public TransferDetails(TransferEntity entity) {
         this(
-            entity.getId(),
             entity.getClientId(),
             entity.getClientBankAccountId(),
             entity.getAmount(),

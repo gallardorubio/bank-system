@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record DepositDetails(
-    UUID id,
     UUID clientId,
     UUID clientBankAccountId,
     BigDecimal amount,
@@ -22,7 +21,6 @@ public record DepositDetails(
 ) {
     public DepositDetails(DepositEntity entity) {
         this(
-            entity.getId(),
             entity.getClientId(),
             entity.getClientBankAccountId(),
             entity.getAmount(),

@@ -12,7 +12,6 @@ import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOri
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationStatusPhase;
 
 public record LoanDetails(
-    UUID id,
     UUID clientId,
     UUID clientBankAccountId,
     BigDecimal amount,
@@ -26,7 +25,6 @@ public record LoanDetails(
 ) {
     public LoanDetails(LoanEntity entity) {
         this(
-            entity.getId(),
             entity.getClientId(),
             entity.getClientBankAccountId(),
             entity.getAmount(),

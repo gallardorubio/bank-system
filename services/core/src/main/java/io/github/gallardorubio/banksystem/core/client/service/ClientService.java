@@ -27,6 +27,7 @@ import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResp
 import io.github.gallardorubio.banksystem.core.client.entity.ClientAccountStatus;
 import io.github.gallardorubio.banksystem.core.client.entity.ClientEntity;
 import io.github.gallardorubio.banksystem.core.client.entity.SecurityQuestionCatalog;
+import io.github.gallardorubio.banksystem.core.config.BusinessException;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 
@@ -45,10 +46,10 @@ public class ClientService {
     @Transactional
     public void createClient(ClientRequest clientRequest) {
         if (clientRepository.existsByEmail(clientRequest.email())) {
-            throw new IllegalArgumentException("A user with this email already exists");
+            throw new BusinessException("El correo electrónico no es válido");
         }
         if (clientRepository.existsByTaxId(clientRequest.taxId())) {
-            throw new IllegalArgumentException("A client with this tax ID already exists");
+            throw new BusinessException("La identificación fiscal no es válida");
         }
 
         List<SecurityQuestionAnswer> hashedAnswers = clientRequest.securityQuestionAnswers().stream()
@@ -100,7 +101,7 @@ public class ClientService {
             cognitoClient.adminAddUserToGroup(groupRequest);
 
         } catch (UsernameExistsException e) {
-            throw e;
+            throw new BusinessException("El correo electrónico no es válido");
         } catch (Exception e) {
             throw new IllegalArgumentException("Error registering user in Cognito: " + e.getMessage());
         }
@@ -172,7 +173,7 @@ public class ClientService {
         List<SecurityQuestionAnswersRequest.SecurityAnswer> providedAnswers = securityAnswersRequest.answers();
 
         if (providedAnswers.size() != savedQuestions.size()) {
-            throw new IllegalArgumentException("Invalid number of answers");
+            throw new BusinessException("Invalid number of answers");
         }
 
         for (var userAns : providedAnswers) {
@@ -184,7 +185,7 @@ public class ClientService {
             );
 
             if (!matches) {
-                throw new SecurityException("Incorrect security answers");
+                throw new BusinessException("Respuestas de seguridad incorrectas");
             }
         }
 
@@ -213,7 +214,7 @@ public class ClientService {
         );
 
         if (!matchesSecurityAnswer) {
-            throw new SecurityException("Incorrect security answer");
+            throw new BusinessException("Respuestas de seguridad incorrectas");
         }
 
         clientEntity.updateClientPersonalData(clientPersonalUpdateRequest);
@@ -274,7 +275,7 @@ public class ClientService {
         VerifySoftwareTokenResponse verifyResponse = cognitoClient.verifySoftwareToken(verifyRequest);
 
         if (verifyResponse.status() != VerifySoftwareTokenResponseType.SUCCESS) {
-            throw new IllegalArgumentException("Código TOTP inválido");
+            throw new BusinessException("Código TOTP inválido");
         }
 
         SetUserMfaPreferenceRequest preferenceRequest = SetUserMfaPreferenceRequest.builder()

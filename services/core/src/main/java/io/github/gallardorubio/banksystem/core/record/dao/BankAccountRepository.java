@@ -23,8 +23,8 @@ public interface BankAccountRepository extends JpaRepository<BankAccountEntity, 
     Optional<BankAccountEntity> findByIdForUpdate(@Param("id") UUID id);
 
     @Modifying
-    @Query(value = "INSERT INTO account (account_id, client_id, client_name, currency, balance) " +
-                   "VALUES ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', 'Vault', 'EUR', 0.0000) " +
+    @Query(value = "INSERT INTO core.account (account_id, client_id, client_name, currency, balance) " +
+                   "VALUES ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', 'vault', 'EUR', 0.0000) " +
                    "ON CONFLICT DO NOTHING", nativeQuery = true)
     void ensureVaultAccountExists();
 

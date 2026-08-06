@@ -19,9 +19,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +53,8 @@ public class DepositService {
         
         depositEntity.pending("Depósito pendiente de aprobación");
 
+        depositEntity = depositRepository.saveAndFlush(depositEntity);
+
         DepositDetails depositDetails = new DepositDetails(depositEntity);
 
         OperationPendingEvent<DepositDetails> operationPending = new OperationPendingEvent<>(
@@ -64,12 +63,7 @@ public class DepositService {
             depositDetails
         );
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                applicationEventPublisher.publishEvent(operationPending);
-            }
-        });
+        applicationEventPublisher.publishEvent(operationPending);
 
         return new DepositResponse(depositEntity);
     }
