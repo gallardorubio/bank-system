@@ -39,50 +39,45 @@ public class ClientService {
 
     @Transactional
     public void createClient(ClientRequest clientRequest) {
-        AdminCreateUserRequest cognitoRequest = AdminCreateUserRequest.builder()
-                .userPoolId(userPoolId)
-                .username(clientRequest.email())
-                .userAttributes(
-                        AttributeType.builder().name("email").value(clientRequest.email()).build(),
-                        AttributeType.builder().name("email_verified").value("true").build()
-                )
-                .messageAction(MessageActionType.SUPPRESS)
-                .build();
-
-        AdminCreateUserResponse cognitoResponse = cognitoClient.adminCreateUser(cognitoRequest);
-
-        String cognitoSub = cognitoResponse.user().attributes().stream()
-                .filter(a -> a.name().equals("sub"))
-                .findFirst()
-                .map(AttributeType::value)
-                .orElseThrow(() -> new IllegalStateException("Cognito SUB not generated"));
-
-        AdminSetUserPasswordRequest setPasswordRequest = AdminSetUserPasswordRequest.builder()
-            .userPoolId(userPoolId)
-            .username(clientRequest.email())
-            .password(clientRequest.password())
-            .permanent(true)
-            .build();
-
-        cognitoClient.adminSetUserPassword(setPasswordRequest);
-
-        UUID clientId = UUID.fromString(cognitoSub);
-
-        AdminAddUserToGroupRequest groupRequest = AdminAddUserToGroupRequest.builder()
-                .userPoolId(userPoolId)
-                .username(clientRequest.email())
-                .groupName("client")
-                .build();
-
-        cognitoClient.adminAddUserToGroup(groupRequest);
+        UUID clientId = UUID.randomUUID();
 
         ClientEntity clientEntity = ClientEntity.fromDto(clientId, clientRequest);
-
         BankAccountEntity bankAccountEntity = bankAccountService.createClientAccount(clientId, clientEntity.getName());
-
         clientEntity.setBankAccountId(bankAccountEntity.getId());
+        
+        clientRepository.saveAndFlush(clientEntity);
 
-        clientRepository.save(clientEntity);
+        try {
+            AdminCreateUserRequest cognitoRequest = AdminCreateUserRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(clientRequest.email())
+                    .userAttributes(
+                            AttributeType.builder().name("email").value(clientRequest.email()).build(),
+                            AttributeType.builder().name("email_verified").value("true").build(),
+                            AttributeType.builder().name("sub").value(clientId.toString()).build()
+                    )
+                    .messageAction(MessageActionType.SUPPRESS)
+                    .build();
+            cognitoClient.adminCreateUser(cognitoRequest);
+
+            AdminSetUserPasswordRequest setPasswordRequest = AdminSetUserPasswordRequest.builder()
+                .userPoolId(userPoolId)
+                .username(clientRequest.email())
+                .password(clientRequest.password())
+                .permanent(true)
+                .build();
+            cognitoClient.adminSetUserPassword(setPasswordRequest);
+
+            AdminAddUserToGroupRequest groupRequest = AdminAddUserToGroupRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(clientRequest.email())
+                    .groupName("client")
+                    .build();
+            cognitoClient.adminAddUserToGroup(groupRequest);
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error registering user in Cognito: " + e.getMessage());
+        }
     }
 
     @Transactional
