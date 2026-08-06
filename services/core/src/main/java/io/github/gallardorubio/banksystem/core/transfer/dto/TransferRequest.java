@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record TransferRequest(
-    @NotNull UUID clientBankAccountId,
     @NotNull @Positive BigDecimal amount,
     @NotNull UUID targetBankAccountId,
     @NotBlank String concept,

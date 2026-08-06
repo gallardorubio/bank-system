@@ -10,6 +10,7 @@ import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOri
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
+import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BankAccountService bankAccountService;
 
     @Transactional(readOnly = true)
     public LoanResponse getLoan(UUID loanId, UUID clientId) {
@@ -48,7 +50,9 @@ public class LoanService {
 
     @Transactional
     public LoanResponse initiatePendingLoan(LoanRequest loanRequest, UUID clientId, OperationRequestOrigin origin) {
-        LoanEntity loanEntity = LoanEntity.fromDto(loanRequest, clientId, origin);
+        UUID clientBankAccountId = bankAccountService.getAccountIdByClientId(clientId);
+
+        LoanEntity loanEntity = LoanEntity.fromDto(loanRequest, clientId, clientBankAccountId, origin);
 
         loanEntity.pending("Préstamo pendiente de aprobación");
 

@@ -55,10 +55,10 @@ public class LoanEntity extends OperationEntity {
     @Column(name = "maturity_date")
     private Instant maturityDate;
 
-    public static LoanEntity fromDto(LoanRequest dto, UUID clientId, OperationRequestOrigin origin) {
+    public static LoanEntity fromDto(LoanRequest dto, UUID clientId, UUID clientBankAccountId, OperationRequestOrigin origin) {
         return LoanEntity.builder()
             .clientId(clientId)
-            .clientBankAccountId(dto.clientBankAccountId())
+            .clientBankAccountId(clientBankAccountId)
             .amount(dto.amount())
             .termPeriods(dto.termPeriods())
             .installmentFrequency(dto.installmentFrequency())

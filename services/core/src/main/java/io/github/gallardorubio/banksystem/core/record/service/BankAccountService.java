@@ -7,6 +7,7 @@ import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.dao.EntryRepository;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
+import io.github.gallardorubio.banksystem.core.record.dto.BankAccountResponse;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import lombok.RequiredArgsConstructor;
 
@@ -125,6 +126,13 @@ public class BankAccountService {
         return bankAccountRepository.findByClientId(clientId)
             .map(BankAccountEntity::getId)
             .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
+    }
+
+    @Transactional(readOnly = true)
+    public BankAccountResponse getBankAccountByClientId(UUID clientId) {
+        return bankAccountRepository.findByClientId(clientId)
+                .map(BankAccountResponse::new)
+                .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
     }
 
 }

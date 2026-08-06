@@ -10,6 +10,7 @@ import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOri
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
+import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ public class DepositService {
     private final DepositRepository depositRepository;
     private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final BankAccountService bankAccountService;
 
     @Transactional(readOnly = true)
     public DepositResponse getDeposit(UUID depositId, UUID clientId) {
@@ -48,7 +50,9 @@ public class DepositService {
 
     @Transactional
     public DepositResponse initiatePendingDeposit(DepositRequest depositRequest, UUID clientId, OperationRequestOrigin origin) {
-        DepositEntity depositEntity = DepositEntity.fromDto(depositRequest, clientId, origin);
+        UUID clientBankAccountId = bankAccountService.getAccountIdByClientId(clientId);
+
+        DepositEntity depositEntity = DepositEntity.fromDto(depositRequest, clientId, clientBankAccountId, origin);
         
         depositEntity.pending("Depósito pendiente de aprobación");
 

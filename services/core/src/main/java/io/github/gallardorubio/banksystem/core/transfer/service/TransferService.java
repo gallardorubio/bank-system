@@ -4,6 +4,7 @@ import io.github.gallardorubio.banksystem.core.client.service.ClientService;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationPendingEvent;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
+import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferDetails;
@@ -30,6 +31,7 @@ public class TransferService {
     private final EntryService recordService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ClientService clientService;
+    private final BankAccountService bankAccountService;
 
     @Transactional(readOnly = true)
     public TransferResponse getTransfer(UUID transferId, UUID clientId) {
@@ -47,7 +49,9 @@ public class TransferService {
 
     @Transactional
     public TransferResponse initiatePendingTransfer(TransferRequest transferRequest, UUID clientId, OperationRequestOrigin origin) {
-        TransferEntity transferEntity = TransferEntity.fromDto(transferRequest, clientId, origin);
+        UUID clientBankAccountId = bankAccountService.getAccountIdByClientId(clientId);
+
+        TransferEntity transferEntity = TransferEntity.fromDto(transferRequest, clientId, clientBankAccountId, origin);
 
         if (transferRequest.shouldSaveAsTrusted()) {
             clientService.addTrustedAccount(clientId, transferRequest.targetBankAccountId());

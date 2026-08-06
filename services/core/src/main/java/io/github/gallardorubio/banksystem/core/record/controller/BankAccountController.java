@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
+import io.github.gallardorubio.banksystem.core.record.dto.BankAccountResponse;
 import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +35,16 @@ import org.springframework.http.MediaType;
 public class BankAccountController {
 
     private final BankAccountService bankAccountService;
+
+    @GetMapping("/me")
+    public ResponseEntity<BankAccountResponse> getMyBankAccount(
+        @AuthenticationPrincipal Jwt jwt
+    ) {
+        BankAccountResponse account = bankAccountService.getBankAccountByClientId(UUID.fromString(jwt.getSubject()));
+        
+        return ResponseEntity.ok(account);
+    }
+    
 
     @PageableAsQueryParam
     @GetMapping("/me/entries")
@@ -52,14 +62,6 @@ public class BankAccountController {
         );
 
         return ResponseEntity.ok(entries);
-    }
-
-    @GetMapping("/me/balance")
-    public ResponseEntity<BigDecimal> getBalance(
-        @AuthenticationPrincipal Jwt jwt
-    ) {
-        BigDecimal balance = bankAccountService.getBankAccountBalance(UUID.fromString(jwt.getSubject()));
-        return ResponseEntity.ok(balance);
     }
 
     @PreAuthorize("hasRole('operator')")

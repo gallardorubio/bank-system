@@ -22,10 +22,10 @@ import java.util.UUID;
 @Table(name = "deposit", schema = "core")
 public class DepositEntity extends OperationEntity {
 
-    public static DepositEntity fromDto(DepositRequest dto, UUID clientId, OperationRequestOrigin origin) {
+    public static DepositEntity fromDto(DepositRequest dto, UUID clientId, UUID clientBankAccountId, OperationRequestOrigin origin) {
         return DepositEntity.builder()
                 .clientId(clientId)
-                .clientBankAccountId(dto.clientBankAccountId())
+                .clientBankAccountId(clientBankAccountId)
                 .amount(dto.amount())
                 .origin(origin)
                 .build();

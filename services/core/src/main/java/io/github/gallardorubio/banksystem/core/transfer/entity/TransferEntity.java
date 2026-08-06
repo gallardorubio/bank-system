@@ -23,10 +23,10 @@ public class TransferEntity extends OperationEntity {
     @Column(name = "concept", nullable = false, updatable = false)
     private String concept;
 
-    public static TransferEntity fromDto(TransferRequest dto, UUID clientId, OperationRequestOrigin origin) {
+    public static TransferEntity fromDto(TransferRequest dto, UUID clientId, UUID clientBankAccountId, OperationRequestOrigin origin) {
         return TransferEntity.builder()
                 .clientId(clientId)
-                .clientBankAccountId(dto.clientBankAccountId())
+                .clientBankAccountId(clientBankAccountId)
                 .amount(dto.amount())
                 .origin(origin)
                 .targetBankAccountId(dto.targetBankAccountId())
