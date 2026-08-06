@@ -12,7 +12,7 @@ import org.hibernate.type.SqlTypes;
 
 import io.github.gallardorubio.banksystem.core.client.dto.ClientPersonalUpdateRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientRequest;
-import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestion;
+import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswer;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class ClientEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "security_questions", nullable = false)
     @Builder.Default
-    private List<SecurityQuestion> securityQuestions = new ArrayList<>();
+    private List<SecurityQuestionAnswer> securityQuestions = new ArrayList<>();
 
     public static ClientEntity fromDto(UUID clientId, ClientRequest clientRequest) {
         return ClientEntity.builder()
@@ -80,7 +80,7 @@ public class ClientEntity {
                 .email(clientRequest.email())
                 .taxId(clientRequest.taxId())
                 .accountStatus(ClientAccountStatus.ACTIVE)
-                .securityQuestions(clientRequest.securityQuestions())
+                .securityQuestions(clientRequest.securityQuestionAnswers())
                 .build();
     }
 

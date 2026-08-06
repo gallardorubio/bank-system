@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.*;
 
 import io.github.gallardorubio.banksystem.core.client.dto.ClientPersonalUpdateRequest;
@@ -16,8 +15,8 @@ import io.github.gallardorubio.banksystem.core.client.dto.ClientRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.MfaSetupResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.MfaVerifyRequest;
-import io.github.gallardorubio.banksystem.core.client.dto.SecurityAnswersRequest;
-import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestion;
+import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswersRequest;
+import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.client.service.ClientService;
 
@@ -40,18 +39,22 @@ public class ClientController {
     }
 
     @GetMapping("/security-questions")
-    public ResponseEntity<List<SecurityQuestion>> getSecurityQuestions(
+    public ResponseEntity<List<SecurityQuestionResponse>> getSecurityQuestionsCatalog() {
+        return ResponseEntity.ok(clientService.getAllSecurityQuestions());
+    }
+
+    @GetMapping("/me/security-questions")
+    public ResponseEntity<List<SecurityQuestionResponse>> getMySecurityQuestions(
         @AuthenticationPrincipal Jwt jwt
     ) {
-        List<SecurityQuestion> questions = clientService.getAllSecurityQuestions(UUID.fromString(jwt.getSubject()));
-
+        List<SecurityQuestionResponse> questions = clientService.getMySecurityQuestions(UUID.fromString(jwt.getSubject()));
         return ResponseEntity.ok(questions);
     }
 
     @PatchMapping("/unlock")
     public ResponseEntity<Void> unlockAccount(
         @AuthenticationPrincipal Jwt jwt,
-        @Valid @RequestBody SecurityAnswersRequest securityAnswersRequest
+        @Valid @RequestBody SecurityQuestionAnswersRequest securityAnswersRequest
     ) {
         clientService.verifyAndUnlockClient(UUID.fromString(jwt.getSubject()), securityAnswersRequest);
 

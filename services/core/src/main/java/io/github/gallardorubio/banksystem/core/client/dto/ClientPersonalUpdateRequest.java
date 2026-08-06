@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.UUID;
 
 public record ClientPersonalUpdateRequest(
     String name,
@@ -13,6 +12,6 @@ public record ClientPersonalUpdateRequest(
     String nationality,
     LocalDate birthDate,
     @Email String email,
-    @NotNull UUID questionId,
+    @NotNull int questionId,
     @NotBlank String answer
 ) {}

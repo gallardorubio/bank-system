@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient;
 import software.amazon.awssdk.services.cognitoidentityprovider.model.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +20,13 @@ import io.github.gallardorubio.banksystem.core.client.dto.ClientPersonalUpdateRe
 import io.github.gallardorubio.banksystem.core.client.dto.ClientRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.MfaSetupResponse;
-import io.github.gallardorubio.banksystem.core.client.dto.SecurityAnswersRequest;
-import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestion;
+import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswersRequest;
+import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionResponse;
+import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswer;
 import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.client.entity.ClientAccountStatus;
 import io.github.gallardorubio.banksystem.core.client.entity.ClientEntity;
+import io.github.gallardorubio.banksystem.core.client.entity.SecurityQuestionCatalog;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
 
@@ -33,19 +37,31 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final BankAccountService bankAccountService;
     private final CognitoIdentityProviderClient cognitoClient;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("#{'${spring.security.oauth2.resourceserver.jwt.issuer-uri}'.substring('${spring.security.oauth2.resourceserver.jwt.issuer-uri}'.lastIndexOf('/') + 1)}")
     private String userPoolId;
 
     @Transactional
     public void createClient(ClientRequest clientRequest) {
-        UUID clientId = UUID.randomUUID();
+        if (clientRepository.existsByEmail(clientRequest.email())) {
+            throw new IllegalArgumentException("A user with this email already exists");
+        }
+        if (clientRepository.existsByTaxId(clientRequest.taxId())) {
+            throw new IllegalArgumentException("A client with this tax ID already exists");
+        }
 
-        ClientEntity clientEntity = ClientEntity.fromDto(clientId, clientRequest);
-        BankAccountEntity bankAccountEntity = bankAccountService.createClientAccount(clientId, clientEntity.getName());
-        clientEntity.setBankAccountId(bankAccountEntity.getId());
-        
-        clientRepository.saveAndFlush(clientEntity);
+        List<SecurityQuestionAnswer> hashedAnswers = clientRequest.securityQuestionAnswers().stream()
+                .map(q -> {
+                    SecurityQuestionCatalog.fromId(q.questionId());
+                    return new SecurityQuestionAnswer(
+                            q.questionId(),
+                            passwordEncoder.encode(q.answer().trim().toLowerCase())
+                    );
+                })
+                .toList();
+
+        UUID clientId;
 
         try {
             AdminCreateUserRequest cognitoRequest = AdminCreateUserRequest.builder()
@@ -53,12 +69,20 @@ public class ClientService {
                     .username(clientRequest.email())
                     .userAttributes(
                             AttributeType.builder().name("email").value(clientRequest.email()).build(),
-                            AttributeType.builder().name("email_verified").value("true").build(),
-                            AttributeType.builder().name("sub").value(clientId.toString()).build()
+                            AttributeType.builder().name("email_verified").value("true").build()
                     )
                     .messageAction(MessageActionType.SUPPRESS)
                     .build();
-            cognitoClient.adminCreateUser(cognitoRequest);
+
+            AdminCreateUserResponse createUserResponse = cognitoClient.adminCreateUser(cognitoRequest);
+
+            String cognitoSub = createUserResponse.user().attributes().stream()
+                    .filter(attr -> "sub".equals(attr.name()))
+                    .findFirst()
+                    .map(AttributeType::value)
+                    .orElseThrow(() -> new IllegalStateException("No se pudo obtener el 'sub' de Cognito"));
+
+            clientId = UUID.fromString(cognitoSub);
 
             AdminSetUserPasswordRequest setPasswordRequest = AdminSetUserPasswordRequest.builder()
                 .userPoolId(userPoolId)
@@ -75,8 +99,40 @@ public class ClientService {
                     .build();
             cognitoClient.adminAddUserToGroup(groupRequest);
 
+        } catch (UsernameExistsException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Error registering user in Cognito: " + e.getMessage());
+        }
+
+        try {
+            ClientRequest secureRequest = new ClientRequest(
+                    clientRequest.name(), clientRequest.phone(), clientRequest.address(),
+                    clientRequest.nationality(), clientRequest.birthDate(), clientRequest.email(),
+                    clientRequest.taxId(), hashedAnswers, clientRequest.password()
+            );
+
+            ClientEntity clientEntity = ClientEntity.fromDto(clientId, secureRequest);
+            BankAccountEntity bankAccountEntity = bankAccountService.createClientAccount(clientId, clientEntity.getName());
+            clientEntity.setBankAccountId(bankAccountEntity.getId());
+
+            clientRepository.saveAndFlush(clientEntity);
+
+        } catch (Exception e) {
+            rollbackCognitoUser(clientRequest.email());
+            throw e;
+        }
+    }
+
+    private void rollbackCognitoUser(String email) {
+        try {
+            AdminDeleteUserRequest deleteRequest = AdminDeleteUserRequest.builder()
+                    .userPoolId(userPoolId)
+                    .username(email)
+                    .build();
+            cognitoClient.adminDeleteUser(deleteRequest);
+        } catch (Exception ex) {
+            System.err.println("Failed to rollback Cognito user creation for: " + email + " Error: " + ex.getMessage());
         }
     }
 
@@ -88,28 +144,43 @@ public class ClientService {
         clientEntity.setAccountStatus(ClientAccountStatus.BLOCKED);
     }
 
-    public List<SecurityQuestion> getAllSecurityQuestions(UUID clientId) {
-        ClientEntity clientEntity = clientRepository.findById(clientId)
-            .orElseThrow(() -> new RuntimeException("Client not found: " + clientId));
-
-        return clientEntity.getSecurityQuestions();
+    public List<SecurityQuestionResponse> getAllSecurityQuestions() {
+        return Arrays.stream(SecurityQuestionCatalog.values())
+                .map(q -> new SecurityQuestionResponse(q.getId(), q.getQuestion()))
+                .toList();
     }
 
-    @Transactional
-    public void verifyAndUnlockClient(UUID clientId, SecurityAnswersRequest securityAnswersRequest) {
+    @Transactional(readOnly = true)
+    public List<SecurityQuestionResponse> getMySecurityQuestions(UUID clientId) {
         ClientEntity clientEntity = clientRepository.findById(clientId)
             .orElseThrow(() -> new ResourceNotFoundException("Client not found: " + clientId));
 
-        List<SecurityQuestion> savedQuestions = clientEntity.getSecurityQuestions();
+        return clientEntity.getSecurityQuestions().stream()
+            .map(saved -> {
+                SecurityQuestionCatalog catalogItem = SecurityQuestionCatalog.fromId(saved.questionId());
+                return new SecurityQuestionResponse(catalogItem.getId(), catalogItem.getQuestion());
+            })
+            .toList();
+    }
 
-        if (securityAnswersRequest.answers().size() != savedQuestions.size()) {
+    @Transactional
+    public void verifyAndUnlockClient(UUID clientId, SecurityQuestionAnswersRequest securityAnswersRequest) {
+        ClientEntity clientEntity = clientRepository.findById(clientId)
+            .orElseThrow(() -> new ResourceNotFoundException("Client not found: " + clientId));
+
+        List<SecurityQuestionAnswer> savedQuestions = clientEntity.getSecurityQuestions();
+        List<SecurityQuestionAnswersRequest.SecurityAnswer> providedAnswers = securityAnswersRequest.answers();
+
+        if (providedAnswers.size() != savedQuestions.size()) {
             throw new IllegalArgumentException("Invalid number of answers");
         }
 
-        for (var userAns : securityAnswersRequest.answers()) {
+        for (var userAns : providedAnswers) {
+            String rawUserAns = userAns.answer().trim().toLowerCase();
+            
             boolean matches = savedQuestions.stream().anyMatch(saved -> 
-                saved.id().equals(userAns.questionId()) &&
-                saved.answer().trim().equalsIgnoreCase(userAns.answer().trim())
+                saved.questionId() == userAns.questionId() &&
+                passwordEncoder.matches(rawUserAns, saved.answer())
             );
 
             if (!matches) {
@@ -134,9 +205,11 @@ public class ClientService {
         ClientEntity clientEntity = clientRepository.findById(clientId)
             .orElseThrow(() -> new ResourceNotFoundException("Client not found: " + clientId));
 
+        String rawUserAns = clientPersonalUpdateRequest.answer().trim().toLowerCase();
+
         boolean matchesSecurityAnswer = clientEntity.getSecurityQuestions().stream().anyMatch(saved ->
-            saved.id().equals(clientPersonalUpdateRequest.questionId()) &&
-            saved.answer().trim().equalsIgnoreCase(clientPersonalUpdateRequest.answer().trim())
+            saved.questionId() == clientPersonalUpdateRequest.questionId() &&
+            passwordEncoder.matches(rawUserAns, saved.answer())
         );
 
         if (!matchesSecurityAnswer) {
@@ -146,7 +219,7 @@ public class ClientService {
         clientEntity.updateClientPersonalData(clientPersonalUpdateRequest);
 
         boolean mfaActive = isMfaEnabled(clientEntity.getEmail());
-
+        
         return new ClientResponse(clientEntity, mfaActive);
     }
 

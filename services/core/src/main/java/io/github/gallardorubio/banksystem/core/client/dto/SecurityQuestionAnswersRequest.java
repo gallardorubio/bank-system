@@ -2,13 +2,12 @@ package io.github.gallardorubio.banksystem.core.client.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
-import java.util.UUID;
 
-public record SecurityAnswersRequest(
+public record SecurityQuestionAnswersRequest(
     @NotEmpty List<SecurityAnswer> answers
 ) {
     public record SecurityAnswer(
-        UUID questionId,
+        int questionId,
         String answer
     ) {}
 }
