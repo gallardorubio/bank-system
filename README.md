@@ -1,14 +1,14 @@
-<p align="center">
+<div align="center">
 ```text
 █████▄  ▄▄▄  ▄▄  ▄▄ ▄▄ ▄▄ ▄█████ ▄▄ ▄▄  ▄▄▄▄ ▄▄▄▄▄▄ ▄▄▄▄▄ ▄▄   ▄▄ 
 ██▄▄██ ██▀██ ███▄██ ██▄█▀ ▀▀▀▄▄▄ ▀███▀ ███▄▄   ██   ██▄▄  ██▀▄▀██ 
 ██▄▄█▀ ██▀██ ██ ▀██ ██ ██ █████▀   █   ▄▄██▀   ██   ██▄▄▄ ██   ██ 
 ```
-</p>
+</div>
 
-## Documentación
+# Documentación
 
-# Core
+## Core
 
 * **API REST (OpenAPI / Swagger UI):**<br>
     `http://${HOST}:${SERVER_PORT}/swagger-ui/index.html`<br>
@@ -20,4 +20,4 @@
 
 > **Nota:** `${HOST}` y `${SERVER_PORT}` corresponden al nombre del host y puerto donde se despliegue el servicio (definido en la variable `SERVER_PORT` del archivo `.env`).
 
-# Agentic
+## Agentic
