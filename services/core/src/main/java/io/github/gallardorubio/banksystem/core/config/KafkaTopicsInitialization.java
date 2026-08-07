@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
-public class KafkaTopicsConfig {
+public class KafkaTopicsInitialization {
 
     @Bean
     public NewTopic operationPendingTopic() {
