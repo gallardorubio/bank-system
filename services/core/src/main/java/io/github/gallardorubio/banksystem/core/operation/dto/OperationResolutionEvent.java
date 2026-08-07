@@ -7,5 +7,5 @@ import java.util.UUID;
 public record OperationResolutionEvent(
     @NotNull UUID operationId,
     @NotNull OperationType operationType,
-    String reason
+    @NotNull String reason
 ) {}
