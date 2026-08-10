@@ -4,7 +4,7 @@ import { ClientView } from './views/ClientView';
 import { RegisterView } from './views/RegisterView';
 import { OperatorView } from './views/OperatorView';
 import { Button } from './components/Button';
-import { Loader2, Home, ArrowLeftRight, User, LogOut, ShieldCheck } from 'lucide-react';
+import { Loader2, Home, ArrowLeftRight, User, LogOut, Bot } from 'lucide-react';
 
 export default function App() {
   const auth = useAuth();
@@ -33,7 +33,7 @@ export default function App() {
       <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-[#0066FF]" />
-          <span className="text-xs font-bold tracking-wider uppercase text-[#627D98]">Iniciando BankSystem...</span>
+          <span className="text-xs font-bold tracking-wider uppercase text-[#627D98]">iniciando</span>
         </div>
       </div>
     );
@@ -45,32 +45,47 @@ export default function App() {
     }
 
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9] p-4">
-        <div className="grid w-full max-w-4xl h-[520px] grid-cols-1 md:grid-cols-2 rounded-[32px] overflow-hidden bg-white border border-[#E2E8F0] shadow-sm">
-          <div className="bg-[#0A2540] p-10 text-white flex flex-col justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#0066FF] flex items-center justify-center font-black text-base tracking-tighter">BS</div>
-              <span className="font-black tracking-tight text-xl">BankSystem</span>
+      <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9] p-6">
+        <div className="grid w-full max-w-7xl h-[680px] grid-cols-1 md:grid-cols-2 rounded-[40px] overflow-hidden bg-white border border-[#E2E8F0] shadow-xl">
+          <div className="bg-[#0A2540] p-16 text-white flex flex-col justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-[#0066FF] flex items-center justify-center font-black text-xl">BS</div>
+              <span className="font-black text-2xl tracking-tight">BankSystem</span>
             </div>
-            <div>
-              <h2 className="text-4xl font-extrabold leading-tight tracking-tight mb-3">Tu banca.<br/>Sin complicaciones.</h2>
-              <p className="text-xs text-[#627D98] leading-relaxed">Gestiona tu capital con rendimiento en tiempo real y seguridad bancaria.</p>
+
+            <div className="space-y-6 my-auto">
+              <h2 className="text-5xl font-black leading-tight tracking-tighter">
+                Tu banca.<br />Sin complicaciones.
+              </h2>
+              <p className="text-lg text-[#627D98] leading-relaxed max-w-lg">
+                Gestiona tu dinero con rendimiento en tiempo real.
+              </p>
             </div>
-            <div className="flex items-center gap-2 text-[11px] bg-white/10 px-3.5 py-2 rounded-xl w-fit">
-              <ShieldCheck className="w-4 h-4 text-[#00F0FF]" /> Cifrado activo de 256 bits
+
+            <div className="inline-flex items-center gap-3 text-sm font-semibold bg-white/10 border border-white/10 px-5 py-3 rounded-2xl shadow-inner text-[#00F0FF] w-fit">
+              <Bot className="w-5 h-5 text-[#00F0FF]" /> 
+              <span className="text-white">Asistido por agentes autónomos</span>
             </div>
           </div>
 
-          <div className="p-10 flex flex-col justify-center gap-6">
-            <div>
-              <h1 className="text-3xl font-black text-[#0A2540]">Acceso</h1>
-              <p className="text-xs text-[#627D98] mt-1">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
+          <div className="p-16 flex flex-col justify-center gap-10">
+            <div className="space-y-3">
+              <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
+              <p className="text-lg text-[#627D98]">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
             </div>
-            <div className="flex flex-col gap-3">
-              <Button variant="primary" onClick={() => auth.signinRedirect()} className="w-full">
+            <div className="flex flex-col gap-5">
+              <Button 
+                variant="primary" 
+                onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
+                className="w-full py-4 text-base font-bold shadow-sm"
+              >
                 Iniciar sesión
               </Button>
-              <Button variant="secondary" onClick={() => setIsRegistering(true)} className="w-full">
+              <Button 
+                variant="secondary" 
+                onClick={() => setIsRegistering(true)} 
+                className="w-full py-4 text-base font-bold"
+              >
                 Crear cuenta
               </Button>
             </div>

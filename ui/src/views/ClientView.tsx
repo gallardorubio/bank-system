@@ -1,7 +1,7 @@
 import { useUserVM } from '../viewmodels/useUserVM';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
-import { ArrowUpRight, ArrowDownLeft, Shield, Lock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Shield, Lock, BotMessageSquare } from 'lucide-react';
 
 interface ClientViewProps {
   activeTab?: 'home' | 'operations' | 'profile';
@@ -13,32 +13,24 @@ export function ClientView({ activeTab = 'home' }: ClientViewProps) {
   if (vm.isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#0066FF] animate-pulse">Cargando dashboard...</span>
+        <span className="text-sm font-bold uppercase tracking-widest text-[#0066FF] animate-pulse">Cargando plataforma...</span>
       </div>
     );
   }
 
   if (activeTab === 'profile') {
     return (
-      <div className="max-w-2xl mx-auto flex flex-col gap-4">
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Perfil de cliente</h2>
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="bg-[#F0F4F9] p-3 rounded-xl">
-              <span className="text-[#627D98] block">Nombre</span>
-              <span className="font-bold">{vm.client?.name || 'N/A'}</span>
+      <div className="max-w-3xl mx-auto flex flex-col gap-8">
+        <Card className="p-10">
+          <h2 className="text-3xl font-black mb-8">Mi Perfil</h2>
+          <div className="grid grid-cols-2 gap-6 text-sm">
+            <div className="bg-[#F0F4F9] p-6 rounded-3xl">
+              <span className="text-[#627D98] block mb-1">Nombre</span>
+              <span className="font-bold text-base">{vm.client?.name || 'N/A'}</span>
             </div>
-            <div className="bg-[#F0F4F9] p-3 rounded-xl">
-              <span className="text-[#627D98] block">Email</span>
-              <span className="font-bold">{vm.client?.email || 'N/A'}</span>
-            </div>
-            <div className="bg-[#F0F4F9] p-3 rounded-xl">
-              <span className="text-[#627D98] block">Teléfono</span>
-              <span className="font-bold">{vm.client?.phone || 'N/A'}</span>
-            </div>
-            <div className="bg-[#F0F4F9] p-3 rounded-xl">
-              <span className="text-[#627D98] block">Tax ID</span>
-              <span className="font-bold">{vm.client?.taxId || 'N/A'}</span>
+            <div className="bg-[#F0F4F9] p-6 rounded-3xl">
+              <span className="text-[#627D98] block mb-1">Email</span>
+              <span className="font-bold text-base">{vm.client?.email || 'N/A'}</span>
             </div>
           </div>
         </Card>
@@ -47,39 +39,39 @@ export function ClientView({ activeTab = 'home' }: ClientViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6 h-full">
+    <div className="flex flex-col gap-10 h-full">
       <div>
-        <span className="text-xs text-[#627D98] font-bold uppercase tracking-wider">Bienvenido</span>
-        <h1 className="text-3xl font-black text-[#0A2540]">{vm.client?.name || 'Cliente'}</h1>
+        <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">Bienvenido de nuevo,</span>
+        <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter">{vm.client?.name || 'Cliente'}</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-[#0A2540] text-white rounded-[28px] p-8 flex flex-col justify-between h-[200px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-[#0A2540] text-white rounded-[32px] p-12 flex flex-col justify-between h-[300px]">
           <div>
-            <span className="text-xs text-[#627D98] font-bold uppercase tracking-wider">Balance Disponible</span>
-            <div className="text-4xl font-black mt-2 tracking-tight">$0.00</div>
+            <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">Balance Disponible</span>
+            <div className="text-6xl font-black mt-4 tracking-tighter">$0.00</div>
           </div>
-          <div className="flex gap-3">
-            <Button variant="primary" size="sm" className="gap-2">
-              <ArrowUpRight className="w-4 h-4" /> Transferir
+          <div className="flex gap-4">
+            <Button variant="primary" size="lg" className="gap-3 px-8">
+              <ArrowUpRight className="w-5 h-5" /> Transferir
             </Button>
-            <Button variant="secondary" size="sm" className="gap-2">
-              <ArrowDownLeft className="w-4 h-4" /> Depositar
+            <Button variant="secondary" size="lg" className="gap-3 px-8">
+              <ArrowDownLeft className="w-5 h-5" /> Depositar
             </Button>
           </div>
         </div>
 
-        <Card className="flex flex-col justify-between h-[200px] p-6">
+        <Card className="flex flex-col justify-between h-[300px] p-8">
           <div>
-            <div className="w-9 h-9 rounded-xl bg-[#E8F0FE] text-[#0066FF] flex items-center justify-center mb-2">
-              <Shield className="w-5 h-5" />
+            <div className="w-16 h-16 rounded-3xl bg-[#E8F0FE] text-[#0066FF] flex items-center justify-center mb-6">
+              <BotMessageSquare className="w-8 h-8" />
             </div>
-            <h3 className="font-bold text-sm">Seguridad de la cuenta</h3>
-            <p className="text-xs text-[#627D98]">Autenticación de dos factores</p>
+            <h3 className="font-bold text-xl mb-2">Asistido por agentes</h3>
+            <p className="text-sm text-[#627D98] leading-relaxed">Tu gestión financiera potenciada por IA autónoma.</p>
           </div>
-          <div className="pt-3 border-t border-[#E2E8F0] flex items-center justify-between">
-            <span className="text-xs font-bold">{vm.client?.mfaEnabled ? 'MFA Activo' : 'MFA Inactivo'}</span>
-            <Button variant="ghost" size="sm"><Lock className="w-3.5 h-3.5" /></Button>
+          <div className="pt-6 border-t border-[#E2E8F0] flex items-center justify-between">
+            <span className="text-sm font-bold">{vm.client?.mfaEnabled ? 'Seguridad Activa' : 'Seguridad Pendiente'}</span>
+            <Button variant="ghost" size="md"><Lock className="w-5 h-5" /></Button>
           </div>
         </Card>
       </div>
