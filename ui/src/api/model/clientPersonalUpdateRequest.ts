@@ -12,7 +12,6 @@ export interface ClientPersonalUpdateRequest {
   address?: string;
   nationality?: string;
   birthDate?: string;
-  email?: string;
   questionId: number;
   /** @minLength 1 */
   answer: string;

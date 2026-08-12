@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientPersonalUpdateRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientResponse;
-import io.github.gallardorubio.banksystem.core.client.dto.MfaSetupResponse;
-import io.github.gallardorubio.banksystem.core.client.dto.MfaVerifyRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswersRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse;
@@ -91,28 +89,12 @@ public class ClientController {
         return ResponseEntity.ok(trustedAccounts);
     }
 
-    @PostMapping("/me/mfa/setup")
-    public ResponseEntity<MfaSetupResponse> setupMfa(
-        @AuthenticationPrincipal Jwt jwt
-    ) {
-        MfaSetupResponse setup = clientService.setupMfa(jwt.getTokenValue());
-        return ResponseEntity.ok(setup);
-    }
-
-    @PostMapping("/me/mfa/enable")
-    public ResponseEntity<Void> enableMfa(
+    @DeleteMapping("/me/trusted-accounts/{id}")
+    public ResponseEntity<Void> removeTrustedBankAccount(
         @AuthenticationPrincipal Jwt jwt,
-        @Valid @RequestBody MfaVerifyRequest request
+        @PathVariable("id") UUID bankAccountId
     ) {
-        clientService.enableMfa(jwt.getTokenValue(), request.totpCode());
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/me/mfa/disable")
-    public ResponseEntity<Void> disableMfa(
-        @AuthenticationPrincipal Jwt jwt
-    ) {
-        clientService.disableMfa(jwt.getTokenValue());
+        clientService.removeTrustedBankAccount(UUID.fromString(jwt.getSubject()), bankAccountId);
         return ResponseEntity.ok().build();
     }
 

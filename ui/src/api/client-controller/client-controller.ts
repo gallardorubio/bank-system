@@ -28,8 +28,6 @@ import type {
   ClientPersonalUpdateRequest,
   ClientRequest,
   ClientResponse,
-  MfaSetupResponse,
-  MfaVerifyRequest,
   SecurityQuestionAnswersRequest,
   SecurityQuestionResponse,
   TrustedBankAccountResponse
@@ -112,176 +110,6 @@ const {mutation: mutationOptions} = options ?
         TContext
       > => {
       return useMutation(getCreateClientMutationOptions(options), queryClient);
-    }
-    export const setupMfa = (
-
- signal?: AbortSignal
-) => {
-
-
-      return customInstance<MfaSetupResponse>(
-      {url: `/api/v1/clients/me/mfa/setup`, method: 'POST', signal
-    },
-      );
-    }
-
-
-
-
-export const getSetupMfaMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupMfa>>, TError,void, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof setupMfa>>, TError,void, TContext> => {
-
-const mutationKey = ['setupMfa'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setupMfa>>, void> = () => {
-
-
-          return  setupMfa()
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SetupMfaMutationResult = NonNullable<Awaited<ReturnType<typeof setupMfa>>>
-
-    export type SetupMfaMutationError = void
-
-    export const useSetupMfa = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setupMfa>>, TError,void, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof setupMfa>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getSetupMfaMutationOptions(options), queryClient);
-    }
-    export const enableMfa = (
-    mfaVerifyRequest: MfaVerifyRequest,
- signal?: AbortSignal
-) => {
-
-
-      return customInstance<void>(
-      {url: `/api/v1/clients/me/mfa/enable`, method: 'POST',
-      headers: {'Content-Type': 'application/json', },
-      data: mfaVerifyRequest, signal
-    },
-      );
-    }
-
-
-
-
-export const getEnableMfaMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enableMfa>>, TError,{data: MfaVerifyRequest}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof enableMfa>>, TError,{data: MfaVerifyRequest}, TContext> => {
-
-const mutationKey = ['enableMfa'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof enableMfa>>, {data: MfaVerifyRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  enableMfa(data,)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type EnableMfaMutationResult = NonNullable<Awaited<ReturnType<typeof enableMfa>>>
-    export type EnableMfaMutationBody = MfaVerifyRequest
-    export type EnableMfaMutationError = void
-
-    export const useEnableMfa = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enableMfa>>, TError,{data: MfaVerifyRequest}, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof enableMfa>>,
-        TError,
-        {data: MfaVerifyRequest},
-        TContext
-      > => {
-      return useMutation(getEnableMfaMutationOptions(options), queryClient);
-    }
-    export const disableMfa = (
-
- signal?: AbortSignal
-) => {
-
-
-      return customInstance<void>(
-      {url: `/api/v1/clients/me/mfa/disable`, method: 'POST', signal
-    },
-      );
-    }
-
-
-
-
-export const getDisableMfaMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disableMfa>>, TError,void, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof disableMfa>>, TError,void, TContext> => {
-
-const mutationKey = ['disableMfa'];
-const {mutation: mutationOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof disableMfa>>, void> = () => {
-
-
-          return  disableMfa()
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DisableMfaMutationResult = NonNullable<Awaited<ReturnType<typeof disableMfa>>>
-
-    export type DisableMfaMutationError = void
-
-    export const useDisableMfa = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disableMfa>>, TError,void, TContext>, }
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof disableMfa>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getDisableMfaMutationOptions(options), queryClient);
     }
     export const unlockAccount = (
     securityQuestionAnswersRequest: SecurityQuestionAnswersRequest,
@@ -743,3 +571,59 @@ export function useGetMySecurityQuestions<TData = Awaited<ReturnType<typeof getM
 
 
 
+export const removeTrustedBankAccount = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/api/v1/clients/me/trusted-accounts/${id}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+
+export const getRemoveTrustedBankAccountMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTrustedBankAccount>>, TError,{id: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof removeTrustedBankAccount>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['removeTrustedBankAccount'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeTrustedBankAccount>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  removeTrustedBankAccount(id,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveTrustedBankAccountMutationResult = NonNullable<Awaited<ReturnType<typeof removeTrustedBankAccount>>>
+
+    export type RemoveTrustedBankAccountMutationError = void
+
+    export const useRemoveTrustedBankAccount = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeTrustedBankAccount>>, TError,{id: string}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeTrustedBankAccount>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getRemoveTrustedBankAccountMutationOptions(options), queryClient);
+    }

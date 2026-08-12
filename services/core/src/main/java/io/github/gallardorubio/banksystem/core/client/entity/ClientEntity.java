@@ -100,18 +100,21 @@ public class ClientEntity {
         if (dto.birthDate() != null) {
             this.birthDate = dto.birthDate();
         }
-        if (dto.email() != null && !dto.email().isBlank()) {
-            this.email = dto.email();
-        }
     }
 
     public void addTrustedBankAccount(UUID bankAccountId) {
-    if (this.trustedBankAccountsId == null) {
-        this.trustedBankAccountsId = new ArrayList<>();
+        if (this.trustedBankAccountsId == null) {
+            this.trustedBankAccountsId = new ArrayList<>();
+        }
+        if (!this.trustedBankAccountsId.contains(bankAccountId)) {
+            this.trustedBankAccountsId.add(bankAccountId);
+        }
     }
-    if (!this.trustedBankAccountsId.contains(bankAccountId)) {
-        this.trustedBankAccountsId.add(bankAccountId);
+
+    public void removeTrustedBankAccount(UUID bankAccountId) {
+        if (this.trustedBankAccountsId != null) {
+            this.trustedBankAccountsId.remove(bankAccountId);
+        }
     }
-}
 
 }

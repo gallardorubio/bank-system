@@ -19,7 +19,6 @@ import io.github.gallardorubio.banksystem.core.client.dto.ClientAccountBlockEven
 import io.github.gallardorubio.banksystem.core.client.dto.ClientPersonalUpdateRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.ClientResponse;
-import io.github.gallardorubio.banksystem.core.client.dto.MfaSetupResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswersRequest;
 import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswer;
@@ -257,48 +256,14 @@ public class ClientService {
         return bankAccountService.getClientNamesByAccountIds(trustedBankAccountIds);
     }
 
-    public MfaSetupResponse setupMfa(String accessToken) {
-        AssociateSoftwareTokenRequest request = AssociateSoftwareTokenRequest.builder()
-                .accessToken(accessToken)
-                .build();
+    @Transactional
+    public void removeTrustedBankAccount(UUID clientId, UUID bankAccountId) {
+        ClientEntity clientEntity = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Client not found: " + clientId));
+        
+        clientEntity.removeTrustedBankAccount(bankAccountId);
 
-        AssociateSoftwareTokenResponse response = cognitoClient.associateSoftwareToken(request);
-        return new MfaSetupResponse(response.secretCode());
+        clientRepository.save(clientEntity);
     }
-
-    public void enableMfa(String accessToken, String totpCode) {
-        VerifySoftwareTokenRequest verifyRequest = VerifySoftwareTokenRequest.builder()
-                .accessToken(accessToken)
-                .userCode(totpCode)
-                .build();
-
-        VerifySoftwareTokenResponse verifyResponse = cognitoClient.verifySoftwareToken(verifyRequest);
-
-        if (verifyResponse.status() != VerifySoftwareTokenResponseType.SUCCESS) {
-            throw new BusinessException("Código TOTP inválido");
-        }
-
-        SetUserMfaPreferenceRequest preferenceRequest = SetUserMfaPreferenceRequest.builder()
-                .accessToken(accessToken)
-                .softwareTokenMfaSettings(SoftwareTokenMfaSettingsType.builder()
-                        .enabled(true)
-                        .preferredMfa(true)
-                        .build())
-                .build();
-
-        cognitoClient.setUserMFAPreference(preferenceRequest);
-    }
-
-    public void disableMfa(String accessToken) {
-        SetUserMfaPreferenceRequest preferenceRequest = SetUserMfaPreferenceRequest.builder()
-                .accessToken(accessToken)
-                .softwareTokenMfaSettings(SoftwareTokenMfaSettingsType.builder()
-                        .enabled(false)
-                        .preferredMfa(false)
-                        .build())
-                .build();
-
-        cognitoClient.setUserMFAPreference(preferenceRequest);
-    }    
 
 }

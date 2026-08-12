@@ -85,7 +85,7 @@ export function RegisterView({ onSuccess, onCancel }: RegisterViewProps) {
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="Nombre completo" type="text" name="name" value={vm.formData.name} onChange={vm.handleChange} required className="h-11 px-4 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] text-sm font-semibold text-[#0A2540] outline-none focus:bg-white focus:border-[#0066FF]" />
             <input placeholder="Correo electrónico" type="email" name="email" value={vm.formData.email} onChange={vm.handleChange} required className="h-11 px-4 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] text-sm font-semibold text-[#0A2540] outline-none focus:bg-white focus:border-[#0066FF]" />
-            <input placeholder="DNI / Tax ID" type="text" name="taxId" value={vm.formData.taxId} onChange={vm.handleChange} required className="h-11 px-4 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] text-sm font-semibold text-[#0A2540] outline-none focus:bg-white focus:border-[#0066FF]" />
+            <input placeholder="Tax ID" type="text" name="taxId" value={vm.formData.taxId} onChange={vm.handleChange} required className="h-11 px-4 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] text-sm font-semibold text-[#0A2540] outline-none focus:bg-white focus:border-[#0066FF]" />
             
             <div className="flex h-11 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] overflow-hidden focus-within:bg-white focus-within:border-[#0066FF]">
               <select value={selectedCountryCode} onChange={handleCountryPhoneChange} className="px-2 bg-transparent text-sm font-bold text-[#0A2540] outline-none border-r border-[#E2E8F0] cursor-pointer">

@@ -64,8 +64,8 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
     @Query("""
     SELECT e FROM EntryEntity e
     WHERE (e.debitBankAccountId = :bankAccountId OR e.creditBankAccountId = :bankAccountId)
-      AND (CAST(:startDate AS timestamp) IS NULL OR e.createdAt >= CAST(:startDate AS timestamp))
-      AND (CAST(:endDate AS timestamp) IS NULL OR e.createdAt <= CAST(:endDate AS timestamp))
+      AND (CAST(:startDate AS timestamp) IS NULL OR e.createdAt >= :startDate)
+      AND (CAST(:endDate AS timestamp) IS NULL OR e.createdAt <= :endDate)
     ORDER BY e.createdAt DESC
     """)
     List<EntryEntity> findEntriesForStatement(
