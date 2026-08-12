@@ -1,9 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { z } from 'zod';
 import { 
   useCreateClient, 
   useGetSecurityQuestionsCatalog 
 } from '../api/client-controller/client-controller';
 import type { ClientRequest } from '../api/model';
+
+export const passwordSchema = z.string()
+  .min(8, 'Mínimo 8 caracteres')
+  .regex(/[0-9]/, 'Un número')
+  .regex(/[a-z]/, 'Una minúscula')
+  .regex(/[A-Z]/, 'Una mayúscula')
+  .regex(/[@#$%^&+=!.]/, 'Un carácter especial (@#$%^&+=!.)');
 
 export function useRegisterVM(onSuccess?: () => void) {
   const { data: questionsCatalog, isLoading: isLoadingQuestions } = useGetSecurityQuestionsCatalog();
@@ -29,16 +37,20 @@ export function useRegisterVM(onSuccess?: () => void) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
+  const selectedQuestionIds = useMemo(() => [
+    Number(formData.q1Id),
+    Number(formData.q2Id),
+    Number(formData.q3Id),
+  ], [formData.q1Id, formData.q2Id, formData.q3Id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    // Validación local del requisito de 3 preguntas únicas
-    const selectedQuestions = [Number(formData.q1Id), Number(formData.q2Id), Number(formData.q3Id)];
-    const uniqueQuestions = new Set(selectedQuestions);
+    const uniqueQuestions = new Set(selectedQuestionIds);
     if (uniqueQuestions.size !== 3) {
       setErrorMessage('Debes seleccionar 3 preguntas de seguridad diferentes.');
       return;
@@ -75,6 +87,7 @@ export function useRegisterVM(onSuccess?: () => void) {
     isLoadingQuestions,
     isSubmitting: createClientMutation.isPending,
     errorMessage,
+    selectedQuestionIds,
     handleChange,
     handleSubmit,
   };

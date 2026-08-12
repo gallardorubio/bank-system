@@ -40,10 +40,6 @@ export default function App() {
   }
 
   if (!auth.isAuthenticated) {
-    if (isRegistering) {
-      return <RegisterView onSuccess={() => setIsRegistering(false)} onCancel={() => setIsRegistering(false)} />;
-    }
-
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9] p-6">
         <div className="grid w-full max-w-7xl h-[680px] grid-cols-1 md:grid-cols-2 rounded-[40px] overflow-hidden bg-white border border-[#E2E8F0] shadow-xl">
@@ -68,28 +64,35 @@ export default function App() {
             </div>
           </div>
 
-          <div className="p-16 flex flex-col justify-center gap-10">
-            <div className="space-y-3">
-              <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
-              <p className="text-lg text-[#627D98]">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
+          {isRegistering ? (
+            <RegisterView 
+              onSuccess={() => setIsRegistering(false)} 
+              onCancel={() => setIsRegistering(false)} 
+            />
+          ) : (
+            <div className="p-16 flex flex-col justify-center gap-10">
+              <div className="space-y-3">
+                <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
+                <p className="text-lg text-[#627D98]">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
+              </div>
+              <div className="flex flex-col gap-5">
+                <Button 
+                  variant="primary" 
+                  onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
+                  className="w-full py-4 text-base font-bold shadow-sm"
+                >
+                  Iniciar sesión
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => setIsRegistering(true)} 
+                  className="w-full py-4 text-base font-bold"
+                >
+                  Crear cuenta
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-col gap-5">
-              <Button 
-                variant="primary" 
-                onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
-                className="w-full py-4 text-base font-bold shadow-sm"
-              >
-                Iniciar sesión
-              </Button>
-              <Button 
-                variant="secondary" 
-                onClick={() => setIsRegistering(true)} 
-                className="w-full py-4 text-base font-bold"
-              >
-                Crear cuenta
-              </Button>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     );
