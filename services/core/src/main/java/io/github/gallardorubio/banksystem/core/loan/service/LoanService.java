@@ -51,9 +51,9 @@ public class LoanService {
 
         LoanEntity loanEntity = LoanEntity.fromDto(loanRequest, clientId, clientBankAccountId, origin);
 
-        loanEntity = loanRepository.saveAndFlush(loanEntity);
-
         loanEntity.pending("Préstamo pendiente de aprobación");
+
+        loanEntity = loanRepository.saveAndFlush(loanEntity);        
 
         LoanDetails loanDetails = new LoanDetails(loanEntity);
 

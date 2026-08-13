@@ -1,32 +1,28 @@
 import { useClientVM } from '../viewmodels/useClientVM';
 import { ClientHomeView } from './client/ClientHomeView';
 import { ClientProfileView } from './client/ClientProfileView';
-import { ClientOperationsView } from './client/ClientOperationsView';
+import { ClientLoansView } from './client/ClientLoansView';
+import { LoadingScreen } from '../components/LoadingScreen';
 
 interface ClientViewProps {
-  activeTab?: 'home' | 'operations' | 'profile';
+  activeTab?: 'home' | 'loans' | 'profile';
+  setActiveTab?: (tab: 'home' | 'loans' | 'profile') => void;
 }
 
-export function ClientView({ activeTab = 'home' }: ClientViewProps) {
+export function ClientView({ activeTab = 'home', setActiveTab }: ClientViewProps) {
   const vm = useClientVM();
 
   if (vm.isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <span className="text-sm font-bold uppercase tracking-widest text-[#0066FF] animate-pulse">
-          Cargando plataforma...
-        </span>
-      </div>
-    );
+    return <LoadingScreen label="Cargando" />;
   }
 
   switch (activeTab) {
     case 'profile':
       return <ClientProfileView />;
-    case 'operations':
-      return <ClientOperationsView />;
+    case 'loans':
+      return <ClientLoansView />;
     case 'home':
     default:
-      return <ClientHomeView client={vm.client} bankAccount={vm.bankAccount} />;
+      return <ClientHomeView client={vm.client} setActiveTab={setActiveTab} />;
   }
 }

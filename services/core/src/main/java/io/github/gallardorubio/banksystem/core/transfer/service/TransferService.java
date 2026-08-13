@@ -48,6 +48,10 @@ public class TransferService {
 
     @Transactional
     public TransferResponse initiatePendingTransfer(TransferRequest transferRequest, UUID clientId, OperationRequestOrigin origin) {
+        if (!bankAccountService.bankAccountExists(transferRequest.targetBankAccountId())) {
+            throw new BusinessException("La cuenta bancaria de destino no existe: " + transferRequest.targetBankAccountId());
+        }
+
         UUID clientBankAccountId = bankAccountService.getAccountIdByClientId(clientId);
 
         if (clientBankAccountId.equals(transferRequest.targetBankAccountId())) {
@@ -66,10 +70,10 @@ public class TransferService {
             clientService.addTrustedAccount(clientId, transferRequest.targetBankAccountId());
         }
 
-        transferEntity = transferRepository.saveAndFlush(transferEntity);
-        
         transferEntity.pending("Transferencia pendiente de aprobación");
 
+        transferEntity = transferRepository.saveAndFlush(transferEntity);
+        
         TransferDetails transferDetails = new TransferDetails(transferEntity);
 
         OperationPendingEvent<TransferDetails> operationPending = new OperationPendingEvent<>(

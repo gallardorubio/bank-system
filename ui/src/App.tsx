@@ -6,12 +6,12 @@ import { ClientView } from './views/ClientView';
 import { RegisterView } from './views/RegisterView';
 import { OperatorView } from './views/OperatorView';
 import { Button } from './components/Button';
-import { Loader2 } from 'lucide-react';
+import { LoadingScreen } from './components/LoadingScreen';
 
 export default function App() {
   const auth = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'operations' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'loans' | 'profile'>('home');
 
   const role = useMemo(() => {
     const profile = auth.user?.profile as Record<string, unknown> | undefined;
@@ -33,10 +33,7 @@ export default function App() {
   if (auth.isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9]">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-[#0066FF]" />
-          <span className="text-xs font-bold tracking-wider uppercase text-[#627D98]">Iniciando</span>
-        </div>
+        <LoadingScreen label="Iniciando" />
       </div>
     );
   }
@@ -46,9 +43,9 @@ export default function App() {
       <AuthLayout>
         {isRegistering ? (
           <RegisterView 
-            onSuccess={() => setIsRegistering(false)} 
-            onCancel={() => setIsRegistering(false)} 
-          />
+             onSuccess={() => setIsRegistering(false)} 
+             onCancel={() => setIsRegistering(false)} 
+           />
         ) : (
           <div className="p-16 flex flex-col justify-center gap-10">
             <div className="space-y-3">
@@ -57,16 +54,16 @@ export default function App() {
             </div>
             <div className="flex flex-col gap-5">
               <Button 
-                variant="primary" 
-                onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
-                className="w-full py-4 text-base font-bold shadow-sm"
+                 variant="primary" 
+                 onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
+                 className="w-full py-4 text-base font-bold shadow-sm"
               >
                 Iniciar sesión
               </Button>
               <Button 
-                variant="secondary" 
-                onClick={() => setIsRegistering(true)} 
-                className="w-full py-4 text-base font-bold"
+                 variant="secondary" 
+                 onClick={() => setIsRegistering(true)} 
+                 className="w-full py-4 text-base font-bold"
               >
                 Crear cuenta
               </Button>
@@ -85,7 +82,7 @@ export default function App() {
       setActiveTab={setActiveTab}
       onLogout={handleLogout}
     >
-      {role === 'operator' ? <OperatorView /> : <ClientView activeTab={activeTab} />}
+      {role === 'operator' ? <OperatorView /> : <ClientView activeTab={activeTab} setActiveTab={setActiveTab} />}
     </DashboardLayout>
   );
 }

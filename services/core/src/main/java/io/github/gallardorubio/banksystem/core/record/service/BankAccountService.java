@@ -135,4 +135,9 @@ public class BankAccountService {
                 .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
     }
 
+    @Transactional(readOnly = true)
+    public boolean bankAccountExists(UUID bankAccountId) {
+        return bankAccountRepository.existsById(bankAccountId);
+    }
+
 }

@@ -9,6 +9,7 @@
 export * from './bankAccountAnalyticsResponse';
 export * from './bankAccountEntryResponse';
 export * from './bankAccountEntryResponseOperationDirection';
+export * from './bankAccountEntryResponseOperationStatus';
 export * from './bankAccountEntryResponseOperationType';
 export * from './bankAccountResponse';
 export * from './clientPersonalUpdateRequest';

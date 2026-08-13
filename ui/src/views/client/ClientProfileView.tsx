@@ -5,6 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useProfileVM } from '../../viewmodels/useProfileVM';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
+import { LoadingScreen } from '../../components/LoadingScreen';
 import { 
   Loader2, 
   ShieldCheck, 
@@ -28,13 +29,7 @@ export function ClientProfileView() {
   const vm = useProfileVM();
 
   if (vm.isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <span className="text-sm font-bold uppercase tracking-widest text-[#0066FF] animate-pulse">
-          Cargando perfil...
-        </span>
-      </div>
-    );
+    return <LoadingScreen label="Cargando" />;
   }
 
   return (
@@ -44,7 +39,6 @@ export function ClientProfileView() {
         <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">Mi Perfil</h1>
       </div>
 
-      {/* 1. INFORMACIÓN PERSONAL */}
       <Card className="p-8 w-full">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
@@ -152,7 +146,6 @@ export function ClientProfileView() {
         )}
       </Card>
 
-      {/* 2. AUTENTICACIÓN MULTIFACTOR (MFA) */}
       <Card className="p-8 w-full border border-[#E2E8F0]">
         <div className={`flex items-center justify-between gap-4 ${(vm.mfaError || vm.mfaSuccessMsg || vm.mfaQrUri) ? 'mb-5' : ''}`}>
           <div className="flex items-center gap-3">
@@ -167,9 +160,9 @@ export function ClientProfileView() {
               variant="primary" 
               disabled={vm.isMfaLoading} 
               onClick={vm.associateMFA} 
-              className="px-5 py-2.5 text-sm font-bold cursor-pointer"
+              className="px-5 py-2.5 text-sm font-bold cursor-pointer gap-2"
             >
-              {vm.isMfaLoading ? 'Cargando...' : 'Configurar MFA'}
+              {vm.isMfaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Configurar MFA'}
             </Button>
           )}
           
@@ -178,9 +171,9 @@ export function ClientProfileView() {
               onClick={vm.desactivarMFA} 
               disabled={vm.isMfaLoading}
               variant="secondary"
-              className="px-5 py-2.5 text-sm font-bold cursor-pointer"
+              className="px-5 py-2.5 text-sm font-bold cursor-pointer gap-2"
             >
-              {vm.isMfaLoading ? 'Cargando...' : 'Desactivar MFA'}
+              {vm.isMfaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Desactivar MFA'}
             </Button>
           )}
         </div>
@@ -215,9 +208,9 @@ export function ClientProfileView() {
                   onClick={() => vm.verificarYActivarMFA(vm.totpCode)} 
                   disabled={vm.isMfaLoading}
                   variant="primary"
-                  className="w-full sm:w-auto px-5"
+                  className="w-full sm:w-auto px-5 gap-2"
                 >
-                  {vm.isMfaLoading ? '...' : 'Confirmar'}
+                  {vm.isMfaLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirmar'}
                 </Button>
               </div>
             </div>
@@ -225,7 +218,6 @@ export function ClientProfileView() {
         )}
       </Card>
 
-      {/* 3. CUENTAS DE CONFIANZA */}
       <Card className="p-8 w-full">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-[#E8F0FE] flex items-center justify-center text-[#0066FF]">
@@ -253,7 +245,6 @@ export function ClientProfileView() {
         )}
       </Card>
 
-      {/* 4. EXTRACTOS BANCARIOS */}
       <Card className="p-8 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
