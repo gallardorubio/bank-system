@@ -1,8 +1,7 @@
-// src/components/UnlockModal.tsx
 import { useState, useEffect } from 'react';
 import { useGetMySecurityQuestions, useUnlockAccount } from '../api/client-controller/client-controller';
 import { Button } from './Button';
-import { ShieldAlert, Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 interface UnlockModalProps {
   isOpen: boolean;

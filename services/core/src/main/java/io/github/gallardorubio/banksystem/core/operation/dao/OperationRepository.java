@@ -15,10 +15,6 @@ import java.util.UUID;
 
 public interface OperationRepository extends JpaRepository<OperationEntity, UUID> {
 
-    Optional<OperationEntity> findById(UUID id);
-
-    Optional<OperationEntity> findByIdAndClientId(UUID id, UUID clientId);
-
     @Query(value = """
         SELECT 
             op.id AS id,

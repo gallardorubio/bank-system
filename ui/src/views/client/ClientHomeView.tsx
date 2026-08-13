@@ -14,7 +14,8 @@ import {
   Loader2,
   Receipt,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Download
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -88,6 +89,8 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(uuid.trim());
   };
+
+  const activeOpId = vm.selectedOperationId || vm.selectedOperation?.id;
 
   return (
     <div className="flex flex-col gap-10 w-full pb-8 relative">
@@ -372,6 +375,20 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                         ))}
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* BOTÓN DE DESCARGA DE INFORME */}
+                {activeOpId && (
+                  <div className="w-full pt-2">
+                    <Button
+                      variant="primary"
+                      className="w-full py-4 text-base font-bold shadow-sm cursor-pointer gap-2 rounded-2xl bg-[#0066FF] hover:bg-[#0052CC]"
+                      onClick={() => vm.handleDownloadStatement(activeOpId)}
+                    >
+                      <Download className="w-5 h-5" />
+                      Descargar informe de operación
+                    </Button>
                   </div>
                 )}
               </div>

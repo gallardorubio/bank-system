@@ -18,12 +18,11 @@ export function useHomeVM() {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
 
-  // Detalles de Operación
+  const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<any | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  // Wizard de Transferencia
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [transferStep, setTransferStep] = useState<1 | 2 | 3 | 4>(1);
   const [transferTargetId, setTransferTargetId] = useState('');
@@ -32,7 +31,6 @@ export function useHomeVM() {
   const [saveAsTrusted, setSaveAsTrusted] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
 
-  // Filtros
   const [filters, setFilters] = useState({
     concept: '',
     target_client_name: '',
@@ -98,6 +96,7 @@ export function useHomeVM() {
 
   const handleRowClick = async (entry: OperationEntryResponse) => {
     if (!entry.operationId) return;
+    setSelectedOperationId(entry.operationId);
     setIsLoadingDetails(true);
     setIsDetailsModalOpen(true);
     setSelectedOperation(null);
@@ -136,6 +135,7 @@ export function useHomeVM() {
   const closeDetailsModal = () => {
     setIsDetailsModalOpen(false);
     setSelectedOperation(null);
+    setSelectedOperationId(null);
   };
 
   const openTransferModal = () => {
@@ -205,6 +205,30 @@ export function useHomeVM() {
     setAppliedFilters({ concept: '', target_client_name: '', created_at: '', amount: '' });
   };
 
+  const handleDownloadStatement = async (id?: string | null) => {
+    const targetId = id || selectedOperationId || selectedOperation?.id;
+    if (!targetId) return;
+
+    try {
+      const blob = await customInstance<Blob>({
+        url: `/api/v1/operations/${targetId}/statement`,
+        method: 'GET',
+        responseType: 'blob',
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `informe_operacion_${targetId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error al descargar el informe:', err);
+    }
+  };
+
   return {
     bankAccount,
     trustedAccounts: trustedAccounts || [],
@@ -220,6 +244,7 @@ export function useHomeVM() {
     setDepositAmount,
     handleConfirmDeposit,
     isDetailsModalOpen,
+    selectedOperationId,
     selectedOperation,
     isLoadingDetails,
     handleRowClick,
@@ -243,5 +268,6 @@ export function useHomeVM() {
     handleFilterChange,
     applyFilters,
     clearFilters,
+    handleDownloadStatement,
   };
 }

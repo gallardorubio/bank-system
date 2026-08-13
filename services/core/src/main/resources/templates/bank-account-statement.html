@@ -35,7 +35,7 @@
         </tr>
         <tr>
             <th>Balance actual</th>
-            <td style="font-size: 14px; font-weight: bold;" th:text="${#numbers.formatDecimal(account.balance, 1, 'POINT', 2, 'COMMA') + ' ' + account.currency}">-</td>
+            <td style="font-size: 14px; font-weight: bold;" th:text="${#numbers.formatDecimal(account.balance, 1, 'NONE', 2, 'POINT') + ' ' + account.currency}">-</td>
             <th>Periodo</th>
             <td th:text="${period}">-</td>
         </tr>
@@ -62,7 +62,7 @@
                     <td>
                         <span class="badge" th:classappend="${entry.operationDirection}" th:text="${entry.operationDirection}">-</span>
                     </td>
-                    <td class="amount" th:text="${#numbers.formatDecimal(entry.amount, 1, 'POINT', 2, 'COMMA') + ' ' + account.currency}">-</td>
+                    <td class="amount" th:text="${#numbers.formatDecimal(entry.amount, 1, 'NONE', 2, 'POINT') + ' ' + account.currency}">-</td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(entries)}">
                     <td colspan="5" style="text-align: center; color: #94a3b8; padding: 15px;">No se registraron movimientos en el periodo seleccionado.</td>

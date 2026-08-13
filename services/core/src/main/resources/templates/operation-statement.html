@@ -7,9 +7,6 @@
         .header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 24px; }
         .header h1 { margin: 0; color: #0f172a; font-size: 22px; }
         .badge { background-color: #e2e8f0; color: #334155; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-        .status-APPROVED, .status-COMPLETED { background-color: #dcfce7; color: #15803d; }
-        .status-DENIED, .status-REJECTED { background-color: #fee2e2; color: #b91c1c; }
-        .status-PENDING, .status-ESCALATED { background-color: #fef3c7; color: #b45309; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { text-align: left; padding: 8px; background-color: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
         td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
@@ -36,13 +33,13 @@
             <th>Cuenta cliente</th>
             <td th:text="${op.clientBankAccountId}">-</td>
             <th>Estado</th>
-            <td><span class="badge" th:classappend="'status-' + ${op.status}" th:text="${op.status}">STATUS</span></td>
+            <td><span class="badge" th:text="${op.status}">STATUS</span></td>
         </tr>
         <tr>
             <th>Fecha creación</th>
             <td th:text="${op.createdAt}">-</td>
             <th>Cuantía</th>
-            <td class="amount" th:text="${op.amount + ' ' + currency}">-</td>
+            <td class="amount" th:text="${#numbers.formatDecimal(op.amount, 1, 'NONE', 2, 'POINT') + ' ' + currency}">-</td>
         </tr>
     </table>
 
@@ -73,11 +70,11 @@
                 <th>Cuotas pagadas</th>
                 <td th:text="${op.installmentsPaid + ' de ' + op.termPeriods}">-</td>
                 <th>Monto pagado</th>
-                <td th:text="${op.paidAmount + ' ' + currency}">-</td>
+                <td th:text="${#numbers.formatDecimal(op.paidAmount, 1, 'NONE', 2, 'POINT') + ' ' + currency}">-</td>
             </tr>
             <tr>
                 <th>Próxima cuota</th>
-                <td th:text="${op.nextInstallmentAmount != null ? op.nextInstallmentAmount + ' ' + currency : 'N/A'}">-</td>
+                <td th:text="${op.nextInstallmentAmount != null ? #numbers.formatDecimal(op.nextInstallmentAmount, 1, 'NONE', 2, 'POINT') + ' ' + currency : 'N/A'}">-</td>
                 <th>Vencimiento cuota</th>
                 <td th:text="${op.nextInstallmentDate != null ? op.nextInstallmentDate : 'N/A'}">-</td>
             </tr>
@@ -105,8 +102,8 @@
         </thead>
         <tbody>
             <tr th:each="phase : ${op.statusHistory}">
-                <td><span class="badge" th:classappend="'status-' + ${phase.status}" th:text="${phase.status}">-</span></td>
-                <td th:text="${phase.createAt}">-</td>
+                <td><span class="badge" th:text="${phase.status}">-</span></td>
+                <td th:text="${phase.createdAt}">-</td>
                 <td th:text="${phase.reason != null ? phase.reason : 'N/A'}">-</td>
             </tr>
         </tbody>

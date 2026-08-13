@@ -14,10 +14,13 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.openpdf.pdf.ITextRenderer;
 
+import io.github.gallardorubio.banksystem.core.deposit.dao.DepositRepository;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
 import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
+import io.github.gallardorubio.banksystem.core.installment.dao.InstallmentRepository;
 import io.github.gallardorubio.banksystem.core.installment.dto.InstallmentResponse;
 import io.github.gallardorubio.banksystem.core.installment.entity.InstallmentEntity;
+import io.github.gallardorubio.banksystem.core.loan.dao.LoanRepository;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
@@ -26,6 +29,7 @@ import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
+import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
 import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 import lombok.RequiredArgsConstructor;
@@ -35,23 +39,39 @@ import lombok.RequiredArgsConstructor;
 public class OperationService {
 
     private final OperationRepository operationRepository;
+    private final DepositRepository depositRepository;
+    private final TransferRepository transferRepository;
+    private final LoanRepository loanRepository;
+    private final InstallmentRepository installmentRepository;
     private final TemplateEngine templateEngine;
     private final BankAccountRepository bankAccountRepository;
 
     @Transactional(readOnly = true)
     public OperationResponse getOperation(UUID operationId, UUID clientId) {
-        OperationEntity operationEntity = operationRepository.findByIdAndClientId(operationId, clientId)
-            .orElseThrow(() -> new ResourceNotFoundException("Operation not found: " + operationId));
+        var deposit = depositRepository.findByIdAndClientId(operationId, clientId);
+        if (deposit.isPresent()) {
+            return new DepositResponse(deposit.get());
+        }
 
-        return switch (operationEntity) {
-            case DepositEntity depositEntity -> new DepositResponse(depositEntity);
-            case InstallmentEntity installmentEntity -> new InstallmentResponse(installmentEntity);
-            case LoanEntity loanEntity -> new LoanResponse(loanEntity);
-            case TransferEntity transferEntity -> new TransferResponse(transferEntity);
-            default -> throw new UnsupportedOperationException("Operation type not supported: " + operationEntity.getClass().getSimpleName()); 
-        };
+        var transfer = transferRepository.findByIdAndClientId(operationId, clientId);
+        if (transfer.isPresent()) {
+            return new TransferResponse(transfer.get());
+        }
+
+        var loan = loanRepository.findByIdAndClientId(operationId, clientId);
+        if (loan.isPresent()) {
+            return new LoanResponse(loan.get());
+        }
+
+        var installment = installmentRepository.findByIdAndClientId(operationId, clientId);
+        if (installment.isPresent()) {
+            return new InstallmentResponse(installment.get());
+        }
+
+        throw new ResourceNotFoundException("Operation not found: " + operationId);
     }
     
+    @Transactional(readOnly = true)
     public byte[] getOperationStatement(UUID operationId, UUID clientId) {
         OperationResponse operationResponse = getOperation(operationId, clientId);
 
