@@ -36,7 +36,8 @@ public class ClientStatusFilter extends OncePerRequestFilter {
             if (isClient) {
                 String path = request.getRequestURI();
 
-                boolean isUnlockAllowed = path.endsWith("/clients/security-questions") || 
+                boolean isUnlockAllowed = path.endsWith("/clients/security-questions") ||
+                                        path.endsWith("/clients/me/security-questions") ||
                                           path.endsWith("/clients/unlock");
 
                 if (!isUnlockAllowed) {

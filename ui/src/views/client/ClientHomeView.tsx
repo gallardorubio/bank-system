@@ -70,16 +70,17 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case 'COMPLETED':
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-[#E8F0FE] text-[#0066FF] font-bold text-xs">COMPLETED</span>;
       case 'APPROVED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs">Completado</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs">APPROVED</span>;
       case 'PENDING':
       case 'ESCALATED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">Pendiente</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-amber-50 text-amber-600 font-bold text-xs">{status}</span>;
       case 'DENIED':
       case 'REJECTED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-400 font-bold text-xs">Rechazado</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-red-50 text-red-500 font-bold text-xs">{status}</span>;
       default:
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">{status || 'OK'}</span>;
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">{status || 'PENDING'}</span>;
     }
   };
 
@@ -95,9 +96,8 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
         <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">{client?.name || 'Cliente'}</h1>
       </div>
 
-      {/* SECCIÓN SUPERIOR: DISTRIBUCIÓN ASIMÉTRICA */}
+      {/* SECCIÓN SUPERIOR */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
-        {/* Tarjeta de Balance */}
         <div className="lg:col-span-7 bg-[#0A2540] text-white rounded-[32px] p-12 flex flex-col justify-between min-h-[320px] shadow-lg">
           <div>
             <div className="flex justify-between items-start">
@@ -134,7 +134,6 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
           </div>
         </div>
 
-        {/* Tarjeta de Préstamos Comercial */}
         <div className="lg:col-span-5 bg-[#0066FF] text-white rounded-[32px] p-12 flex flex-col justify-between min-h-[320px] shadow-lg relative overflow-hidden">
           <div className="absolute right-0 bottom-0 translate-x-6 translate-y-6 w-48 h-48 bg-white/10 rounded-full blur-xl pointer-events-none" />
           <div>
@@ -181,20 +180,20 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
         </div>
 
         {showFilters && (
-          <form onSubmit={vm.applyFilters} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 p-4 rounded-2xl bg-[#F0F4F9] border border-[#E2E8F0]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 p-4 rounded-2xl bg-[#F0F4F9] border border-[#E2E8F0]">
             <input type="text" name="concept" placeholder="Concepto..." value={vm.filters.concept} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
             <input type="text" name="target_client_name" placeholder="Destinatario..." value={vm.filters.target_client_name} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
             <input type="date" name="created_at" value={vm.filters.created_at} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
             <input type="number" step="0.01" name="amount" placeholder="Cuantía (€)" value={vm.filters.amount} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
             <div className="flex gap-2">
-              <Button type="submit" variant="primary" className="flex-1 h-10 px-3 text-xs font-bold gap-1 cursor-pointer">
+              <Button type="button" variant="primary" onClick={vm.applyFilters} className="flex-1 h-10 px-3 text-xs font-bold gap-1 cursor-pointer">
                 <Search className="w-3.5 h-3.5" /> Aplicar
               </Button>
               <Button type="button" variant="ghost" onClick={vm.clearFilters} className="h-10 px-3 text-xs font-bold cursor-pointer">
                 <RotateCcw className="w-3.5 h-3.5 text-[#627D98]" />
               </Button>
             </div>
-          </form>
+          </div>
         )}
 
         <div className="overflow-x-auto pr-2 pb-0">
@@ -210,9 +209,10 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F5F9] text-base font-semibold text-[#0A2540]">
-                {vm.entries.map((entry) => {
-                  const isRejected = entry.operationStatus === 'REJECTED' || entry.operationStatus === 'DENIED';
-                  const isPending = entry.operationStatus === 'PENDING' || entry.operationStatus === 'ESCALATED';
+                {vm.entries.map((entry: any) => {
+                  const status = entry.status || entry.operationStatus;
+                  const isCompleted = status === 'COMPLETED';
+                  const isRejected = status === 'REJECTED' || status === 'DENIED';
 
                   return (
                     <tr 
@@ -235,14 +235,14 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                         {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : '-'}
                       </td>
                       <td className="py-4 px-6">
-                        {getStatusBadge(entry.operationStatus)}
+                        {getStatusBadge(status)}
                       </td>
-                      <td className={`py-4 px-6 text-right font-black text-lg text-[#0A2540] whitespace-nowrap ${
-                        isRejected 
-                          ? 'line-through text-slate-400' 
-                          : isPending 
-                            ? 'opacity-40' 
-                            : ''
+                      <td className={`py-4 px-6 text-right font-black text-lg whitespace-nowrap ${
+                        isCompleted 
+                          ? 'text-[#0A2540]' 
+                          : isRejected 
+                            ? 'line-through text-slate-400' 
+                            : 'opacity-40 text-[#0A2540]'
                       }`}>
                         {entry.operationDirection === 'CREDIT' ? '+' : '-'}{entry.amount?.toFixed(2)} {currency}
                       </td>
@@ -280,7 +280,6 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
               <LoadingScreen label="Cargando detalles..." />
             ) : vm.selectedOperation ? (
               <div className="w-full space-y-8">
-                {/* Cabecera Principal */}
                 <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
                   <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
                     <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tipo de Operación</span>
@@ -309,14 +308,6 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                       <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
                         <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tasa de Interés</span>
                         <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.interestRate}% TIN</span>
-                      </div>
-                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuotas Pagadas</span>
-                        <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.installmentsPaid} de {vm.selectedOperation.termPeriods}</span>
-                      </div>
-                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Monto Pagado</span>
-                        <span className="text-2xl font-bold text-[#627D98]">{vm.selectedOperation.paidAmount?.toFixed(2)} {currency}</span>
                       </div>
                     </>
                   )}
@@ -395,7 +386,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
         </div>
       )}
 
-      {/* MODAL DE DEPÓSITO ESTILO APPLE */}
+      {/* MODAL DE DEPÓSITO */}
       {vm.isDepositModalOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150">
           <div className="relative flex items-center justify-center w-full pt-2">
@@ -447,7 +438,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
         </div>
       )}
 
-      {/* MODAL DE TRANSFERENCIA WIZARD ESTILO APPLE */}
+      {/* MODAL DE TRANSFERENCIA */}
       {vm.isTransferModalOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150">
           <div className="relative flex items-center justify-center w-full pt-2">

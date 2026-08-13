@@ -1,17 +1,14 @@
 import { useState, useMemo } from 'react';
-import { useGetMyBankAccount, useGetEntries } from '../api/bank-account-controller/bank-account-controller';
-import { useCreateDeposit, useGetAllDeposits } from '../api/deposit-controller/deposit-controller';
-import { useGetAllTransfers, useCreateTransfer } from '../api/transfer-controller/transfer-controller';
-import { useGetAllLoans } from '../api/loan-controller/loan-controller';
+import { useGetMyBankAccount } from '../api/bank-account-controller/bank-account-controller';
+import { useGetMyOperations } from '../api/operation-controller/operation-controller';
+import { useCreateDeposit } from '../api/deposit-controller/deposit-controller';
+import { useCreateTransfer } from '../api/transfer-controller/transfer-controller';
 import { useGetTrustedBankAccounts } from '../api/client-controller/client-controller';
 import { customInstance } from '../api/mutator/instance';
-import type { DepositRequest, TransferRequest, BankAccountEntryResponse } from '../api/model';
+import type { DepositRequest, TransferRequest, OperationEntryResponse } from '../api/model';
 
 export function useHomeVM() {
   const { data: bankAccount, isLoading: isLoadingAccount, refetch: refetchAccount } = useGetMyBankAccount();
-  const { data: deposits, refetch: refetchDeposits } = useGetAllDeposits();
-  const { data: transfers, refetch: refetchTransfers } = useGetAllTransfers();
-  const { data: loans } = useGetAllLoans();
   const { data: trustedAccounts, refetch: refetchTrusted } = useGetTrustedBankAccounts();
   
   const createDepositMutation = useCreateDeposit();
@@ -21,12 +18,12 @@ export function useHomeVM() {
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
 
-  // Estados para el Modal de Detalles de Operación
+  // Detalles de Operación
   const [selectedOperation, setSelectedOperation] = useState<any | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
 
-  // Estados para el Wizard de Transferencia estilo Apple
+  // Wizard de Transferencia
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [transferStep, setTransferStep] = useState<1 | 2 | 3 | 4>(1);
   const [transferTargetId, setTransferTargetId] = useState('');
@@ -50,86 +47,21 @@ export function useHomeVM() {
     amount: '',
   });
 
-  const { data: entriesPage, isLoading: isLoadingEntries, refetch: refetchEntries } = useGetEntries({
-    concept: appliedFilters.concept,
-    target_client_name: appliedFilters.target_client_name,
-    created_at: appliedFilters.created_at,
+  const { 
+    data: operationsPage, 
+    isLoading: isLoadingOperations, 
+    refetch: refetchOperations 
+  } = useGetMyOperations({
+    concept: appliedFilters.concept || undefined,
+    target_client_name: appliedFilters.target_client_name || undefined,
+    created_at: appliedFilters.created_at || undefined,
     amount: appliedFilters.amount ? Number(appliedFilters.amount) : undefined,
     size: 20,
   });
 
-  const allOperations = useMemo<BankAccountEntryResponse[]>(() => {
-    const list: BankAccountEntryResponse[] = [];
-
-    if (deposits) {
-      deposits.forEach(dep => {
-        list.push({
-          id: dep.id,
-          operationId: dep.id,
-          operationType: 'DEPOSIT',
-          description: 'Depósito en cuenta',
-          amount: dep.amount,
-          operationDirection: 'CREDIT',
-          operationStatus: dep.status as any,
-          createdAt: dep.createdAt,
-        });
-      });
-    }
-
-    if (transfers) {
-      transfers.forEach(tr => {
-        list.push({
-          id: tr.id,
-          operationId: tr.id,
-          operationType: 'TRANSFER',
-          description: tr.concept || 'Transferencia',
-          amount: tr.amount,
-          operationDirection: tr.clientBankAccountId === bankAccount?.id ? 'DEBIT' : 'CREDIT',
-          operationStatus: tr.status as any,
-          createdAt: tr.createdAt,
-        });
-      });
-    }
-
-    if (loans) {
-      loans.forEach(loan => {
-        list.push({
-          id: loan.id,
-          operationId: loan.id,
-          operationType: 'LOAN',
-          description: `Préstamo (${loan.termPeriods} cuotas)`,
-          amount: loan.amount,
-          operationDirection: 'CREDIT',
-          operationStatus: loan.status as any,
-          createdAt: loan.createdAt,
-        });
-      });
-    }
-
-    return list.sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
-    });
-  }, [deposits, transfers, loans, bankAccount?.id]);
-
-  const filteredEntries = useMemo(() => {
-    return allOperations.filter(item => {
-      if (appliedFilters.concept && !item.description?.toLowerCase().includes(appliedFilters.concept.toLowerCase())) {
-        return false;
-      }
-      if (appliedFilters.amount && item.amount !== Number(appliedFilters.amount)) {
-        return false;
-      }
-      if (appliedFilters.created_at && item.createdAt) {
-        const itemDate = item.createdAt.split('T')[0];
-        if (itemDate !== appliedFilters.created_at) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }, [allOperations, appliedFilters]);
+  const entries = useMemo<OperationEntryResponse[]>(() => {
+    return operationsPage?.content || [];
+  }, [operationsPage?.content]);
 
   const openDepositModal = () => {
     setDepositAmount('');
@@ -158,20 +90,18 @@ export function useHomeVM() {
       await createDepositMutation.mutateAsync({ data: payload });
       closeDepositModal();
       refetchAccount();
-      refetchEntries();
-      refetchDeposits();
+      refetchOperations();
     } catch (err: any) {
       setDepositError(err?.response?.data?.detail || err?.message || 'Error al procesar el depósito');
     }
   };
 
-  // Cargar detalles utilizando la ruta completa orientada al tipo de operación correcto
-  const handleRowClick = async (entry: BankAccountEntryResponse) => {
+  const handleRowClick = async (entry: OperationEntryResponse) => {
     if (!entry.operationId) return;
     setIsLoadingDetails(true);
     setIsDetailsModalOpen(true);
     setSelectedOperation(null);
-    
+
     let endpoint = `/api/v1/operations/${entry.operationId}`;
     if (entry.operationType === 'DEPOSIT') {
       endpoint = `/api/v1/deposits/${entry.operationId}`;
@@ -189,7 +119,6 @@ export function useHomeVM() {
       setSelectedOperation({ ...details, operationType: entry.operationType });
     } catch (err) {
       console.error('Error al cargar detalles de la operación:', err);
-      // Fallback por si la entidad es genérica
       try {
         const fallbackDetails = await customInstance<any>({
           url: `/api/v1/operations/${entry.operationId}`,
@@ -209,7 +138,6 @@ export function useHomeVM() {
     setSelectedOperation(null);
   };
 
-  // Métodos de control para Transferencias
   const openTransferModal = () => {
     setTransferStep(1);
     setTransferTargetId('');
@@ -249,8 +177,7 @@ export function useHomeVM() {
       await createTransferMutation.mutateAsync({ data: payload });
       closeTransferModal();
       refetchAccount();
-      refetchEntries();
-      refetchTransfers();
+      refetchOperations();
     } catch (err: any) {
       setTransferError(err?.response?.data?.detail || err?.message || 'Error al procesar la transferencia');
       setTransferStep(4);
@@ -262,7 +189,9 @@ export function useHomeVM() {
   };
 
   const applyFilters = (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     setAppliedFilters({
       concept: filters.concept,
       target_client_name: filters.target_client_name,
@@ -279,8 +208,8 @@ export function useHomeVM() {
   return {
     bankAccount,
     trustedAccounts: trustedAccounts || [],
-    entries: filteredEntries,
-    isLoading: isLoadingAccount || isLoadingEntries,
+    entries,
+    isLoading: isLoadingAccount || isLoadingOperations,
     isDepositing: createDepositMutation.isPending,
     isTransferring: createTransferMutation.isPending,
     isDepositModalOpen,
@@ -290,13 +219,11 @@ export function useHomeVM() {
     closeDepositModal,
     setDepositAmount,
     handleConfirmDeposit,
-    // Detalles de operación modal
     isDetailsModalOpen,
     selectedOperation,
     isLoadingDetails,
     handleRowClick,
     closeDetailsModal,
-    // Transfer states
     isTransferModalOpen,
     transferStep,
     setTransferStep,

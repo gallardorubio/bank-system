@@ -22,8 +22,10 @@ import type {
 
 import type {
   DepositResponse,
+  GetMyOperationsParams,
   InstallmentResponse,
   LoanResponse,
+  PagedModelOperationEntryResponse,
   TransferResponse
 } from '../model';
 
@@ -209,6 +211,93 @@ export function useGetOperationStatement<TData = Awaited<ReturnType<typeof getOp
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetOperationStatementQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getMyOperations = (
+    params?: GetMyOperationsParams,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<PagedModelOperationEntryResponse>(
+      {url: `/api/v1/operations/me`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGetMyOperationsQueryKey = (params?: GetMyOperationsParams,) => {
+    return [
+    `/api/v1/operations/me`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyOperationsQueryOptions = <TData = Awaited<ReturnType<typeof getMyOperations>>, TError = void>(params?: GetMyOperationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyOperations>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyOperationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyOperations>>> = ({ signal }) => getMyOperations(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyOperations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMyOperationsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyOperations>>>
+export type GetMyOperationsQueryError = void
+
+
+export function useGetMyOperations<TData = Awaited<ReturnType<typeof getMyOperations>>, TError = void>(
+ params: undefined |  GetMyOperationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyOperations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyOperations>>,
+          TError,
+          Awaited<ReturnType<typeof getMyOperations>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyOperations<TData = Awaited<ReturnType<typeof getMyOperations>>, TError = void>(
+ params?: GetMyOperationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyOperations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyOperations>>,
+          TError,
+          Awaited<ReturnType<typeof getMyOperations>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMyOperations<TData = Awaited<ReturnType<typeof getMyOperations>>, TError = void>(
+ params?: GetMyOperationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyOperations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetMyOperations<TData = Awaited<ReturnType<typeof getMyOperations>>, TError = void>(
+ params?: GetMyOperationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyOperations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMyOperationsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

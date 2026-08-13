@@ -1,17 +1,19 @@
+import { useState } from 'react';
 import { useLoansVM } from '../../viewmodels/useLoansVM';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { LoadingScreen } from '../../components/LoadingScreen';
-import { Landmark, Loader2, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Calculator } from 'lucide-react';
+import { Landmark, Loader2, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, X } from 'lucide-react';
+import type { LoanResponse } from '../../api/model';
 
 export function ClientLoansView() {
   const vm = useLoansVM();
+  const [selectedLoan, setSelectedLoan] = useState<LoanResponse | null>(null);
 
   if (vm.isLoading) {
     return <LoadingScreen label="Cargando" />;
   }
 
-  // Lógica exacta de cálculo idéntica al backend Java
   const principal = Number(vm.amount) || 0;
   const periods = Number(vm.termPeriods) || 12;
   const annualRate = Number(vm.interestRate) || 0;
@@ -35,7 +37,6 @@ export function ClientLoansView() {
   const amountPercent = Math.min(100, Math.max(0, ((principal - 500) / (100000 - 500)) * 100));
   const periodsPercent = Math.min(100, Math.max(0, ((periods - 1) / (360 - 1)) * 100));
 
-  // Validadores para evitar letras, signos negativos o símbolos extraños en inputs numéricos
   const handleNumericInput = (setter: (val: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (val === '' || /^\d*\.?\d*$/.test(val)) {
@@ -43,8 +44,25 @@ export function ClientLoansView() {
     }
   };
 
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case 'COMPLETED':
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-semibold text-xs">COMPLETED</span>;
+      case 'APPROVED':
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-semibold text-xs">APPROVED</span>;
+      case 'PENDING':
+      case 'ESCALATED':
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-semibold text-xs">{status}</span>;
+      case 'DENIED':
+      case 'REJECTED':
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-400 font-semibold text-xs">{status}</span>;
+      default:
+        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-semibold text-xs">{status || 'PENDING'}</span>;
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-10 h-full w-full pb-12">
+    <div className="flex flex-col gap-10 w-full pb-8 relative">
       <div>
         <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">Financiación</span>
         <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">Préstamos</h1>
@@ -52,7 +70,6 @@ export function ClientLoansView() {
 
       {/* SIMULADOR FINTECH GAMIFICADO */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
-        {/* PANEL DE CONTROL (IZQUIERDA) */}
         <Card className="lg:col-span-7 p-10 flex flex-col justify-between shadow-sm border border-[#E2E8F0] rounded-[36px]">
           <div>
             {vm.successMsg && (
@@ -67,7 +84,6 @@ export function ClientLoansView() {
             )}
 
             <form onSubmit={vm.handleCreateLoan} id="loan-form" className="space-y-6">
-              {/* MONTO */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="text-xs font-bold text-[#627D98] uppercase tracking-wider">Cantidad solicitada</label>
@@ -98,7 +114,6 @@ export function ClientLoansView() {
                 />
               </div>
 
-              {/* PLAZOS / CUOTAS */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="text-xs font-bold text-[#627D98] uppercase tracking-wider">Plazo de amortización</label>
@@ -133,7 +148,6 @@ export function ClientLoansView() {
                 />
               </div>
 
-              {/* FRECUENCIA E INTERÉS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-[#627D98] uppercase tracking-wider">Frecuencia</label>
@@ -174,7 +188,6 @@ export function ClientLoansView() {
           </div>
         </Card>
 
-        {/* PANEL DE RESULTADOS / RESUMEN VISUAL */}
         <div className="lg:col-span-5 bg-[#0066FF] text-white rounded-[36px] p-10 flex flex-col justify-between shadow-lg relative overflow-hidden">
           <div className="absolute right-0 bottom-0 translate-x-8 translate-y-8 w-56 h-56 bg-white/10 rounded-full blur-3xl pointer-events-none" />
           
@@ -185,14 +198,12 @@ export function ClientLoansView() {
                 <Landmark className="w-5 h-5 text-white" />
               </div>
             </div>
-            {/* Dinero más grande en blanco con divisa --primary-dark */}
             <div className="text-7xl font-black mt-6 tracking-tighter text-white flex items-baseline gap-2.5">
               <span className="leading-none">{isFinite(estimatedInstallment) ? estimatedInstallment.toFixed(2) : '0.00'}</span> 
               <span className="text-3xl font-black text-[#0A2540]">EUR</span>
             </div>
           </div>
 
-          {/* BARRA VISUAL DE PROPORCIÓN CON MÁS ESPACIO VERTICAL RESPECTO A LA CUOTA */}
           <div className="space-y-3 my-12">
             <div className="flex justify-between text-xs font-bold">
               <span className="text-white/90">Capital ({principal} €)</span>
@@ -204,7 +215,6 @@ export function ClientLoansView() {
             </div>
           </div>
 
-          {/* DETALLES DE LA SIMULACIÓN */}
           <div className="space-y-4 bg-[#0A2540] p-7 rounded-[28px] border border-white/10 text-left shadow-md">
             <div className="flex justify-between items-center pb-4 border-b border-white/10">
               <span className="text-sm font-bold text-white/80">Total a devolver:</span>
@@ -225,9 +235,9 @@ export function ClientLoansView() {
         </div>
       </div>
 
-      {/* HISTORIAL DE PRÉSTAMOS */}
-      <Card className="p-8 w-full shadow-sm">
-        <h3 className="text-xl font-black text-[#0A2540] mb-6">Tus préstamos activos e históricos</h3>
+      {/* HISTORIAL DE PRÉSTAMOS CON ESPACIO INFERIOR ADECUADO (pb-16 / mb-24) */}
+      <Card className="p-8 w-full shadow-sm mb-24">
+        <h3 className="text-xl font-black text-[#0A2540] mb-6">Préstamos</h3>
         {vm.loans.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -241,23 +251,22 @@ export function ClientLoansView() {
                   <th className="py-4 px-4 font-bold">Estado</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F1F5F9] text-base font-semibold text-[#0A2540]">
+              <tbody className="divide-y divide-[#F1F5F9] text-base font-semibold text-[#627D98]">
                 {vm.loans.map((loan) => (
-                  <tr key={loan.id} className="hover:bg-[#F8FAFC] transition-colors">
-                    <td className="py-4 px-4 text-[#627D98] text-base">
+                  <tr 
+                    key={loan.id} 
+                    onClick={() => setSelectedLoan(loan)}
+                    className="hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
+                  >
+                    <td className="py-4 px-4 text-sm font-medium text-[#627D98]">
                       {loan.createdAt ? new Date(loan.createdAt).toLocaleDateString() : '-'}
                     </td>
-                    <td className="py-4 px-4 font-black text-lg text-[#0A2540]">{loan.amount} EUR</td>
-                    <td className="py-4 px-4 text-base">{loan.termPeriods} cuotas</td>
-                    <td className="py-4 px-4 text-base">{loan.installmentFrequency}</td>
-                    <td className="py-4 px-4 text-base">{loan.interestRate}%</td>
+                    <td className="py-4 px-4 font-bold text-base text-[#627D98]">{loan.amount} EUR</td>
+                    <td className="py-4 px-4 text-sm font-medium text-[#627D98]">{loan.termPeriods} cuotas</td>
+                    <td className="py-4 px-4 text-sm font-medium text-[#627D98]">{loan.installmentFrequency}</td>
+                    <td className="py-4 px-4 text-sm font-medium text-[#627D98]">{loan.interestRate}%</td>
                     <td className="py-4 px-4">
-                      <span className={`px-3 py-1 rounded-lg text-xs font-bold ${
-                        loan.status === 'COMPLETED' || loan.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' :
-                        loan.status === 'PENDING' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
-                      }`}>
-                        {loan.status}
-                      </span>
+                      {getStatusBadge(loan.status)}
                     </td>
                   </tr>
                 ))}
@@ -270,6 +279,120 @@ export function ClientLoansView() {
           </div>
         )}
       </Card>
+
+      {/* MODAL COMPLETO DE DETALLES DEL PRÉSTAMO */}
+      {selectedLoan && (
+        <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150 overflow-y-auto">
+          <div className="relative flex items-center justify-center w-full pt-2">
+            <span className="text-sm font-bold text-[#0A2540] uppercase tracking-widest">
+              Detalles del Préstamo
+            </span>
+            <button 
+              onClick={() => setSelectedLoan(null)}
+              className="absolute top-0 right-2 p-3 rounded-full hover:bg-[#F0F4F9] text-[#0A2540] transition-colors cursor-pointer"
+              title="Cerrar"
+            >
+              <X className="w-10 h-10" />
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center justify-center max-w-3xl mx-auto w-full my-auto gap-8 pt-16 pb-12">
+            <div className="w-full space-y-8">
+              <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Plazo / Frecuencia</span>
+                  <span className="text-xl font-bold text-[#627D98]">{selectedLoan.termPeriods ?? '-'} cuotas ({selectedLoan.installmentFrequency ?? '-'})</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tasa de Interés</span>
+                  <span className="text-xl font-bold text-[#627D98]">{selectedLoan.interestRate !== undefined ? `${selectedLoan.interestRate}% TIN` : '-'}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuotas Pagadas</span>
+                  <span className="text-xl font-bold text-[#627D98]">{selectedLoan.installmentsPaid ?? 0} de {selectedLoan.termPeriods ?? 0}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Monto Pagado</span>
+                  <span className="text-2xl font-bold text-[#627D98]">{selectedLoan.paidAmount !== undefined && selectedLoan.paidAmount !== null ? `${Number(selectedLoan.paidAmount).toFixed(2)} EUR` : '0.00 EUR'}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Importe Próxima Cuota</span>
+                  <span className="text-2xl font-bold text-[#627D98]">{selectedLoan.nextInstallmentAmount !== undefined && selectedLoan.nextInstallmentAmount !== null ? `${Number(selectedLoan.nextInstallmentAmount).toFixed(2)} EUR` : '-'}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Fecha Próxima Cuota</span>
+                  <span className="text-lg font-bold text-[#627D98]">{selectedLoan.nextInstallmentDate ? new Date(selectedLoan.nextInstallmentDate).toLocaleDateString() : '-'}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Fecha Vencimiento Final</span>
+                  <span className="text-lg font-bold text-[#627D98]">{selectedLoan.maturityDate ? new Date(selectedLoan.maturityDate).toLocaleDateString() : '-'}</span>
+                </div>
+
+                <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Fecha de Creación</span>
+                  <span className="text-lg font-bold text-[#627D98]">{selectedLoan.createdAt ? new Date(selectedLoan.createdAt).toLocaleString() : '-'}</span>
+                </div>
+
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Monto del Préstamo</span>
+                  <span className="text-4xl font-black text-[#0A2540]">
+                    {selectedLoan.amount !== undefined && selectedLoan.amount !== null ? `${Number(selectedLoan.amount).toFixed(2)} EUR` : '-'}
+                  </span>
+                </div>
+              </div>
+
+              {/* HISTORIAL DE ESTADOS */}
+              {selectedLoan.statusHistory && selectedLoan.statusHistory.length > 0 && (
+                <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6 text-left">
+                  <span className="text-base font-bold text-[#627D98] uppercase tracking-wider block mb-4">Historial de Estados</span>
+                  
+                  {selectedLoan.statusHistory.length === 1 ? (
+                    <div className="flex flex-col gap-1.5 pl-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md shrink-0" />
+                          <span className="font-black text-xl text-[#0A2540]">{selectedLoan.statusHistory[0].status}</span>
+                        </div>
+                        <span className="text-sm font-bold text-[#627D98]">
+                          {selectedLoan.statusHistory[0].createdAt ? new Date(selectedLoan.statusHistory[0].createdAt).toLocaleString() : ''}
+                        </span>
+                      </div>
+                      {selectedLoan.statusHistory[0].reason && (
+                        <p className="text-sm text-slate-600 font-semibold pl-8">{selectedLoan.statusHistory[0].reason}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="relative pl-8 space-y-8 before:absolute before:left-3 before:top-3 before:bottom-3 before:w-1 before:bg-slate-300">
+                      {selectedLoan.statusHistory.map((phase: any, index: number) => (
+                        <div key={index} className="relative flex flex-col gap-1.5">
+                          <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md" />
+                          <div className="flex items-center justify-between">
+                            <span className="font-black text-xl text-[#0A2540]">{phase.status}</span>
+                            <span className="text-sm font-bold text-[#627D98]">
+                              {phase.createdAt ? new Date(phase.createdAt).toLocaleString() : ''}
+                            </span>
+                          </div>
+                          {phase.reason && (
+                            <p className="text-sm text-slate-600 font-semibold">{phase.reason}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full pb-4"></div>
+        </div>
+      )}
     </div>
   );
 }

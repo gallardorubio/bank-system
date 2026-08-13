@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { AuthLayout } from './layouts/AuthLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
@@ -7,11 +7,19 @@ import { RegisterView } from './views/RegisterView';
 import { OperatorView } from './views/OperatorView';
 import { Button } from './components/Button';
 import { LoadingScreen } from './components/LoadingScreen';
+import { UnlockModal } from './components/UnlockModal';
 
 export default function App() {
   const auth = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [activeTab, setActiveTab] = useState<'home' | 'loans' | 'profile'>('home');
+  const [isAccountBlockedModalOpen, setIsAccountBlockedModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleBlocked = () => setIsAccountBlockedModalOpen(true);
+    window.addEventListener('account-blocked', handleBlocked);
+    return () => window.removeEventListener('account-blocked', handleBlocked);
+  }, []);
 
   const role = useMemo(() => {
     const profile = auth.user?.profile as Record<string, unknown> | undefined;
@@ -30,59 +38,71 @@ export default function App() {
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 
-  if (auth.isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9]">
-        <LoadingScreen label="Iniciando" />
-      </div>
-    );
-  }
+  const content = useMemo(() => {
+    if (auth.isLoading) {
+      return (
+        <div className="flex h-screen w-full items-center justify-center bg-[#F0F4F9]">
+          <LoadingScreen label="Iniciando" />
+        </div>
+      );
+    }
 
-  if (!auth.isAuthenticated) {
+    if (!auth.isAuthenticated) {
+      return (
+        <AuthLayout>
+          {isRegistering ? (
+            <RegisterView 
+               onSuccess={() => setIsRegistering(false)} 
+               onCancel={() => setIsRegistering(false)} 
+             />
+          ) : (
+            <div className="p-16 flex flex-col justify-center gap-10">
+              <div className="space-y-3">
+                <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
+                <p className="text-lg text-[#627D98]">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
+              </div>
+              <div className="flex flex-col gap-5">
+                <Button 
+                   variant="primary" 
+                   onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
+                   className="w-full py-4 text-base font-bold shadow-sm"
+                >
+                  Iniciar sesión
+                </Button>
+                <Button 
+                   variant="secondary" 
+                   onClick={() => setIsRegistering(true)} 
+                   className="w-full py-4 text-base font-bold"
+                >
+                  Crear cuenta
+                </Button>
+              </div>
+            </div>
+          )}
+        </AuthLayout>
+      );
+    }
+
     return (
-      <AuthLayout>
-        {isRegistering ? (
-          <RegisterView 
-             onSuccess={() => setIsRegistering(false)} 
-             onCancel={() => setIsRegistering(false)} 
-           />
-        ) : (
-          <div className="p-16 flex flex-col justify-center gap-10">
-            <div className="space-y-3">
-              <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
-              <p className="text-lg text-[#627D98]">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
-            </div>
-            <div className="flex flex-col gap-5">
-              <Button 
-                 variant="primary" 
-                 onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
-                 className="w-full py-4 text-base font-bold shadow-sm"
-              >
-                Iniciar sesión
-              </Button>
-              <Button 
-                 variant="secondary" 
-                 onClick={() => setIsRegistering(true)} 
-                 className="w-full py-4 text-base font-bold"
-              >
-                Crear cuenta
-              </Button>
-            </div>
-          </div>
-        )}
-      </AuthLayout>
+      <DashboardLayout
+        userEmail={auth.user?.profile.email}
+        role={role}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onLogout={handleLogout}
+      >
+        {role === 'operator' ? <OperatorView /> : <ClientView activeTab={activeTab} setActiveTab={setActiveTab} />}
+      </DashboardLayout>
     );
-  }
+  }, [auth.isLoading, auth.isAuthenticated, auth.user?.profile?.email, auth, isRegistering, role, activeTab]);
 
   return (
-    <DashboardLayout
-      userEmail={auth.user?.profile.email}
-      role={role}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onLogout={handleLogout}
-    >
-      {role === 'operator' ? <OperatorView /> : <ClientView activeTab={activeTab} setActiveTab={setActiveTab} />}
-    </DashboardLayout>
+    <>
+      {content}
+      <UnlockModal 
+        isOpen={isAccountBlockedModalOpen} 
+        onUnlocked={() => setIsAccountBlockedModalOpen(false)} 
+      />
+    </>
   );
 }

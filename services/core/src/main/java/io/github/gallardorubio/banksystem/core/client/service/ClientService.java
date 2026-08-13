@@ -167,25 +167,24 @@ public class ClientService {
     public void verifyAndUnlockClient(UUID clientId, SecurityQuestionAnswersRequest securityAnswersRequest) {
         ClientEntity clientEntity = clientRepository.findById(clientId)
             .orElseThrow(() -> new ResourceNotFoundException("Client not found: " + clientId));
-
+        
         List<SecurityQuestionAnswer> savedQuestions = clientEntity.getSecurityQuestions();
         List<SecurityQuestionAnswersRequest.SecurityAnswer> providedAnswers = securityAnswersRequest.answers();
 
-        if (providedAnswers.size() != savedQuestions.size()) {
-            throw new BusinessException("Invalid number of answers");
+        if (providedAnswers == null || providedAnswers.isEmpty()) {
+            throw new BusinessException("Debes responder a una pregunta de seguridad");
         }
 
-        for (var userAns : providedAnswers) {
+        boolean matches = providedAnswers.stream().anyMatch(userAns -> {
             String rawUserAns = userAns.answer().trim().toLowerCase();
-            
-            boolean matches = savedQuestions.stream().anyMatch(saved -> 
+            return savedQuestions.stream().anyMatch(saved -> 
                 saved.questionId() == userAns.questionId() &&
                 passwordEncoder.matches(rawUserAns, saved.answer())
             );
+        });
 
-            if (!matches) {
-                throw new BusinessException("Respuestas de seguridad incorrectas");
-            }
+        if (!matches) {
+            throw new BusinessException("Respuesta de seguridad incorrectas");
         }
 
         clientEntity.setAccountStatus(ClientAccountStatus.ACTIVE);

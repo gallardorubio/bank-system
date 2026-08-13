@@ -6,7 +6,6 @@
  * OpenAPI spec version: 0.0.1
  */
 import type { BankAccountEntryResponseOperationDirection } from './bankAccountEntryResponseOperationDirection';
-import type { BankAccountEntryResponseOperationStatus } from './bankAccountEntryResponseOperationStatus';
 import type { BankAccountEntryResponseOperationType } from './bankAccountEntryResponseOperationType';
 
 export interface BankAccountEntryResponse {
@@ -16,6 +15,5 @@ export interface BankAccountEntryResponse {
   description?: string;
   amount?: number;
   operationDirection?: BankAccountEntryResponseOperationDirection;
-  operationStatus?: BankAccountEntryResponseOperationStatus;
   createdAt?: string;
 }
