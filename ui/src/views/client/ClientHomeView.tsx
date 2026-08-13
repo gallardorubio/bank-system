@@ -169,7 +169,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
       <Card className="px-8 pt-8 pb-8 flex flex-col w-full shadow-sm mb-4">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <p className="text-2xl font-black text-[#0A2540]">Movimientos</p>
+            <p className="text-2xl font-black text-[#0A2540]">Operaciones</p>
           </div>
           <Button 
             variant="secondary" 

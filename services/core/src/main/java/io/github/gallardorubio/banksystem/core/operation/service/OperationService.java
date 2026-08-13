@@ -1,9 +1,13 @@
 package io.github.gallardorubio.banksystem.core.operation.service;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
@@ -17,6 +21,7 @@ import io.github.gallardorubio.banksystem.core.installment.entity.InstallmentEnt
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationEntryResponse;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
@@ -70,6 +75,29 @@ public class OperationService {
         } catch (Exception e) {
             throw new RuntimeException("Error generating PDF statement for operation: " + operationId, e);
         }        
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OperationEntryResponse> getAllOperationsFiltered(
+        UUID clientId,
+        String concept,
+        String targetClientName,
+        Instant createdAt,
+        UUID targetBankAccountId,
+        BigDecimal amount,
+        Pageable pageable
+    ) {
+        return operationRepository.findFilteredOperations(
+            clientId, concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
+        ).map(p -> new OperationEntryResponse(
+            p.getId(),
+            p.getOperationId(),
+            p.getOperationType(),
+            p.getDescription(),
+            p.getAmount(),
+            p.getOperationDirection(),
+            p.getCreatedAt()
+        ));
     }
     
 }
