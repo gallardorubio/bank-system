@@ -7,7 +7,7 @@ import type { DepositResponse, LoanResponse } from '../../api/model';
 export type ResolutionTarget = {
   id: string;
   type: 'deposit' | 'loan';
-  action: 'APPROVE' | 'REJECT';
+  action: 'APPROVE' | 'DENY';
 };
 
 export function useEscalatedVM() {
@@ -53,7 +53,7 @@ export function useEscalatedVM() {
     setSelectedOperation(null);
   };
 
-  const openConfirmDialog = (id: string, type: 'deposit' | 'loan', action: 'APPROVE' | 'REJECT') => {
+  const openConfirmDialog = (id: string, type: 'deposit' | 'loan', action: 'APPROVE' | 'DENY') => {
     setActionError(null);
     setResolutionReason('');
     setConfirmResolution({ id, type, action });

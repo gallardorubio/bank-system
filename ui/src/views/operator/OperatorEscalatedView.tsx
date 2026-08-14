@@ -113,7 +113,7 @@ export function OperatorEscalatedView() {
                         className="rounded-lg"
                         onClick={(e) => {
                           e.stopPropagation();
-                          vm.openConfirmDialog(item.id, vm.activeSubTab === 'deposits' ? 'deposit' : 'loan', 'REJECT');
+                          vm.openConfirmDialog(item.id, vm.activeSubTab === 'deposits' ? 'deposit' : 'loan', 'DENY');
                         }}
                       >
                         Denegar

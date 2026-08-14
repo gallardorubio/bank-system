@@ -79,7 +79,7 @@ public class BankAccountController {
         @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate
     ) {
         UUID bankAccountId = bankAccountService.getAccountIdByClientId(UUID.fromString(jwt.getSubject()));
-        byte[] pdfBytes = bankAccountService.getBankAccountStatementPdf(bankAccountId, startDate, endDate);
+        byte[] pdfBytes = bankAccountService.getBankAccountStatement(bankAccountId, startDate, endDate);
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bank-account-statement-" + bankAccountId + ".pdf")
@@ -94,7 +94,7 @@ public class BankAccountController {
         @RequestParam(value = "start_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant startDate,
         @RequestParam(value = "end_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant endDate
     ) {
-        byte[] pdfBytes = bankAccountService.getBankAccountStatementPdf(bankAccountId, startDate, endDate);
+        byte[] pdfBytes = bankAccountService.getBankAccountStatement(bankAccountId, startDate, endDate);
 
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bank-account-statement-" + bankAccountId + ".pdf")
