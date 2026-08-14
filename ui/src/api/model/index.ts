@@ -38,6 +38,7 @@ export * from './mfaVerifyRequest';
 export * from './operationEntryResponse';
 export * from './operationEntryResponseOperationDirection';
 export * from './operationEntryResponseOperationType';
+export * from './operationEntryResponseStatus';
 export * from './operationResponse';
 export * from './operationStatusPhase';
 export * from './operationStatusPhaseStatus';

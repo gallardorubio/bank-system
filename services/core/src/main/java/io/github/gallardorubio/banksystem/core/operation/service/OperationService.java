@@ -108,6 +108,7 @@ public class OperationService {
             p.getId(),
             p.getOperationId(),
             p.getOperationType(),
+            p.getStatus(),
             p.getDescription(),
             p.getAmount(),
             p.getOperationDirection(),

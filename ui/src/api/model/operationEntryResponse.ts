@@ -7,11 +7,13 @@
  */
 import type { OperationEntryResponseOperationDirection } from './operationEntryResponseOperationDirection';
 import type { OperationEntryResponseOperationType } from './operationEntryResponseOperationType';
+import type { OperationEntryResponseStatus } from './operationEntryResponseStatus';
 
 export interface OperationEntryResponse {
   id?: string;
   operationId?: string;
   operationType?: OperationEntryResponseOperationType;
+  status?: OperationEntryResponseStatus;
   description?: string;
   amount?: number;
   operationDirection?: OperationEntryResponseOperationDirection;

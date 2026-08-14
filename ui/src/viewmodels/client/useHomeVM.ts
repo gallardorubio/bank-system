@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useGetMyBankAccount } from '../../api/bank-account-controller/bank-account-controller';
 import { useGetMyOperations } from '../../api/operation-controller/operation-controller';
 import { useCreateDeposit } from '../../api/deposit-controller/deposit-controller';
@@ -31,6 +31,9 @@ export function useHomeVM() {
   const [saveAsTrusted, setSaveAsTrusted] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
 
+  // Estado local para mantener los estados enriquecidos de las operaciones
+  const [enrichedStatuses, setEnrichedStatuses] = useState<Record<string, string>>({});
+
   const [filters, setFilters] = useState({
     concept: '',
     target_client_name: '',
@@ -57,9 +60,46 @@ export function useHomeVM() {
     size: 20,
   });
 
-  const entries = useMemo<OperationEntryResponse[]>(() => {
+  const rawEntries = useMemo<OperationEntryResponse[]>(() => {
     return operationsPage?.content || [];
   }, [operationsPage?.content]);
+
+  // Enriquecer las operaciones en segundo plano para obtener su estado real
+  useEffect(() => {
+    if (!rawEntries.length) return;
+
+    const fetchStatuses = async () => {
+      const newStatuses: Record<string, string> = {};
+      for (const entry of rawEntries) {
+        const opId = entry.operationId;
+        if (!opId) continue;
+
+        let endpoint = `/api/v1/operations/${opId}`;
+        if (entry.operationType === 'DEPOSIT') endpoint = `/api/v1/deposits/${opId}`;
+        else if (entry.operationType === 'TRANSFER') endpoint = `/api/v1/transfers/${opId}`;
+        else if (entry.operationType === 'LOAN') endpoint = `/api/v1/loans/${opId}`;
+
+        try {
+          const details: any = await customInstance({ url: endpoint, method: 'GET' });
+          if (details?.status) {
+            newStatuses[opId] = details.status;
+          }
+        } catch {
+          // Ignorar errores individuales de carga en lote
+        }
+      }
+      setEnrichedStatuses(prev => ({ ...prev, ...newStatuses }));
+    };
+
+    fetchStatuses();
+  }, [rawEntries]);
+
+  const entries = useMemo(() => {
+    return rawEntries.map(entry => ({
+      ...entry,
+      status: entry.status || (entry.operationId ? enrichedStatuses[entry.operationId] : undefined)
+    }));
+  }, [rawEntries, enrichedStatuses]);
 
   const openDepositModal = () => {
     setDepositAmount('');

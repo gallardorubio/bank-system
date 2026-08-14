@@ -1,6 +1,7 @@
 package io.github.gallardorubio.banksystem.core.operation.dto;
 
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationDirection;
+import io.github.gallardorubio.banksystem.core.operation.entity.OperationStatus;
 import io.github.gallardorubio.banksystem.core.operation.entity.OperationType;
 
 import java.math.BigDecimal;
@@ -11,6 +12,7 @@ public interface OperationEntryProjection {
     UUID getId();
     UUID getOperationId();
     OperationType getOperationType();
+    OperationStatus getStatus();
     String getDescription();
     BigDecimal getAmount();
     OperationDirection getOperationDirection();

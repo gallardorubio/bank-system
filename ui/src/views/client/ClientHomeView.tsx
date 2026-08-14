@@ -69,20 +69,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
   };
 
   const getStatusBadge = (status?: string) => {
-    switch (status) {
-      case 'COMPLETED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-[#E8F0FE] text-[#0066FF] font-bold text-xs">COMPLETED</span>;
-      case 'APPROVED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold text-xs">APPROVED</span>;
-      case 'PENDING':
-      case 'ESCALATED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-amber-50 text-amber-600 font-bold text-xs">{status}</span>;
-      case 'DENIED':
-      case 'REJECTED':
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-red-50 text-red-500 font-bold text-xs">{status}</span>;
-      default:
-        return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">{status || 'PENDING'}</span>;
-    }
+    return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">{status}</span>;
   };
 
   const isUuidValid = (uuid: string) => {
@@ -358,10 +345,16 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                         )}
                       </div>
                     ) : (
-                      <div className="relative pl-8 space-y-8 before:absolute before:left-3 before:top-3 before:bottom-3 before:w-1 before:bg-slate-300">
-                        {vm.selectedOperation.statusHistory.map((phase: any, index: number) => (
+                      <div className="pl-8 flex flex-col gap-8">
+                        {vm.selectedOperation.statusHistory.map((phase: any, index: number, arr: any[]) => (
                           <div key={index} className="relative flex flex-col gap-1.5">
-                            <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md" />
+                            {/* Línea conectora, se oculta en el último elemento para que no sobresalga */}
+                            {index !== arr.length - 1 && (
+                              <div className="absolute -left-[26px] top-3 bottom-[-40px] w-1 bg-[#E2E8F0] z-0" />
+                            )}
+                            {/* Punto */}
+                            <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md z-10" />
+                            
                             <div className="flex items-center justify-between">
                               <span className="font-black text-xl text-[#0A2540]">{phase.status}</span>
                               <span className="text-sm font-bold text-[#627D98]">
