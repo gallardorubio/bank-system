@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface OperationRepository extends JpaRepository<OperationEntity, UUID> {

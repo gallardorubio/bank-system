@@ -2,7 +2,7 @@ import type { ClientResponse } from '../../api/model';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
 import { LoadingScreen } from '../../components/LoadingScreen';
-import { useHomeVM } from '../../viewmodels/useHomeVM';
+import { useHomeVM } from '../../viewmodels/client/useHomeVM';
 import { 
   ArrowUpRight, 
   ArrowDownLeft, 

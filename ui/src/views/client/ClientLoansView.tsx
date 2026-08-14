@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLoansVM } from '../../viewmodels/useLoansVM';
+import { useLoansVM } from '../../viewmodels/client/useLoansVM';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { LoadingScreen } from '../../components/LoadingScreen';

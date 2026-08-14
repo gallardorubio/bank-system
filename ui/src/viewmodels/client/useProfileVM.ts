@@ -4,9 +4,9 @@ import {
    useUpdateClientPersonal, 
    useGetMySecurityQuestions, 
    useGetTrustedBankAccounts 
-} from '../api/client-controller/client-controller';
-import { customInstance } from '../api/mutator/instance';
-import type { ClientPersonalUpdateRequest } from '../api/model';
+} from '../../api/client-controller/client-controller';
+import { customInstance } from '../../api/mutator/instance';
+import type { ClientPersonalUpdateRequest } from '../../api/model';
 
 type CognitoJsonResponse = Record<string, any>;
 

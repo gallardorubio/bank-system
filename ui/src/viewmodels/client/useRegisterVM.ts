@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { 
   useCreateClient, 
   useGetSecurityQuestionsCatalog 
-} from '../api/client-controller/client-controller';
-import type { ClientRequest } from '../api/model';
+} from '../../api/client-controller/client-controller';
+import type { ClientRequest } from '../../api/model';
 
 export const passwordSchema = z.string()
   .min(8, 'Mínimo 8 caracteres')

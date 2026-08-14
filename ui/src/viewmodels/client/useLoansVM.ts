@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useGetAllLoans, useCreateLoan } from '../api/loan-controller/loan-controller';
-import type { LoanRequest, LoanRequestInstallmentFrequency } from '../api/model';
+import { useGetAllLoans, useCreateLoan } from '../../api/loan-controller/loan-controller';
+import type { LoanRequest, LoanRequestInstallmentFrequency } from '../../api/model';
 
 export function useLoansVM() {
   const { data: loans, isLoading, refetch } = useGetAllLoans();

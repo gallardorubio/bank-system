@@ -1,4 +1,4 @@
-import { useClientVM } from '../viewmodels/useClientVM';
+import { useClientVM } from '../viewmodels/client/useClientVM';
 import { ClientHomeView } from './client/ClientHomeView';
 import { ClientProfileView } from './client/ClientProfileView';
 import { ClientLoansView } from './client/ClientLoansView';

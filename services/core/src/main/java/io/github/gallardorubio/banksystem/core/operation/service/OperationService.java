@@ -16,22 +16,17 @@ import org.openpdf.pdf.ITextRenderer;
 
 import io.github.gallardorubio.banksystem.core.deposit.dao.DepositRepository;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
-import io.github.gallardorubio.banksystem.core.deposit.entity.DepositEntity;
 import io.github.gallardorubio.banksystem.core.installment.dao.InstallmentRepository;
 import io.github.gallardorubio.banksystem.core.installment.dto.InstallmentResponse;
-import io.github.gallardorubio.banksystem.core.installment.entity.InstallmentEntity;
 import io.github.gallardorubio.banksystem.core.loan.dao.LoanRepository;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
-import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationEntryResponse;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
-import io.github.gallardorubio.banksystem.core.operation.entity.OperationEntity;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
 import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
-import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 import lombok.RequiredArgsConstructor;
 
 @Service

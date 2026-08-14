@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import countries from 'i18n-iso-countries';
 import esLocale from 'i18n-iso-countries/langs/es.json';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
-import { useRegisterVM } from '../viewmodels/useRegisterVM';
+import { useRegisterVM } from '../viewmodels/client/useRegisterVM';
 import { Button } from '../components/Button';
 import { Loader2, Check, X } from 'lucide-react';
 

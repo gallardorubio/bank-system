@@ -1,5 +1,5 @@
-import { useGetClientPersonal } from '../api/client-controller/client-controller';
-import { useGetMyBankAccount } from '../api/bank-account-controller/bank-account-controller';
+import { useGetClientPersonal } from '../../api/client-controller/client-controller';
+import { useGetMyBankAccount } from '../../api/bank-account-controller/bank-account-controller';
 
 export function useClientVM() {
   const { data: client, isLoading: isLoadingClient, error: clientError } = useGetClientPersonal();

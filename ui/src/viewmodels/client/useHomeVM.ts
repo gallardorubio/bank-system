@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
-import { useGetMyBankAccount } from '../api/bank-account-controller/bank-account-controller';
-import { useGetMyOperations } from '../api/operation-controller/operation-controller';
-import { useCreateDeposit } from '../api/deposit-controller/deposit-controller';
-import { useCreateTransfer } from '../api/transfer-controller/transfer-controller';
-import { useGetTrustedBankAccounts } from '../api/client-controller/client-controller';
-import { customInstance } from '../api/mutator/instance';
-import type { DepositRequest, TransferRequest, OperationEntryResponse } from '../api/model';
+import { useGetMyBankAccount } from '../../api/bank-account-controller/bank-account-controller';
+import { useGetMyOperations } from '../../api/operation-controller/operation-controller';
+import { useCreateDeposit } from '../../api/deposit-controller/deposit-controller';
+import { useCreateTransfer } from '../../api/transfer-controller/transfer-controller';
+import { useGetTrustedBankAccounts } from '../../api/client-controller/client-controller';
+import { customInstance } from '../../api/mutator/instance';
+import type { DepositRequest, TransferRequest, OperationEntryResponse } from '../../api/model';
 
 export function useHomeVM() {
   const { data: bankAccount, isLoading: isLoadingAccount, refetch: refetchAccount } = useGetMyBankAccount();

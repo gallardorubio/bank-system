@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { AuthLayout } from './layouts/AuthLayout';
-import { DashboardLayout } from './layouts/DashboardLayout';
+import { DashboardLayout, type TabType } from './layouts/DashboardLayout';
 import { ClientView } from './views/ClientView';
 import { RegisterView } from './views/RegisterView';
 import { OperatorView } from './views/OperatorView';
@@ -12,7 +12,7 @@ import { UnlockModal } from './components/UnlockModal';
 export default function App() {
   const auth = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
-  const [activeTab, setActiveTab] = useState<'home' | 'loans' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isAccountBlockedModalOpen, setIsAccountBlockedModalOpen] = useState(false);
 
   useEffect(() => {
@@ -24,11 +24,26 @@ export default function App() {
   const role = useMemo(() => {
     const profile = auth.user?.profile as Record<string, unknown> | undefined;
     if (!profile) return 'client';
-    const groups = (profile['cognito:groups'] || profile['groups'] || profile['roles']) as string[] | string | undefined;
-    if (Array.isArray(groups) && groups.some(g => g.toLowerCase().includes('operator') || g.toLowerCase().includes('admin'))) return 'operator';
-    if (typeof groups === 'string' && (groups.toLowerCase().includes('operator') || groups.toLowerCase().includes('admin'))) return 'operator';
+    const groups = (profile['cognito:groups'] || profile['groups'] || profile['roles']) as
+      | string[]
+      | string
+      | undefined;
+    if (Array.isArray(groups) && groups.some((g) => g.toLowerCase().includes('operator') || g.toLowerCase().includes('admin'))) {
+      return 'operator';
+    }
+    if (typeof groups === 'string' && (groups.toLowerCase().includes('operator') || groups.toLowerCase().includes('admin'))) {
+      return 'operator';
+    }
     return 'client';
   }, [auth.user?.profile]);
+
+  useEffect(() => {
+    if (role === 'operator' && (activeTab === 'home' || activeTab === 'loans' || activeTab === 'profile')) {
+      setActiveTab('statistics');
+    } else if (role === 'client' && (activeTab === 'statistics' || activeTab === 'escalated' || activeTab === 'fraud')) {
+      setActiveTab('home');
+    }
+  }, [role, activeTab]);
 
   const handleLogout = () => {
     const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
@@ -51,28 +66,30 @@ export default function App() {
       return (
         <AuthLayout>
           {isRegistering ? (
-            <RegisterView 
-               onSuccess={() => setIsRegistering(false)} 
-               onCancel={() => setIsRegistering(false)} 
-             />
+            <RegisterView
+              onSuccess={() => setIsRegistering(false)}
+              onCancel={() => setIsRegistering(false)}
+            />
           ) : (
             <div className="p-16 flex flex-col justify-center gap-10">
               <div className="space-y-3">
                 <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
-                <p className="text-lg text-[#627D98]">Ingresa a tu banca en línea o crea una cuenta en segundos.</p>
+                <p className="text-lg text-[#627D98]">
+                  Ingresa a tu banca en línea o crea una cuenta en segundos.
+                </p>
               </div>
               <div className="flex flex-col gap-5">
-                <Button 
-                   variant="primary" 
-                   onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })} 
-                   className="w-full py-4 text-base font-bold shadow-sm"
+                <Button
+                  variant="primary"
+                  onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })}
+                  className="w-full py-4 text-base font-bold shadow-sm"
                 >
                   Iniciar sesión
                 </Button>
-                <Button 
-                   variant="secondary" 
-                   onClick={() => setIsRegistering(true)} 
-                   className="w-full py-4 text-base font-bold"
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsRegistering(true)}
+                  className="w-full py-4 text-base font-bold"
                 >
                   Crear cuenta
                 </Button>
@@ -91,7 +108,14 @@ export default function App() {
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
       >
-        {role === 'operator' ? <OperatorView /> : <ClientView activeTab={activeTab} setActiveTab={setActiveTab} />}
+        {role === 'operator' ? (
+          <OperatorView activeTab={activeTab as 'statistics' | 'escalated' | 'fraud'} />
+        ) : (
+          <ClientView
+            activeTab={activeTab as 'home' | 'loans' | 'profile'}
+            setActiveTab={setActiveTab}
+          />
+        )}
       </DashboardLayout>
     );
   }, [auth.isLoading, auth.isAuthenticated, auth.user?.profile?.email, auth, isRegistering, role, activeTab]);
@@ -99,9 +123,9 @@ export default function App() {
   return (
     <>
       {content}
-      <UnlockModal 
-        isOpen={isAccountBlockedModalOpen} 
-        onUnlocked={() => setIsAccountBlockedModalOpen(false)} 
+      <UnlockModal
+        isOpen={isAccountBlockedModalOpen}
+        onUnlocked={() => setIsAccountBlockedModalOpen(false)}
       />
     </>
   );

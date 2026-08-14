@@ -2,7 +2,7 @@ import countries from 'i18n-iso-countries';
 import esLocale from 'i18n-iso-countries/langs/es.json';
 import { getCountries, getCountryCallingCode } from 'libphonenumber-js';
 import { QRCodeSVG } from 'qrcode.react';
-import { useProfileVM } from '../../viewmodels/useProfileVM';
+import { useProfileVM } from '../../viewmodels/client/useProfileVM';
 import { Card } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { LoadingScreen } from '../../components/LoadingScreen';
