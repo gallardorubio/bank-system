@@ -165,4 +165,27 @@ public class BankAccountService {
     public boolean bankAccountExists(UUID bankAccountId) {
         return bankAccountRepository.existsById(bankAccountId);
     }
+
+    @Transactional(readOnly = true)
+    public List<BankAccountEntryResponse> getAllClientEntries(UUID clientId) {
+        UUID bankAccountId = bankAccountRepository.findByClientId(clientId)
+            .map(BankAccountEntity::getId)
+            .orElseThrow(() -> new IllegalArgumentException("Bank account not found for client: " + clientId));
+
+        return entryRepository.findAllByDebitBankAccountIdOrCreditBankAccountIdOrderByCreatedAtDesc(bankAccountId, bankAccountId)
+            .stream()
+            .map(entry -> {
+                OperationEntity operationEntity = getOperationEntity(entry.getOperationId());
+                return new BankAccountEntryResponse(entry, bankAccountId, operationEntity);
+            })
+            .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public BankAccountResponse getBankAccount(UUID bankAccountId) {
+        return bankAccountRepository.findById(bankAccountId)
+            .map(BankAccountResponse::new)
+            .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + bankAccountId));
+    }
+
 }

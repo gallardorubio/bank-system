@@ -3,6 +3,9 @@ package io.github.gallardorubio.banksystem.core.operation.service;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.kafka.common.errors.ResourceNotFoundException;
@@ -114,6 +117,20 @@ public class OperationService {
             p.getOperationDirection(),
             p.getCreatedAt()
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public List<OperationResponse> getAllClientOperations(UUID clientId) {
+        List<OperationResponse> list = new ArrayList<>();
+    
+        list.addAll(depositRepository.findAllByClientId(clientId).stream().map(DepositResponse::new).toList());
+        list.addAll(transferRepository.findAllByClientId(clientId).stream().map(TransferResponse::new).toList());
+        list.addAll(loanRepository.findAllByClientId(clientId).stream().map(LoanResponse::new).toList());
+        list.addAll(installmentRepository.findAllByClientId(clientId).stream().map(InstallmentResponse::new).toList());
+
+        list.sort(Comparator.comparing(OperationResponse::createdAt).reversed());
+        
+        return list;
     }
     
 }

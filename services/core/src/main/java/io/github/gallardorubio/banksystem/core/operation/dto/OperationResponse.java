@@ -1,5 +1,7 @@
 package io.github.gallardorubio.banksystem.core.operation.dto;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.gallardorubio.banksystem.core.deposit.dto.DepositResponse;
@@ -22,4 +24,5 @@ import io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse;
 })
 public interface OperationResponse {
     OperationType operationType();
+    Instant createdAt();
 }

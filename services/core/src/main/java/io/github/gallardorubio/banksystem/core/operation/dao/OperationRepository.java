@@ -122,4 +122,5 @@ public interface OperationRepository extends JpaRepository<OperationEntity, UUID
         @Param("amount") BigDecimal amount,
         Pageable pageable
     );
+
 }

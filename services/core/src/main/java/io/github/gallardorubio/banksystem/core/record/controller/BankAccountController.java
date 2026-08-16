@@ -2,6 +2,7 @@ package io.github.gallardorubio.banksystem.core.record.controller;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -22,6 +23,7 @@ import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsRe
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountResponse;
 import io.github.gallardorubio.banksystem.core.record.service.BankAccountService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -100,6 +102,22 @@ public class BankAccountController {
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=bank-account-statement-" + bankAccountId + ".pdf")
             .contentType(MediaType.APPLICATION_PDF)
             .body(pdfBytes);
+    }
+
+    @Hidden
+    @PreAuthorize("hasAuthority('SCOPE_' + @environment.getProperty('COGNITO_AGENTIC_SCOPE'))")
+    @GetMapping("/{clientId}/entries")
+    public ResponseEntity<List<BankAccountEntryResponse>> getAllClientEntries(@PathVariable("clientId") UUID clientId) {
+        List<BankAccountEntryResponse> entries = bankAccountService.getAllClientEntries(clientId);
+        return ResponseEntity.ok(entries);
+    }
+
+    @Hidden
+    @PreAuthorize("hasAuthority('SCOPE_' + @environment.getProperty('COGNITO_AGENTIC_SCOPE'))")
+    @GetMapping("/{id}")
+    public ResponseEntity<BankAccountResponse> getBankAccount(@PathVariable("id") UUID bankAccountId) {
+        BankAccountResponse account = bankAccountService.getBankAccount(bankAccountId);
+        return ResponseEntity.ok(account);
     }
 
 }

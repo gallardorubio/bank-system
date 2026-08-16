@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -80,11 +81,11 @@ public class OperationController {
 
     @Hidden
     @PreAuthorize("hasAuthority('SCOPE_' + @environment.getProperty('COGNITO_AGENTIC_SCOPE'))")
-    @GetMapping("/test")
-    public ResponseEntity<String> testEndpoint() {
-        return ResponseEntity.ok("Test endpoint accessed successfully.");
-    }
-    
-    
+    @GetMapping("/clients/{clientId}")
+    public ResponseEntity<List<OperationResponse>> getAllClientOperations(@PathVariable("clientId") UUID clientId) {
+        List<OperationResponse> operations = operationService.getAllClientOperations(clientId);
+
+        return ResponseEntity.ok(operations);
+    }    
 
 }

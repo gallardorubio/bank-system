@@ -73,5 +73,7 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
         @Param("startDate") Instant startDate,
         @Param("endDate") Instant endDate
     );
+
+    List<EntryEntity> findAllByDebitBankAccountIdOrCreditBankAccountIdOrderByCreatedAtDesc(UUID debitBankAccountId, UUID creditBankAccountId);
     
 }

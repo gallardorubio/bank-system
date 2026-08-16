@@ -17,7 +17,9 @@ import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionAnswer
 import io.github.gallardorubio.banksystem.core.client.dto.SecurityQuestionResponse;
 import io.github.gallardorubio.banksystem.core.client.dto.TrustedBankAccountResponse;
 import io.github.gallardorubio.banksystem.core.client.service.ClientService;
+import io.swagger.v3.oas.annotations.Hidden;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -96,6 +98,14 @@ public class ClientController {
     ) {
         clientService.removeTrustedBankAccount(UUID.fromString(jwt.getSubject()), bankAccountId);
         return ResponseEntity.ok().build();
+    }
+
+    @Hidden
+    @PreAuthorize("hasAuthority('SCOPE_' + @environment.getProperty('COGNITO_AGENTIC_SCOPE'))")
+    @GetMapping("/{id}")
+    public ResponseEntity<ClientResponse> getClient(@PathVariable("id") UUID clientId) {
+        ClientResponse clientResponse = clientService.getClientPersonal(clientId);
+        return ResponseEntity.ok(clientResponse);
     }
 
 }
