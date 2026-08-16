@@ -2,6 +2,7 @@ from enum import Enum
 from typing import List, Any, Generic, TypeVar, Optional
 from uuid import UUID
 from datetime import datetime
+from decimal import Decimal
 from pydantic import BaseModel
 
 class OperationType(str, Enum):
@@ -37,7 +38,7 @@ class OperationStatusPhase(BaseModel):
 class DepositDetails(BaseModel):
     clientId: UUID
     clientBankAccountId: UUID
-    amount: float
+    amount: Decimal
     status: OperationStatus
     statusHistory: List[OperationStatusPhase]
     origin: OperationRequestOrigin
@@ -46,19 +47,19 @@ class DepositDetails(BaseModel):
 class LoanDetails(BaseModel):
     clientId: UUID
     clientBankAccountId: UUID
-    amount: float
+    amount: Decimal
     status: OperationStatus
     statusHistory: List[OperationStatusPhase]
     origin: OperationRequestOrigin
     createdAt: datetime
     termPeriods: int
     installmentFrequency: InstallmentFrequency
-    interestRate: float
+    interestRate: Decimal
 
 class TransferDetails(BaseModel):
     clientId: UUID
     clientBankAccountId: UUID
-    amount: float
+    amount: Decimal
     status: OperationStatus
     statusHistory: List[OperationStatusPhase]
     origin: OperationRequestOrigin
@@ -73,7 +74,7 @@ class FraudDetectedEvent(BaseModel):
     operationId: UUID
     clientId: UUID
     clientBankAccountId: UUID
-    amount: float
+    amount: Decimal
     reason: str
 
 T = TypeVar("T")

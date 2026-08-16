@@ -24,10 +24,14 @@ def _send_resolution(topic: str, operation_id: UUID, operation_type: OperationTy
         operationType=operation_type,
         reason=reason,
     )
+    headers = [
+        ("__TypeId__", b"io.github.gallardorubio.banksystem.core.operation.dto.OperationResolutionEvent")
+    ]
     producer.produce(
         topic,
         key=str(operation_id).encode("utf-8"),
         value=json.dumps(event.model_dump(mode="json")).encode("utf-8"),
+        headers=headers,
         callback=_delivery_report,
     )
     producer.flush()
@@ -46,20 +50,28 @@ def send_operation_escalated(operation_id: UUID, operation_type: OperationType, 
 
 
 def send_fraud_detected(event: FraudDetectedEvent):
+    headers = [
+        ("__TypeId__", b"io.github.gallardorubio.banksystem.core.fraud.dto.FraudDetectedEvent")
+    ]
     producer.produce(
         "fraud-detected",
         key=str(event.operationId).encode("utf-8"),
         value=json.dumps(event.model_dump(mode="json")).encode("utf-8"),
+        headers=headers,
         callback=_delivery_report,
     )
     producer.flush()
 
 
 def send_client_blocked(event: ClientAccountBlockEvent):
+    headers = [
+        ("__TypeId__", b"io.github.gallardorubio.banksystem.core.client.dto.ClientAccountBlockEvent")
+    ]
     producer.produce(
         "client-blocked",
         key=str(event.clientId).encode("utf-8"),
         value=json.dumps(event.model_dump(mode="json")).encode("utf-8"),
+        headers=headers,
         callback=_delivery_report,
     )
     producer.flush()

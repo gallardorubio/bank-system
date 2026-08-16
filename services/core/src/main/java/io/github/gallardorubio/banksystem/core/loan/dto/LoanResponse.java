@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.github.gallardorubio.banksystem.core.loan.entity.InstallmentFrequency;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
@@ -47,6 +49,7 @@ public record LoanResponse(
         );
     }
 
+    @JsonProperty("operationType")
     @Override
     public OperationType operationType() {
         return OperationType.LOAN;

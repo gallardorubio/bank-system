@@ -108,4 +108,13 @@ public class ClientController {
         return ResponseEntity.ok(clientResponse);
     }
 
+    @Hidden
+    @PreAuthorize("hasAuthority('SCOPE_' + @environment.getProperty('COGNITO_AGENTIC_SCOPE'))")
+    @GetMapping("/{clientId}/trusted-accounts")
+    public ResponseEntity<List<TrustedBankAccountResponse>> getClientTrustedBankAccounts(@PathVariable("clientId") UUID clientId) {
+        List<TrustedBankAccountResponse> trustedAccounts = clientService.getTrustedBankAccounts(clientId);
+        
+        return ResponseEntity.ok(trustedAccounts);
+    }
+
 }

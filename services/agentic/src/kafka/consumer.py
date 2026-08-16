@@ -1,5 +1,6 @@
 import json
 from confluent_kafka import Consumer, KafkaError
+from confluent_kafka.admin import AdminClient, NewTopic
 from src import config
 from src.agent.graph import agent_graph
 from src.agent.state import AgentState
@@ -10,6 +11,7 @@ from src.models.events import (
     DepositDetails,
     LoanDetails,
 )
+from decimal import Decimal
 
 TOPIC_NAME = "operation-pending"
 
@@ -17,7 +19,7 @@ TOPIC_NAME = "operation-pending"
 def process_operation_pending(event: OperationPendingEvent):
     client_id = None
     client_bank_account_id = None
-    amount = 0.0
+    amount = Decimal("0.0")
 
     if event.operationType == OperationType.TRANSFER:
         details = TransferDetails(**event.details)
@@ -48,6 +50,9 @@ def process_operation_pending(event: OperationPendingEvent):
 
 
 def listen_operation_pending():
+    admin_client = AdminClient({"bootstrap.servers": config.BOOTSTRAP_SERVERS})
+    admin_client.create_topics([NewTopic(TOPIC_NAME)])
+
     conf = {
         "bootstrap.servers": config.BOOTSTRAP_SERVERS,
         "group.id": config.KAFKA_GROUP_ID,
@@ -66,7 +71,7 @@ def listen_operation_pending():
             if msg.error():
                 if msg.error().code() == KafkaError._PARTITION_EOF:
                     continue
-                break
+                continue
 
             payload = json.loads(msg.value().decode("utf-8"))
             event = OperationPendingEvent(**payload)

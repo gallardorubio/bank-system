@@ -1,7 +1,15 @@
+from decimal import Decimal
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
+from src.models.dtos import (
+    BankAccountEntryResponse,
+    BankAccountResponse,
+    ClientResponse,
+    OperationItemResponse,
+    TrustedBankAccountResponse,
+)
 from src.models.events import OperationType
 
 
@@ -53,7 +61,13 @@ class AgentState(BaseModel):
     details: Dict[str, Any]
     client_id: Optional[UUID] = None
     client_bank_account_id: Optional[UUID] = None
-    amount: float = 0.0
+    amount: Decimal = Decimal("0.0")
+
+    client_data: Optional[ClientResponse] = None
+    account_data: Optional[BankAccountResponse] = None
+    historical_entries: List[BankAccountEntryResponse] = []
+    historical_operations: List[OperationItemResponse] = []
+    trusted_accounts: List[TrustedBankAccountResponse] = []
 
     security_eval: Optional[SecurityEvaluation] = None
     fraud_eval: Optional[FraudEvaluation] = None

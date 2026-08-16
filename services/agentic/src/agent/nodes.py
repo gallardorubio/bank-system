@@ -1,28 +1,30 @@
 import json
+from decimal import Decimal
 import boto3
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_aws import ChatBedrockConverse
 from src import config
 from src.agent.state import (
     AgentState,
-    SecurityEvaluation,
-    FraudEvaluation,
     CreditEvaluation,
-    FinalDecision,
-    ResolutionAction,
     EvaluationSeverity,
+    FinalDecision,
+    FraudEvaluation,
+    ResolutionAction,
+    SecurityEvaluation,
 )
-from src.models.events import (
-    OperationType,
-    FraudDetectedEvent,
-    ClientAccountBlockEvent,
-)
+from src.client.core import core_client
 from src.kafka.producer import (
+    send_client_blocked,
+    send_fraud_detected,
     send_operation_approved,
     send_operation_denied,
     send_operation_escalated,
-    send_fraud_detected,
-    send_client_blocked,
+)
+from src.models.events import (
+    ClientAccountBlockEvent,
+    FraudDetectedEvent,
+    OperationType,
 )
 
 bedrock_client = boto3.client("bedrock-runtime", region_name=config.AWS_REGION)
@@ -34,21 +36,49 @@ llm = ChatBedrockConverse(
 )
 
 
+def fetch_context(state: AgentState) -> dict:
+    if not state.client_id:
+        return {}
+
+    client_data = core_client.get_client(state.client_id)
+    account_data = (
+        core_client.get_bank_account(state.client_bank_account_id)
+        if state.client_bank_account_id
+        else None
+    )
+    entries = core_client.get_client_entries(state.client_id)
+    operations = core_client.get_client_operations(state.client_id)
+    trusted = core_client.get_client_trusted_accounts(state.client_id)
+
+    return {
+        "client_data": client_data,
+        "account_data": account_data,
+        "historical_entries": entries,
+        "historical_operations": operations,
+        "trusted_accounts": trusted,
+    }
+
+
 def evaluate_security(state: AgentState) -> dict:
     origin = state.details.get("origin", {})
+    client_summary = (
+        state.client_data.model_dump(mode="json") if state.client_data else {}
+    )
+
     structured_llm = llm.with_structured_output(SecurityEvaluation)
 
     prompt = (
-        f"Evalua la seguridad de la operacion bancaria ID: {state.operation_id}.\n"
+        f"Evalua la seguridad del acceso de la operacion ID: {state.operation_id}.\n"
         f"Tipo de operacion: {state.operation_type.value}\n"
-        f"Metadatos de origen: {json.dumps(origin)}\n"
+        f"Metadatos de red y origen: {json.dumps(origin)}\n"
+        f"Datos del cliente titular: {json.dumps(client_summary, default=str)}\n"
         "Criterios de evaluacion:\n"
-        "- Analiza riesgos por origen geografico, IP anonimizada/sospechosa o agentes no estandar.\n"
-        "- Si detectas usurpacion critica o riesgo extremo, requires_client_block=True y passed=False."
+        "- Compara la ubicacion de la peticion con el pais/direccion del cliente.\n"
+        "- Si detectas usurpacion grave, IP anonimizada hostil o incongruencia geografica critica: requires_client_block=True y passed=False."
     )
 
     result = structured_llm.invoke([
-        SystemMessage(content="Eres un analista de ciberseguridad bancaria estricto y riguroso."),
+        SystemMessage(content="Eres un auditor de ciberseguridad bancaria estricto."),
         HumanMessage(content=prompt),
     ])
     return {"security_eval": result}
@@ -57,23 +87,33 @@ def evaluate_security(state: AgentState) -> dict:
 def evaluate_fraud(state: AgentState) -> dict:
     structured_llm = llm.with_structured_output(FraudEvaluation)
 
+    entries_summary = [
+        entry.model_dump(mode="json") for entry in state.historical_entries[:15]
+    ]
+    account_summary = (
+        state.account_data.model_dump(mode="json") if state.account_data else {}
+    )
+
     payload = {
         "operation_type": state.operation_type.value,
-        "amount": state.amount,
+        "amount": str(state.amount),
         "details": state.details,
+        "current_account": account_summary,
+        "recent_entries": entries_summary,
     }
 
     prompt = (
         f"Evalua el riesgo de fraude transaccional para la operacion ID: {state.operation_id}.\n"
-        f"Datos transaccionales: {json.dumps(payload, default=str)}\n"
+        f"Contexto transaccional: {json.dumps(payload, default=str)}\n"
         "Criterios de evaluacion:\n"
-        "- Analiza conceptos sospechosos, desviaciones cuantiosas o patrones anomalos de movimiento.\n"
-        "- Si es fraude confirmado, is_fraud=True, passed=False.\n"
-        "- Si amerita bloqueo inmediato de cuenta por reincidencia o severidad, requires_client_block=True."
+        "- Analiza si el importe rompe el patron de gasto historico del cliente.\n"
+        "- Revisa conceptos anomalos o sospechosos.\n"
+        "- Si es fraude categorico: is_fraud=True, passed=False.\n"
+        "- Si la severidad amerita inhabilitar la cuenta: requires_client_block=True."
     )
 
     result = structured_llm.invoke([
-        SystemMessage(content="Eres un auditor de prevencion de fraude transaccional bancario."),
+        SystemMessage(content="Eres un analista antifraude transaccional bancario."),
         HumanMessage(content=prompt),
     ])
     return {"fraud_eval": result}
@@ -85,7 +125,7 @@ def evaluate_credit(state: AgentState) -> dict:
             "credit_eval": CreditEvaluation(
                 passed=True,
                 severity=EvaluationSeverity.LOW,
-                reason="Operacion no sujeta a scoring crediticio.",
+                reason="Operacion no sujeta a evaluacion de scoring crediticio.",
                 risk_score=0.0,
                 creditworthy=True,
                 recommended_action="APPROVE",
@@ -94,20 +134,33 @@ def evaluate_credit(state: AgentState) -> dict:
 
     structured_llm = llm.with_structured_output(CreditEvaluation)
 
+    entries_summary = [
+        entry.model_dump(mode="json") for entry in state.historical_entries
+    ]
+    operations_summary = [
+        op.model_dump(mode="json") for op in state.historical_operations
+    ]
+
+    payload = {
+        "amount": str(state.amount),
+        "loan_details": state.details,
+        "account_balance": str(state.account_data.balance) if state.account_data else "0",
+        "historical_entries": entries_summary,
+        "historical_operations": operations_summary,
+    }
+
     prompt = (
-        f"Evalua el riesgo crediticio de la operacion ID: {state.operation_id}.\n"
-        f"Tipo: {state.operation_type.value}\n"
-        f"Monto: {state.amount}\n"
-        f"Condiciones: {json.dumps(state.details, default=str)}\n"
+        f"Evalua el riesgo crediticio de la solicitud de prestamo ID: {state.operation_id}.\n"
+        f"Informacion financiera: {json.dumps(payload, default=str)}\n"
         "Criterios de evaluacion:\n"
-        "- Analiza capacidad de pago, tasa de interes y plazo.\n"
-        "- Si el riesgo es admisible: creditworthy=True, passed=True, recommended_action='APPROVE'.\n"
-        "- Si el riesgo es dudoso pero viable con revision manual: passed=False, recommended_action='ESCALATE'.\n"
-        "- Si el riesgo es inasumible: passed=False, recommended_action='DENY'."
+        "- Analiza ingresos historicos frente al importe del prestamo, tipo de interes y cuotas.\n"
+        "- Si la capacidad financiera es solvente: creditworthy=True, passed=True, recommended_action='APPROVE'.\n"
+        "- Si el caso es limite o requiere evaluacion manual humana: passed=False, recommended_action='ESCALATE'.\n"
+        "- Si el riesgo de impago es alto o inasumible: passed=False, recommended_action='DENY'."
     )
 
     result = structured_llm.invoke([
-        SystemMessage(content="Eres un analista de scoring y concesion crediticia bancaria."),
+        SystemMessage(content="Eres un analista de riesgos y concesion crediticia bancaria."),
         HumanMessage(content=prompt),
     ])
     return {"credit_eval": result}
@@ -123,7 +176,7 @@ def synthesize_decision(state: AgentState) -> dict:
 
     if is_fraud or (sec and not sec.passed) or (fraud and not fraud.passed):
         action = ResolutionAction.DENIED
-        reason_detail = fraud.reason if (fraud and not fraud.passed) else sec.reason
+        reason_detail = fraud.reason if (fraud and not fraud.passed) else (sec.reason if sec else "Error de validacion")
         reason = f"Rechazado por seguridad/fraude: {reason_detail}"
     elif credit and not credit.passed:
         if credit.recommended_action == "ESCALATE":
@@ -134,7 +187,7 @@ def synthesize_decision(state: AgentState) -> dict:
             reason = f"Rechazado por scoring crediticio: {credit.reason}"
     else:
         action = ResolutionAction.APPROVED
-        reason = "Aprobado: Verificaciones de seguridad, antifraude y riesgo crediticio superadas."
+        reason = "Aprobado: Verificaciones de seguridad, antifraude y solvencia crediticia superadas."
 
     decision = FinalDecision(
         action=action,

@@ -22,6 +22,12 @@ references/
 target/
 .mvn/
 
+# agentic
+
+.venv/
+__pycache__/
+*.egg-info/
+
 # ui
 
 logs
