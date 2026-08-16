@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,7 +60,7 @@ public class LoanController {
         return loanResponse;
     }
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @PatchMapping("/{id}")
     public ResponseEntity<LoanResponse> resolveLoan(
         @PathVariable("id") UUID loanId,
@@ -77,7 +76,7 @@ public class LoanController {
         return ResponseEntity.ok(loanResponse);        
     }
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @GetMapping("/escalated")
     public ResponseEntity<List<LoanResponse>> getEscalatedLoans() {
         List<LoanResponse> loans = loanService.getEscalatedLoans();

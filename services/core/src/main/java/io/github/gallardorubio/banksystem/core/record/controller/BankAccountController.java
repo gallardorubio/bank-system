@@ -64,7 +64,7 @@ public class BankAccountController {
         return ResponseEntity.ok(entries);
     }
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @GetMapping("/analytics")
     public ResponseEntity<BankAccountAnalyticsResponse> getAnalytics() {
         BankAccountAnalyticsResponse analytics = bankAccountService.getBankAnalytics();
@@ -87,7 +87,7 @@ public class BankAccountController {
             .body(pdfBytes);
     }
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @GetMapping(value = "/{id}/statement", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getBankAccountStatement(
         @PathVariable("id") UUID bankAccountId,

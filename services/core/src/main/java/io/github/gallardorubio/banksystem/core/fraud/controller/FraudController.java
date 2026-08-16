@@ -21,7 +21,7 @@ public class FraudController {
 
     private final FraudService fraudService;
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @GetMapping
     public ResponseEntity<Page<FraudEntity>> getFraudRecords(
         @ParameterObject @PageableDefault(size = 20) Pageable pageable

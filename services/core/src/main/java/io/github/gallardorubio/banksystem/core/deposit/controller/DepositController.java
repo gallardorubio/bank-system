@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -61,7 +60,7 @@ public class DepositController {
         return depositResponse;
     }
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @PatchMapping("/{id}")
     public ResponseEntity<DepositResponse> resolveDeposit(
         @PathVariable("id") UUID depositId,
@@ -77,7 +76,7 @@ public class DepositController {
         return ResponseEntity.ok(depositResponse); 
     }
 
-    @PreAuthorize("hasRole('operator')")
+    @PreAuthorize("hasRole(@environment.getProperty('COGNITO_OPERATOR_ROLE'))")
     @GetMapping("/escalated")
     public ResponseEntity<List<DepositResponse>> getEscalatedDeposits() {
         List<DepositResponse> deposits = depositService.getEscalatedDeposits();

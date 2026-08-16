@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationEntryResponse;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.service.OperationService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,6 +77,14 @@ public class OperationController {
 
         return ResponseEntity.ok(operations);
     }
+
+    @Hidden
+    @PreAuthorize("hasAuthority('SCOPE_' + @environment.getProperty('COGNITO_AGENTIC_SCOPE'))")
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Test endpoint accessed successfully.");
+    }
+    
     
 
 }

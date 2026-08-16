@@ -47,12 +47,23 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        authoritiesConverter.setAuthoritiesClaimName("cognito:groups");
-        authoritiesConverter.setAuthorityPrefix("ROLE_");
+        JwtGrantedAuthoritiesConverter groupsConverter = new JwtGrantedAuthoritiesConverter();
+
+        groupsConverter.setAuthoritiesClaimName("cognito:groups");
+        groupsConverter.setAuthorityPrefix("ROLE_");
+
+        JwtGrantedAuthoritiesConverter scopesConverter = new JwtGrantedAuthoritiesConverter();
 
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            var authorities = new java.util.HashSet<org.springframework.security.core.GrantedAuthority>();
+
+            authorities.addAll(groupsConverter.convert(jwt));
+            authorities.addAll(scopesConverter.convert(jwt));
+            
+            return authorities;
+        });
+
         return jwtConverter;
     }
 
