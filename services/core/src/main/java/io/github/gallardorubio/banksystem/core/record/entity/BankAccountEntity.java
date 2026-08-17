@@ -55,4 +55,8 @@ public class BankAccountEntity implements Serializable {
         
         this.balance = this.balance.subtract(amount);
     }
+
+    public void setClientName(String newName) {
+        this.clientName = newName;
+    }
 }

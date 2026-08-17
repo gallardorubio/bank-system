@@ -3,52 +3,125 @@
 <head>
     <meta charset="UTF-8"/>
     <style>
-        body { font-family: Arial, sans-serif; color: #1e293b; margin: 30px; font-size: 13px; }
-        .header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 24px; }
-        .header h1 { margin: 0; color: #0f172a; font-size: 22px; }
-        .badge { background-color: #e2e8f0; color: #334155; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; padding: 8px; background-color: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
-        .amount { font-size: 18px; font-weight: bold; color: #0f172a; }
-        .section-title { font-size: 14px; font-weight: bold; margin-top: 24px; color: #334155; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; }
-        .footer { margin-top: 50px; font-size: 10px; text-align: center; color: #6c757d; }
+        @page {
+            size: A4;
+            margin: 20mm 15mm 20mm 15mm;
+        }
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            color: #1e293b; 
+            margin: 0; 
+            padding: 0;
+            font-size: 12px; 
+        }
+        .header { 
+            border-bottom: 2px solid #0f172a; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+        }
+        .header h1 { 
+            margin: 0; 
+            color: #0f172a; 
+            font-size: 22px; 
+            font-weight: bold;
+        }
+        .header p {
+            margin: 4px 0 0 0; 
+            color: #64748b;
+            font-size: 12px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+            table-layout: fixed;
+        }
+        th { 
+            text-align: left; 
+            padding: 8px 6px; 
+            background-color: #f8fafc; 
+            color: #64748b; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            border-bottom: 1px solid #e2e8f0; 
+            font-weight: bold;
+            vertical-align: middle;
+        }
+        td { 
+            padding: 8px 6px; 
+            border-bottom: 1px solid #f1f5f9; 
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        .badge { 
+            display: inline-block;
+            background-color: #e2e8f0; 
+            color: #334155; 
+            padding: 3px 8px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            font-size: 10px; 
+            line-height: 12px;
+            text-align: center;
+        }
+        .amount { 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #0f172a; 
+        }
+        .section-title { 
+            font-size: 13px; 
+            font-weight: bold; 
+            margin-top: 22px; 
+            color: #334155; 
+            border-bottom: 1px solid #cbd5e1; 
+            padding-bottom: 4px; 
+        }
+        .footer { 
+            width: 100%;
+            margin-top: 40px; 
+            font-size: 10px; 
+            text-align: center; 
+            color: #64748b; 
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>Informe de operación</h1>
-        <p style="margin: 4px 0 0 0; color: #64748b;">Bank System Core Service</p>
+        <p>Bank System Core Service</p>
     </div>
 
+    <!-- Tabla Principal de la Operación -->
     <table>
         <tr>
-            <th>ID Operación</th>
-            <td th:text="${op.id}">-</td>
-            <th>Tipo</th>
-            <td><span class="badge" th:text="${op.operationType()}">TYPE</span></td>
+            <th style="width: 22%;">ID Operación</th>
+            <td style="width: 38%; font-size: 11px;" th:text="${op.id}">-</td>
+            <th style="width: 18%;">Tipo</th>
+            <td style="width: 22%;"><span class="badge" th:text="${op.operationType()}">TYPE</span></td>
         </tr>
         <tr>
             <th>Cuenta cliente</th>
-            <td th:text="${op.clientBankAccountId}">-</td>
+            <td style="font-size: 11px;" th:text="${op.clientBankAccountId}">-</td>
             <th>Estado</th>
             <td><span class="badge" th:text="${op.status}">STATUS</span></td>
         </tr>
         <tr>
             <th>Fecha creación</th>
-            <td th:text="${op.createdAt}">-</td>
+            <td style="font-size: 11px;" th:text="${op.createdAt}">-</td>
             <th>Cuantía</th>
             <td class="amount" th:text="${#numbers.formatDecimal(op.amount, 1, 'NONE', 2, 'POINT') + ' ' + currency}">-</td>
         </tr>
     </table>
 
+    <!-- Transferencia -->
     <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse)}">
         <div class="section-title">Detalles de la transferencia</div>
         <table>
             <tr>
-                <th>Cuenta destino</th>
-                <td th:text="${op.targetBankAccountId}">-</td>
+                <th style="width: 22%;">Cuenta destino</th>
+                <td style="width: 78%; font-size: 11px;" th:text="${op.targetBankAccountId}">-</td>
             </tr>
             <tr>
                 <th>Concepto</th>
@@ -57,14 +130,15 @@
         </table>
     </div>
 
+    <!-- Préstamo -->
     <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse)}">
         <div class="section-title">Detalles del préstamo</div>
         <table>
             <tr>
-                <th>Plazo</th>
-                <td th:text="${op.termPeriods + ' períodos (' + op.installmentFrequency + ')'}">-</td>
-                <th>Tasa de interés</th>
-                <td th:text="${op.interestRate + '%'}">-</td>
+                <th style="width: 22%;">Plazo</th>
+                <td style="width: 28%;" th:text="${op.termPeriods + ' períodos (' + op.installmentFrequency + ')'}">-</td>
+                <th style="width: 22%;">Tasa de interés</th>
+                <td style="width: 28%;" th:text="${op.interestRate + '%'}">-</td>
             </tr>
             <tr>
                 <th>Cuotas pagadas</th>
@@ -76,34 +150,36 @@
                 <th>Próxima cuota</th>
                 <td th:text="${op.nextInstallmentAmount != null ? #numbers.formatDecimal(op.nextInstallmentAmount, 1, 'NONE', 2, 'POINT') + ' ' + currency : 'N/A'}">-</td>
                 <th>Vencimiento cuota</th>
-                <td th:text="${op.nextInstallmentDate != null ? op.nextInstallmentDate : 'N/A'}">-</td>
+                <td style="font-size: 11px;" th:text="${op.nextInstallmentDate != null ? op.nextInstallmentDate : 'N/A'}">-</td>
             </tr>
         </table>
     </div>
 
+    <!-- Cuota (Installment) -->
     <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.installment.dto.InstallmentResponse)}">
         <div class="section-title">Detalles del pago de cuota</div>
         <table>
             <tr>
-                <th>ID del préstamo asociado</th>
-                <td th:text="${op.loanId}">-</td>
+                <th style="width: 25%;">ID préstamo asociado</th>
+                <td style="width: 75%; font-size: 11px;" th:text="${op.loanId}">-</td>
             </tr>
         </table>
     </div>
 
+    <!-- Historial de cambios -->
     <div class="section-title">Historial de cambios de estado</div>
     <table>
         <thead>
             <tr>
-                <th>Estado</th>
-                <th>Fecha</th>
-                <th>Razón</th>
+                <th style="width: 18%;">Estado</th>
+                <th style="width: 32%;">Fecha</th>
+                <th style="width: 50%;">Razón</th>
             </tr>
         </thead>
         <tbody>
             <tr th:each="phase : ${op.statusHistory}">
                 <td><span class="badge" th:text="${phase.status}">-</span></td>
-                <td th:text="${phase.createdAt}">-</td>
+                <td style="font-size: 11px;" th:text="${phase.createdAt}">-</td>
                 <td th:text="${phase.reason != null ? phase.reason : 'N/A'}">-</td>
             </tr>
         </tbody>

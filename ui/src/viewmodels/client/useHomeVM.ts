@@ -55,6 +55,16 @@ export function useHomeVM() {
     size: 50,
   });
 
+  const formatCreatedAtParam = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    try {
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? undefined : date.toISOString();
+    } catch {
+      return undefined;
+    }
+  };
+
   // Movimientos: Con filtros aplicados
   const {
     data: entriesPage,
@@ -63,7 +73,7 @@ export function useHomeVM() {
   } = useGetEntries({
     concept: appliedFilters.concept || undefined,
     target_client_name: appliedFilters.target_client_name || undefined,
-    created_at: appliedFilters.created_at || undefined,
+    created_at: formatCreatedAtParam(appliedFilters.created_at),
     amount: appliedFilters.amount ? Number(appliedFilters.amount) : undefined,
     size: 50,
   });

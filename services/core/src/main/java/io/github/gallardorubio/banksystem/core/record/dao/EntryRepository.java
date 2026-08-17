@@ -19,7 +19,7 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
         LEFT JOIN core.account b_debit ON e.debit_bank_account_id = b_debit.account_id
         LEFT JOIN core.account b_credit ON e.credit_bank_account_id = b_credit.account_id
         WHERE (e.debit_bank_account_id = :bankAccountId OR e.credit_bank_account_id = :bankAccountId)
-          AND (:amount IS NULL OR e.amount = :amount)
+          AND (CAST(:amount AS numeric) IS NULL OR ROUND(e.amount, 2) = CAST(:amount AS numeric))
           AND (CAST(:createdAt AS timestamp) IS NULL OR e.created_at >= CAST(:createdAt AS timestamp))
           AND (CAST(:concept AS text) IS NULL OR (t.id IS NOT NULL AND LOWER(t.concept) LIKE LOWER(CONCAT('%', CAST(:concept AS text), '%'))))
           AND (:targetBankAccountId IS NULL OR (t.id IS NOT NULL AND (
@@ -38,7 +38,7 @@ public interface EntryRepository extends JpaRepository<EntryEntity, UUID> {
         LEFT JOIN core.account b_debit ON e.debit_bank_account_id = b_debit.account_id
         LEFT JOIN core.account b_credit ON e.credit_bank_account_id = b_credit.account_id
         WHERE (e.debit_bank_account_id = :bankAccountId OR e.credit_bank_account_id = :bankAccountId)
-          AND (:amount IS NULL OR e.amount = :amount)
+          AND (CAST(:amount AS numeric) IS NULL OR ROUND(e.amount, 2) = CAST(:amount AS numeric))
           AND (CAST(:createdAt AS timestamp) IS NULL OR e.created_at >= CAST(:createdAt AS timestamp))
           AND (CAST(:concept AS text) IS NULL OR (t.id IS NOT NULL AND LOWER(t.concept) LIKE LOWER(CONCAT('%', CAST(:concept AS text), '%'))))
           AND (:targetBankAccountId IS NULL OR (t.id IS NOT NULL AND (

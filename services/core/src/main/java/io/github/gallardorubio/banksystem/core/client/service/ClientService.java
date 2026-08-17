@@ -217,6 +217,10 @@ public class ClientService {
 
         clientEntity.updateClientPersonalData(clientPersonalUpdateRequest);
 
+        if (clientPersonalUpdateRequest.name() != null && !clientPersonalUpdateRequest.name().isBlank()) {
+            bankAccountService.updateClientName(clientId, clientPersonalUpdateRequest.name());
+        }
+
         boolean mfaActive = isMfaEnabled(clientEntity.getEmail());
         
         return new ClientResponse(clientEntity, mfaActive);

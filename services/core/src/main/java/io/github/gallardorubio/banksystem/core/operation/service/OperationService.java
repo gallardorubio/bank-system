@@ -24,7 +24,6 @@ import io.github.gallardorubio.banksystem.core.installment.dto.InstallmentRespon
 import io.github.gallardorubio.banksystem.core.loan.dao.LoanRepository;
 import io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse;
 import io.github.gallardorubio.banksystem.core.operation.dao.OperationRepository;
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationEntryResponse;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.record.dao.BankAccountRepository;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
@@ -96,7 +95,7 @@ public class OperationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OperationEntryResponse> getAllOperationsFiltered(
+    public Page<OperationResponse> getAllOperationsFiltered(
         UUID clientId,
         String concept,
         String targetClientName,
@@ -105,18 +104,8 @@ public class OperationService {
         BigDecimal amount,
         Pageable pageable
     ) {
-        return operationRepository.findFilteredOperations(
-            clientId, concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
-        ).map(p -> new OperationEntryResponse(
-            p.getId(),
-            p.getOperationId(),
-            p.getOperationType(),
-            p.getStatus(),
-            p.getDescription(),
-            p.getAmount(),
-            p.getOperationDirection(),
-            p.getCreatedAt()
-        ));
+        return operationRepository.findOperationIdsFiltered(clientId, concept, createdAt, amount, pageable)
+        .map(id -> getOperation(id, clientId));
     }
 
     @Transactional(readOnly = true)

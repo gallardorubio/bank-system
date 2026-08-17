@@ -19,6 +19,8 @@ public interface LoanRepository extends JpaRepository<LoanEntity, UUID> {
 
     List<LoanEntity> findAllByClientId(UUID clientId);
 
+    List<LoanEntity> findAllByClientIdOrderByCreatedAtDesc(UUID clientId);
+
     Optional<LoanEntity> findByIdAndClientId(UUID loanId, UUID clientId);
 
     List<LoanEntity> findAllByStatus(OperationStatus operationStatus);

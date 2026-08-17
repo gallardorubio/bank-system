@@ -4,6 +4,7 @@ import io.github.gallardorubio.banksystem.core.installment.dao.InstallmentReposi
 import io.github.gallardorubio.banksystem.core.installment.entity.InstallmentEntity;
 import io.github.gallardorubio.banksystem.core.loan.dao.LoanRepository;
 import io.github.gallardorubio.banksystem.core.loan.entity.LoanEntity;
+import io.github.gallardorubio.banksystem.core.operation.dto.OperationRequestOrigin;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
 import io.github.gallardorubio.banksystem.core.record.service.EntryService;
 import lombok.RequiredArgsConstructor;
@@ -38,15 +39,25 @@ public class InstallmentService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processInstallment(LoanEntity loanEntity) {
+        OperationRequestOrigin origin = new OperationRequestOrigin(
+            "127.0.0.1",
+            "CoreBatch",
+            "ES",
+            "local"
+        );
+
         InstallmentEntity installmentEntity = InstallmentEntity.builder()
             .loanId(loanEntity.getId())
             .clientId(loanEntity.getClientId())
             .clientBankAccountId(loanEntity.getClientBankAccountId())
             .amount(loanEntity.getNextInstallmentAmount())
+            .origin(origin)
             .build();
 
         installmentEntity.pending("Pago de cuota pendiente de aprobación automática");
         installmentEntity.approve("Pago de cuota aprobado automáticamente");
+
+        installmentEntity = installmentRepository.saveAndFlush(installmentEntity);
         
         try {
             recordService.processEntry(

@@ -40,7 +40,7 @@ public class LoanService {
 
     @Transactional(readOnly = true)
     public List<LoanResponse> getAllLoans(UUID clientId) {
-        return loanRepository.findAllByClientId(clientId).stream()
+        return loanRepository.findAllByClientIdOrderByCreatedAtDesc(clientId).stream()
             .map(loan -> new LoanResponse(loan))
             .toList();
     }

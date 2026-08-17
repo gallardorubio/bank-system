@@ -11,7 +11,9 @@ import io.github.gallardorubio.banksystem.core.record.dto.BankAccountAnalyticsRe
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountEntryResponse;
 import io.github.gallardorubio.banksystem.core.record.dto.BankAccountResponse;
 import io.github.gallardorubio.banksystem.core.record.entity.BankAccountEntity;
+import io.github.gallardorubio.banksystem.core.record.entity.EntryEntity;
 import io.github.gallardorubio.banksystem.core.transfer.dao.TransferRepository;
+import io.github.gallardorubio.banksystem.core.transfer.entity.TransferEntity;
 import lombok.RequiredArgsConstructor;
 import org.openpdf.pdf.ITextRenderer;
 import org.springframework.data.domain.Page;
@@ -63,6 +65,31 @@ public class BankAccountService {
         return null;
     }
 
+    private String buildEntryDescription(EntryEntity entry, UUID clientBankAccountId, OperationEntity op) {
+        if (op == null) {
+            return "Movimiento en cuenta";
+        }
+        if (op instanceof TransferEntity transfer) {
+            boolean isCredit = entry.getCreditBankAccountId().equals(clientBankAccountId);
+            String conceptText = (transfer.getConcept() != null && !transfer.getConcept().isBlank())
+                    ? transfer.getConcept()
+                    : "Transferencia";
+
+            if (isCredit) {
+                String senderName = bankAccountRepository.findById(entry.getDebitBankAccountId())
+                        .map(BankAccountEntity::getClientName)
+                        .orElse("Tercero");
+                return "De " + senderName + " - " + conceptText;
+            } else {
+                String receiverName = bankAccountRepository.findById(entry.getCreditBankAccountId())
+                        .map(BankAccountEntity::getClientName)
+                        .orElse("Tercero");
+                return "A " + receiverName + " - " + conceptText;
+            }
+        }
+        return op.buildDescription();
+    }
+
     @Transactional(readOnly = true)
     public Page<BankAccountEntryResponse> getAllBankAccountEntriesFiltered(
         UUID clientId,
@@ -81,7 +108,8 @@ public class BankAccountService {
             bankAccountId, concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
         ).map(entry -> {
             OperationEntity operationEntity = getOperationEntity(entry.getOperationId());
-            return new BankAccountEntryResponse(entry, bankAccountId, operationEntity);
+            String description = buildEntryDescription(entry, bankAccountId, operationEntity);
+            return new BankAccountEntryResponse(entry, bankAccountId, operationEntity, description);
         });
     }
 
@@ -94,7 +122,8 @@ public class BankAccountService {
             .stream()
             .map(entry -> {
                 OperationEntity op = getOperationEntity(entry.getOperationId());
-                return new BankAccountEntryResponse(entry, bankAccountId, op);
+                String description = buildEntryDescription(entry, bankAccountId, op);
+                return new BankAccountEntryResponse(entry, bankAccountId, op, description);
             })
             .toList();
 
@@ -176,7 +205,8 @@ public class BankAccountService {
             .stream()
             .map(entry -> {
                 OperationEntity operationEntity = getOperationEntity(entry.getOperationId());
-                return new BankAccountEntryResponse(entry, bankAccountId, operationEntity);
+                String description = buildEntryDescription(entry, bankAccountId, operationEntity);
+                return new BankAccountEntryResponse(entry, bankAccountId, operationEntity, description);
             })
             .toList();
     }
@@ -188,4 +218,11 @@ public class BankAccountService {
             .orElseThrow(() -> new IllegalArgumentException("Bank account not found: " + bankAccountId));
     }
 
+    @Transactional
+    public void updateClientName(UUID clientId, String newName) {
+        bankAccountRepository.findByClientId(clientId).ifPresent(account -> {
+            account.setClientName(newName);
+            bankAccountRepository.save(account);
+        });
+    }
 }

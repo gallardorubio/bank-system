@@ -3,7 +3,6 @@ package io.github.gallardorubio.banksystem.core.operation.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.github.gallardorubio.banksystem.core.operation.dto.OperationEntryResponse;
 import io.github.gallardorubio.banksystem.core.operation.dto.OperationResponse;
 import io.github.gallardorubio.banksystem.core.operation.service.OperationService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -63,7 +62,7 @@ public class OperationController {
 
     @PageableAsQueryParam
     @GetMapping("/me")
-    public ResponseEntity<Page<OperationEntryResponse>> getMyOperations(
+    public ResponseEntity<Page<OperationResponse>> getMyOperations(
         @AuthenticationPrincipal Jwt jwt,
         @RequestParam(required = false) String concept,
         @RequestParam(value = "target_client_name", required = false) String targetClientName,
@@ -72,7 +71,7 @@ public class OperationController {
         @RequestParam(required = false) BigDecimal amount,
         @Parameter(hidden = true) @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<OperationEntryResponse> operations = operationService.getAllOperationsFiltered(
+        Page<OperationResponse> operations = operationService.getAllOperationsFiltered(
             UUID.fromString(jwt.getSubject()), concept, targetClientName, createdAt, targetBankAccountId, amount, pageable
         );
 
@@ -86,6 +85,6 @@ public class OperationController {
         List<OperationResponse> operations = operationService.getAllClientOperations(clientId);
 
         return ResponseEntity.ok(operations);
-    }    
+    }
 
 }
