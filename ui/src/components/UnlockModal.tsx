@@ -69,7 +69,7 @@ export function UnlockModal({ isOpen, onUnlocked }: UnlockModalProps) {
       <div className="relative flex items-center justify-center w-full pt-2">
         <div className="flex items-center gap-3">
           <span className="text-sm font-bold text-[#0A2540] uppercase tracking-widest">
-            Verificación de Seguridad
+            Verificación de seguridad
           </span>
         </div>
       </div>
@@ -143,7 +143,7 @@ export function UnlockModal({ isOpen, onUnlocked }: UnlockModalProps) {
             disabled={unlockMutation.isPending || isLoadingQuestions}
             className="w-full py-4 text-base font-bold shadow-sm cursor-pointer"
           >
-            {unlockMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Desbloquear Cuenta'}
+            {unlockMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Desbloquear cuenta'}
           </Button>
         )}
       </div>

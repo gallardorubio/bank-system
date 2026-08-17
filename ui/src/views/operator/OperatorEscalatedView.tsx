@@ -215,11 +215,9 @@ export function OperatorEscalatedView() {
                       <div className="pl-8 flex flex-col gap-8">
                         {vm.selectedOperation.statusHistory.map((phase: any, index: number, arr: any[]) => (
                           <div key={index} className="relative flex flex-col gap-1.5">
-                            {/* Línea conectora, se oculta en el último elemento para que no sobresalga */}
                             {index !== arr.length - 1 && (
                               <div className="absolute -left-[26px] top-3 bottom-[-40px] w-1 bg-[#E2E8F0] z-0" />
                             )}
-                            {/* Punto */}
                             <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md z-10" />
                             
                             <div className="flex items-center justify-between">

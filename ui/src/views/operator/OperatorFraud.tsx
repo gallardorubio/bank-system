@@ -88,7 +88,6 @@ export function OperatorFraud() {
           </table>
         </div>
 
-        {/* PAGINACIÓN */}
         {vm.pageMetadata && (vm.pageMetadata.totalPages ?? 0) > 1 && (
           <div className="flex items-center justify-between p-4 border-t border-[#E2E8F0] bg-[#F0F4F9]">
             <span className="text-xs font-bold text-[#627D98]">
@@ -114,7 +113,6 @@ export function OperatorFraud() {
         )}
       </Card>
 
-      {/* MODAL DE DETALLES DE FRAUDE */}
       {vm.isDetailsModalOpen && vm.selectedRecord && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150 overflow-y-auto">
           <div className="relative flex items-center justify-center w-full pt-2">

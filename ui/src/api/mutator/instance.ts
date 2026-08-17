@@ -1,4 +1,3 @@
-// src/api/mutator/instance.ts
 import Axios, { type AxiosRequestConfig } from 'axios';
 
 export const AXIOS_INSTANCE = Axios.create({

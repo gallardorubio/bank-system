@@ -46,7 +46,6 @@ export function useHomeVM() {
     amount: '',
   });
 
-  // Operaciones: Sin filtros
   const {
     data: operationsPage,
     isLoading: isLoadingOperations,
@@ -65,7 +64,6 @@ export function useHomeVM() {
     }
   };
 
-  // Movimientos: Con filtros aplicados
   const {
     data: entriesPage,
     isLoading: isLoadingEntries,

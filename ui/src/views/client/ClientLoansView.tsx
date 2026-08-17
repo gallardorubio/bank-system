@@ -55,7 +55,6 @@ export function ClientLoansView() {
         <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">Préstamos</h1>
       </div>
 
-      {/* SIMULADOR FINTECH GAMIFICADO */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
         <Card className="lg:col-span-7 p-10 flex flex-col justify-between shadow-sm border border-[#E2E8F0] rounded-[36px]">
           <div>
@@ -222,7 +221,6 @@ export function ClientLoansView() {
         </div>
       </div>
 
-      {/* HISTORIAL DE PRÉSTAMOS CON ESPACIO INFERIOR ADECUADO (pb-16 / mb-24) */}
       <Card className="p-8 w-full shadow-sm mb-24">
         <h3 className="text-xl font-black text-[#0A2540] mb-6">Préstamos</h3>
         {vm.loans.length > 0 ? (
@@ -267,7 +265,6 @@ export function ClientLoansView() {
         )}
       </Card>
 
-      {/* MODAL COMPLETO DE DETALLES DEL PRÉSTAMO */}
       {selectedLoan && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150 overflow-y-auto">
           <div className="relative flex items-center justify-center w-full pt-2">
@@ -334,7 +331,6 @@ export function ClientLoansView() {
                 </div>
               </div>
 
-              {/* HISTORIAL DE ESTADOS */}
               {selectedLoan.statusHistory && selectedLoan.statusHistory.length > 0 && (
                 <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6 text-left">
                   <span className="text-base font-bold text-[#627D98] uppercase tracking-wider block mb-4">Historial de Estados</span>
@@ -358,11 +354,10 @@ export function ClientLoansView() {
                       <div className="pl-8 flex flex-col gap-8">
                         {selectedLoan.statusHistory.map((phase: any, index: number, arr: any[]) => (
                           <div key={index} className="relative flex flex-col gap-1.5">
-                            {/* Línea conectora, se oculta en el último elemento para que no sobresalga */}
+
                             {index !== arr.length - 1 && (
                               <div className="absolute -left-[26px] top-3 bottom-[-40px] w-1 bg-[#E2E8F0] z-0" />
                             )}
-                            {/* Punto */}
                             <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md z-10" />
                             
                             <div className="flex items-center justify-between">

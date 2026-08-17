@@ -28,7 +28,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
         <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">{client?.name || 'Cliente'}</h1>
       </div>
 
-      {/* SECCIÓN SUPERIOR */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
         <div className="lg:col-span-7 bg-[#0A2540] text-white rounded-[32px] p-12 flex flex-col justify-between min-h-[320px] shadow-lg">
           <div>
@@ -96,10 +95,8 @@ export function ClientHomeView({ client, setActiveTab }: any) {
         </div>
       </div>
 
-      {/* TABLAS DE MOVIMIENTOS Y OPERACIONES (7:5) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full mt-2">
         
-        {/* MOVIMIENTOS (7/12) */}
         <Card className="px-8 pt-8 pb-8 flex flex-col w-full shadow-sm lg:col-span-7">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -175,7 +172,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
           )}
         </Card>
 
-        {/* OPERACIONES (5/12) */}
         <Card className="px-8 pt-8 pb-8 flex flex-col w-full shadow-sm lg:col-span-5">
           <div className="flex items-center justify-between mb-6">
             <p className="text-2xl font-black text-[#0A2540]">Operaciones</p>
@@ -220,7 +216,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
         </Card>
       </div>
 
-      {/* MODAL DE DETALLES DE OPERACIÓN / MOVIMIENTO */}
       {vm.isDetailsModalOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150 overflow-y-auto">
           <div className="relative flex items-center justify-center w-full pt-2">
@@ -242,9 +237,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
             ) : vm.selectedOperation ? (
               <div className="w-full space-y-8">
                 {vm.selectedOperation.operationDirection ? (
-                  // ===================
-                  // VISTA DE MOVIMIENTO
-                  // ===================
                   <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
                     <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
                       <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tipo de Operación</span>
@@ -273,9 +265,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
                     </div>
                   </div>
                 ) : (
-                  // ===================
-                  // VISTA DE OPERACIÓN 
-                  // ===================
                   <>
                     <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
                       <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
@@ -331,7 +320,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
                       </div>
                     </div>
 
-                    {/* HISTORIAL DE ESTADOS (Solo Operaciones) */}
                     {vm.selectedOperation.statusHistory && vm.selectedOperation.statusHistory.length > 0 && (
                       <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6 text-left">
                         <span className="text-base font-bold text-[#627D98] uppercase tracking-wider block mb-4">Historial de Estados</span>
@@ -355,11 +343,9 @@ export function ClientHomeView({ client, setActiveTab }: any) {
                           <div className="pl-8 flex flex-col gap-8">
                             {vm.selectedOperation.statusHistory.map((phase: any, index: number, arr: any[]) => (
                               <div key={index} className="relative flex flex-col gap-1.5">
-                                {/* Línea conectora */}
                                 {index !== arr.length - 1 && (
                                   <div className="absolute -left-[26px] top-3 bottom-[-40px] w-1 bg-[#E2E8F0] z-0" />
                                 )}
-                                {/* Punto azul original */}
                                 <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md z-10" />
                                 
                                 <div className="flex items-center justify-between">
@@ -378,7 +364,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
                       </div>
                     )}
 
-                    {/* BOTÓN DE DESCARGA DE INFORME (Solo Operaciones) */}
                     {activeOpId && (
                       <div className="w-full pt-2">
                         <Button
@@ -405,7 +390,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
         </div>
       )}
 
-      {/* MODAL DE DEPÓSITO */}
       {vm.isDepositModalOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150">
           <div className="relative flex items-center justify-center w-full pt-2">
@@ -457,7 +441,6 @@ export function ClientHomeView({ client, setActiveTab }: any) {
         </div>
       )}
 
-      {/* MODAL DE TRANSFERENCIA */}
       {vm.isTransferModalOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150">
           <div className="relative flex items-center justify-center w-full pt-2">

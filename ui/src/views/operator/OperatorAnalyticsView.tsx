@@ -18,7 +18,6 @@ export function OperatorAnalyticsView() {
   const totalLiquidity = vault + clientBalance;
   const clientRatio = totalLiquidity > 0 ? (clientBalance / totalLiquidity) * 100 : 0;
 
-  // Métricas financieras reales
   const cashRatio = clientBalance > 0 ? (vault / clientBalance) * 100 : 0;
   const liquidityGap = vault - clientBalance;
 
@@ -39,7 +38,6 @@ export function OperatorAnalyticsView() {
         </div>
       )}
 
-      {/* KPI GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-5 flex flex-col justify-between border border-[#E2E8F0]">
           <div className="flex items-center justify-between">
@@ -106,9 +104,7 @@ export function OperatorAnalyticsView() {
         </Card>
       </div>
 
-      {/* CORE FINANCIAL OVERVIEW & COEFICIENTE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Panel Principal: Solvencia */}
         <div className="lg:col-span-7 bg-[#0A2540] text-white rounded-[36px] p-9 flex flex-col justify-between shadow-lg relative overflow-hidden">
           <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-[#0066FF]/25 rounded-full blur-3xl pointer-events-none" />
 
@@ -162,7 +158,6 @@ export function OperatorAnalyticsView() {
           </div>
         </div>
 
-        {/* Card Lateral: Coeficiente de Caja y Cobertura de Pasivos */}
         <Card className="lg:col-span-5 p-8 flex flex-col justify-between border border-[#E2E8F0] rounded-[36px] bg-white">
           <div>
             <div className="flex items-center justify-between mb-6">
