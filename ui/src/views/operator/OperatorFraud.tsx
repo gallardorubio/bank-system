@@ -1,13 +1,13 @@
 import { useFraudVM } from '../../viewmodels/operator/useFraudVM';
 import { Card } from '../../components/Card';
 import { LoadingScreen } from '../../components/LoadingScreen';
-import { ShieldAlert, ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react';
 
 export function OperatorFraud() {
   const vm = useFraudVM();
 
   if (vm.isLoading) {
-    return <LoadingScreen label="Cargando auditoría de fraude" />;
+    return <LoadingScreen label="Cargando" />;
   }
 
   return (
@@ -42,7 +42,7 @@ export function OperatorFraud() {
               {vm.records.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-12 text-center text-sm font-bold text-[#627D98]">
-                    No se registran incidentes ni alertas de fraude
+                    No se registraron alertas de fraude.
                   </td>
                 </tr>
               ) : (
@@ -54,7 +54,6 @@ export function OperatorFraud() {
                   >
                     <td className="py-4 px-6 font-mono text-xs font-bold text-[#0066FF]">
                       <div className="flex items-center gap-2">
-                        <ShieldAlert className="w-4 h-4 text-[#e11d48] shrink-0" />
                         <span>{item.id}</span>
                       </div>
                     </td>

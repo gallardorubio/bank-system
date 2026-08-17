@@ -7,7 +7,7 @@ export function OperatorAnalyticsView() {
   const { analytics, isLoading, error, formatAmount, reserveCoverageRatio } = useOperatorAnalyticsVM();
 
   if (isLoading) {
-    return <LoadingScreen label="Cargando estadísticas" />;
+    return <LoadingScreen label="Cargando" />;
   }
 
   const vault = analytics?.vaultBalance ?? 0;

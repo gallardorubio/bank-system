@@ -149,7 +149,7 @@ export function ClientLoansView() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-[#627D98] uppercase tracking-wider">Tasa Interés (% TIN)</label>
+                  <label className="text-xs font-bold text-[#627D98] uppercase tracking-wider">Tipo de interés (%)</label>
                   <input 
                     type="text"
                     inputMode="decimal"
@@ -170,7 +170,7 @@ export function ClientLoansView() {
               disabled={vm.isSubmitting || principal <= 0} 
               className="w-full py-4 text-base font-bold shadow-lg cursor-pointer gap-2 rounded-2xl"
             >
-              {vm.isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Solicitar Préstamo <ArrowRight className="w-5 h-5" /></>}
+              {vm.isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Solicitar préstamo <ArrowRight className="w-5 h-5" /></>}
             </Button>
           </div>
         </Card>

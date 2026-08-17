@@ -9,7 +9,7 @@ export function ClientHomeView({ client, setActiveTab }: any) {
   const { balanceValue, currency, activeOpId } = vm;
 
   if (vm.isLoading && !vm.bankAccount) {
-    return <LoadingScreen label="Cargando panel..." />;
+    return <LoadingScreen label="Cargando" />;
   }
 
   const getStatusBadge = (status?: string) => {
@@ -123,7 +123,7 @@ export function ClientHomeView({ client, setActiveTab }: any) {
                   <span className="text-xs font-bold text-slate-400 mr-2 whitespace-nowrap">Desde:</span>
                   <input type="date" name="created_at" value={vm.filters.created_at} onChange={vm.handleFilterChange} className="bg-transparent w-full text-xs font-semibold text-[#0A2540] outline-none" />
                 </div>
-                <input type="number" step="0.01" name="amount" placeholder="Cuantía (€)" value={vm.filters.amount} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
+                <input type="number" step="0.01" name="amount" placeholder="Cuantía..." value={vm.filters.amount} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
               </div>
               <div className="flex justify-end gap-2 mt-1">
                 <Button type="button" variant="primary" onClick={vm.applyFilters} className="h-10 px-4 text-xs font-bold gap-1 cursor-pointer">
@@ -238,7 +238,7 @@ export function ClientHomeView({ client, setActiveTab }: any) {
 
           <div className="flex flex-col items-center justify-center max-w-3xl mx-auto w-full my-auto gap-8 pt-16 pb-12">
             {vm.isLoadingDetails ? (
-              <LoadingScreen label="Cargando detalles..." />
+              <LoadingScreen label="Cargando" />
             ) : vm.selectedOperation ? (
               <div className="w-full space-y-8">
                 {vm.selectedOperation.operationDirection ? (
