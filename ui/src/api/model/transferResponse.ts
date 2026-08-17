@@ -7,6 +7,7 @@
  */
 import type { OperationResponse } from './operationResponse';
 import type { OperationStatusPhase } from './operationStatusPhase';
+import type { TransferResponseOperationType } from './transferResponseOperationType';
 import type { TransferResponseStatus } from './transferResponseStatus';
 
 export type TransferResponse = OperationResponse & {
@@ -18,4 +19,5 @@ export type TransferResponse = OperationResponse & {
   createdAt?: string;
   targetBankAccountId?: string;
   concept?: string;
+  operationType?: TransferResponseOperationType;
 };

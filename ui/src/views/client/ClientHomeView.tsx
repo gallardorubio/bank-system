@@ -1,83 +1,25 @@
-import type { ClientResponse } from '../../api/model';
-import { Button } from '../../components/Button';
-import { Card } from '../../components/Card';
-import { LoadingScreen } from '../../components/LoadingScreen';
 import { useHomeVM } from '../../viewmodels/client/useHomeVM';
-import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  Landmark, 
-  Search, 
-  RotateCcw, 
-  SlidersHorizontal, 
-  X, 
-  Loader2,
-  Receipt,
-  ChevronRight,
-  ChevronLeft,
-  Download
-} from 'lucide-react';
-import { useState } from 'react';
+import { Card } from '../../components/Card';
+import { Button } from '../../components/Button';
+import { LoadingScreen } from '../../components/LoadingScreen';
+import { ArrowUpRight, ArrowDownLeft, Landmark, SlidersHorizontal, Search, RotateCcw, X, Loader2, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 
-interface ClientHomeViewProps {
-  client?: ClientResponse;
-  setActiveTab?: (tab: 'home' | 'loans' | 'profile') => void;
-}
-
-export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
+export function ClientHomeView({ client, setActiveTab }: any) {
   const vm = useHomeVM();
-  const [showFilters, setShowFilters] = useState(false);
+  const { balanceValue, currency, activeOpId } = vm;
 
-  if (vm.isLoading) {
-    return <LoadingScreen label="Cargando" />;
+  if (vm.isLoading && !vm.bankAccount) {
+    return <LoadingScreen label="Cargando panel..." />;
   }
 
-  const currency = vm.bankAccount?.currency || 'EUR';
-  const balanceValue = typeof vm.bankAccount?.balance === 'number' 
-    ? vm.bankAccount.balance.toFixed(2) 
-    : '0.00';
-
-  const handleAmountInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      vm.setDepositAmount(value);
-    }
-  };
-
-  const handleTransferAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      vm.setTransferAmount(value);
-    }
-  };
-
-  const getOperationIcon = (type?: string, direction?: string) => {
-    switch (type) {
-      case 'DEPOSIT':
-        return <ArrowDownLeft className="w-5 h-5 text-slate-500" />;
-      case 'TRANSFER':
-        return direction === 'CREDIT' 
-          ? <ArrowDownLeft className="w-5 h-5 text-slate-500" />
-          : <ArrowUpRight className="w-5 h-5 text-slate-500" />;
-      case 'LOAN':
-        return <Landmark className="w-5 h-5 text-slate-500" />;
-      case 'INSTALLMENT':
-        return <Receipt className="w-5 h-5 text-slate-500" />;
-      default:
-        return <ArrowUpRight className="w-5 h-5 text-slate-400" />;
-    }
-  };
-
   const getStatusBadge = (status?: string) => {
-    return <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 font-bold text-xs">{status}</span>;
+    if (!status) return <span className="text-[#627D98]">-</span>;
+    return (
+      <span className="px-3 py-1 rounded-md text-xs font-bold bg-[#F0F4F9] text-[#627D98] border border-[#E2E8F0]">
+        {status}
+      </span>
+    );
   };
-
-  const isUuidValid = (uuid: string) => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid.trim());
-  };
-
-  const activeOpId = vm.selectedOperationId || vm.selectedOperation?.id;
 
   return (
     <div className="flex flex-col gap-10 w-full pb-8 relative">
@@ -137,7 +79,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
               Solicita préstamos fácilmente.
             </h2>
             <p className="text-sm text-white/80 mt-2">
-              Tipos competitivos desde el 4.5% TIN sin papeleos.
+              Tipos competitivos sin papeleos.
             </p>
           </div>
 
@@ -154,107 +96,136 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
         </div>
       </div>
 
-      {/* MOVIMIENTOS RECIENTES */}
-      <Card className="px-8 pt-8 pb-8 flex flex-col w-full shadow-sm mb-4">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-2xl font-black text-[#0A2540]">Operaciones</p>
-          </div>
-          <Button 
-            variant="secondary" 
-            onClick={() => setShowFilters(!showFilters)} 
-            className="gap-2 px-4 py-2 text-sm font-bold cursor-pointer"
-          >
-            <SlidersHorizontal className="w-4 h-4" /> {showFilters ? 'Ocultar filtros' : 'Filtrar'}
-          </Button>
-        </div>
-
-        {showFilters && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 p-4 rounded-2xl bg-[#F0F4F9] border border-[#E2E8F0]">
-            <input type="text" name="concept" placeholder="Concepto..." value={vm.filters.concept} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
-            <input type="text" name="target_client_name" placeholder="Destinatario..." value={vm.filters.target_client_name} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
-            <input type="date" name="created_at" value={vm.filters.created_at} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
-            <input type="number" step="0.01" name="amount" placeholder="Cuantía (€)" value={vm.filters.amount} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
-            <div className="flex gap-2">
-              <Button type="button" variant="primary" onClick={vm.applyFilters} className="flex-1 h-10 px-3 text-xs font-bold gap-1 cursor-pointer">
-                <Search className="w-3.5 h-3.5" /> Aplicar
-              </Button>
-              <Button type="button" variant="ghost" onClick={vm.clearFilters} className="h-10 px-3 text-xs font-bold cursor-pointer">
-                <RotateCcw className="w-3.5 h-3.5 text-[#627D98]" />
-              </Button>
+      {/* TABLAS DE MOVIMIENTOS Y OPERACIONES (7:5) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full mt-2">
+        
+        {/* MOVIMIENTOS (7/12) */}
+        <Card className="px-8 pt-8 pb-8 flex flex-col w-full shadow-sm lg:col-span-7">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <p className="text-2xl font-black text-[#0A2540]">Movimientos</p>
             </div>
+            <Button 
+              variant="secondary" 
+              onClick={() => vm.setShowFilters(!vm.showFilters)} 
+              className="gap-2 px-4 py-2 text-sm font-bold cursor-pointer"
+            >
+              <SlidersHorizontal className="w-4 h-4" /> {vm.showFilters ? 'Ocultar filtros' : 'Filtrar'}
+            </Button>
           </div>
-        )}
 
-        <div className="overflow-x-auto pr-2 pb-0">
-          {vm.entries.length > 0 ? (
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="border-b border-[#E2E8F0] text-[#627D98] text-sm uppercase tracking-wider bg-white">
-                  <th className="py-4 px-6 font-bold w-1/6">Tipo</th>
-                  <th className="py-4 px-6 font-bold w-2/6">Descripción</th>
-                  <th className="py-4 px-6 font-bold w-1/6">Fecha</th>
-                  <th className="py-4 px-6 font-bold w-1/6">Estado</th>
-                  <th className="py-4 px-6 font-bold text-right w-1/6">Cuantía</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F1F5F9] text-base font-semibold text-[#0A2540]">
-                {vm.entries.map((entry: any) => {
-                  const status = entry.status || entry.operationStatus;
-                  const isCompleted = status === 'COMPLETED';
-                  const isRejected = status === 'REJECTED' || status === 'DENIED';
-
-                  return (
-                    <tr 
-                      key={entry.id} 
-                      onClick={() => vm.handleRowClick(entry)}
-                      className="hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
-                    >
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-[#F0F4F9] flex items-center justify-center shrink-0 group-hover:bg-[#E8F0FE] transition-colors">
-                            {getOperationIcon(entry.operationType, entry.operationDirection)}
-                          </div>
-                          <span className="font-semibold text-slate-600 text-base">
-                            {entry.operationType}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 max-w-sm truncate text-base text-slate-500 font-normal">{entry.description || 'Sin concepto'}</td>
-                      <td className="py-4 px-6 text-[#627D98] text-base whitespace-nowrap">
-                        {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : '-'}
-                      </td>
-                      <td className="py-4 px-6">
-                        {getStatusBadge(status)}
-                      </td>
-                      <td className={`py-4 px-6 text-right font-black text-lg whitespace-nowrap ${
-                        isCompleted 
-                          ? 'text-[#0A2540]' 
-                          : isRejected 
-                            ? 'line-through text-slate-400' 
-                            : 'opacity-40 text-[#0A2540]'
-                      }`}>
-                        {entry.operationDirection === 'CREDIT' ? '+' : '-'}{entry.amount?.toFixed(2)} {currency}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-12 text-[#627D98] text-base font-semibold">
-              No se registraron movimientos.
+          {vm.showFilters && (
+            <div className="flex flex-col gap-3 mb-6 p-4 rounded-2xl bg-[#F0F4F9] border border-[#E2E8F0]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" name="concept" placeholder="Concepto..." value={vm.filters.concept} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
+                <input type="text" name="target_client_name" placeholder="Nombre cliente destino..." value={vm.filters.target_client_name} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
+                <div className="flex items-center bg-white rounded-xl border border-[#E2E8F0] px-3 h-10 overflow-hidden">
+                  <span className="text-xs font-bold text-slate-400 mr-2 whitespace-nowrap">Desde:</span>
+                  <input type="date" name="created_at" value={vm.filters.created_at} onChange={vm.handleFilterChange} className="bg-transparent w-full text-xs font-semibold text-[#0A2540] outline-none" />
+                </div>
+                <input type="number" step="0.01" name="amount" placeholder="Cuantía (€)" value={vm.filters.amount} onChange={vm.handleFilterChange} className="h-10 px-3 rounded-xl border border-[#E2E8F0] bg-white text-xs font-semibold text-[#0A2540] outline-none" />
+              </div>
+              <div className="flex justify-end gap-2 mt-1">
+                <Button type="button" variant="primary" onClick={vm.applyFilters} className="h-10 px-4 text-xs font-bold gap-1 cursor-pointer">
+                  <Search className="w-3.5 h-3.5" /> Aplicar
+                </Button>
+                <Button type="button" variant="ghost" onClick={vm.clearFilters} className="h-10 px-3 text-xs font-bold cursor-pointer bg-white border border-[#E2E8F0]">
+                  <RotateCcw className="w-3.5 h-3.5 text-[#627D98]" />
+                </Button>
+              </div>
             </div>
           )}
-        </div>
-      </Card>
 
-      {/* MODAL DE DETALLES DE OPERACIÓN */}
+          {vm.entries.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[#E2E8F0] text-[#627D98] text-xs uppercase tracking-wider">
+                    <th className="py-4 px-4 font-bold w-[120px] whitespace-nowrap">Fecha</th>
+                    <th className="py-4 px-4 font-bold">Descripción</th>
+                    <th className="py-4 px-4 font-bold text-right w-[140px] whitespace-nowrap">Cuantía</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#F1F5F9] text-base font-semibold text-[#627D98]">
+                  {vm.entries.map((entry: any) => (
+                    <tr
+                      key={entry.id}
+                      className="hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
+                      onClick={() => vm.handleRowClick(entry)}
+                    >
+                      <td className="py-4 px-4 text-sm font-medium text-[#627D98]">
+                        {entry.createdAt ? new Date(entry.createdAt).toLocaleDateString() : '-'}
+                      </td>
+                      <td className="py-4 px-4 text-sm font-medium text-[#627D98] break-words">
+                        {entry.description || '-'}
+                      </td>
+                      <td className="py-4 px-4 font-bold text-base text-right text-[#0A2540]">
+                        {entry.operationDirection === 'CREDIT' ? '+' : entry.operationDirection === 'DEBIT' ? '-' : ''}
+                        {vm.formatAmount(entry.amount)} EUR
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-16 text-[#627D98] text-base font-semibold">
+              No hay movimientos recientes.
+            </div>
+          )}
+        </Card>
+
+        {/* OPERACIONES (5/12) */}
+        <Card className="px-8 pt-8 pb-8 flex flex-col w-full shadow-sm lg:col-span-5">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-2xl font-black text-[#0A2540]">Operaciones</p>
+          </div>
+
+          {vm.operations.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[#E2E8F0] text-[#627D98] text-xs uppercase tracking-wider">
+                    <th className="py-4 px-4 font-bold w-1/3">Fecha</th>
+                    <th className="py-4 px-4 font-bold w-1/3 text-center">Tipo</th>
+                    <th className="py-4 px-4 font-bold text-right w-1/3">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#F1F5F9] text-base font-semibold text-[#627D98]">
+                  {vm.operations.map((op: any) => (
+                    <tr
+                      key={op.id}
+                      className="hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
+                      onClick={() => vm.handleRowClick(op)}
+                    >
+                      <td className="py-4 px-4 text-sm font-medium text-[#627D98]">
+                        {op.createdAt ? new Date(op.createdAt).toLocaleDateString() : '-'}
+                      </td>
+                      <td className="py-4 px-4 text-sm font-medium text-[#627D98] text-center">
+                        {op.operationType}
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        {getStatusBadge(op.status)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-16 text-[#627D98] text-base font-semibold">
+              No hay operaciones registradas.
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* MODAL DE DETALLES DE OPERACIÓN / MOVIMIENTO */}
       {vm.isDetailsModalOpen && (
         <div className="fixed inset-0 z-50 bg-white flex flex-col justify-between p-8 md:p-12 animate-in fade-in duration-150 overflow-y-auto">
           <div className="relative flex items-center justify-center w-full pt-2">
             <span className="text-sm font-bold text-[#0A2540] uppercase tracking-widest">
-              Detalles de la Operación
+              {vm.selectedOperation?.operationDirection ? 'Detalles del Movimiento' : 'Detalles de la Operación'}
             </span>
             <button 
               onClick={vm.closeDetailsModal}
@@ -270,124 +241,162 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
               <LoadingScreen label="Cargando detalles..." />
             ) : vm.selectedOperation ? (
               <div className="w-full space-y-8">
-                <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
-                  <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                    <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tipo de Operación</span>
-                    <span className="text-2xl font-black text-[#627D98]">{vm.selectedOperation.operationType}</span>
-                  </div>
-
-                  {vm.selectedOperation.operationType === 'TRANSFER' && (
-                    <>
-                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuenta Destino</span>
-                        <span className="text-base font-mono font-bold text-[#627D98]">{vm.selectedOperation.targetBankAccountId}</span>
-                      </div>
-                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Concepto</span>
-                        <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.concept}</span>
-                      </div>
-                    </>
-                  )}
-
-                  {vm.selectedOperation.operationType === 'LOAN' && (
-                    <>
-                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Plazo / Frecuencia</span>
-                        <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.termPeriods} cuotas ({vm.selectedOperation.installmentFrequency})</span>
-                      </div>
-                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tasa de Interés</span>
-                        <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.interestRate}% TIN</span>
-                      </div>
-                    </>
-                  )}
-
-                  {vm.selectedOperation.operationType === 'INSTALLMENT' && (
+                {vm.selectedOperation.operationDirection ? (
+                  // ===================
+                  // VISTA DE MOVIMIENTO
+                  // ===================
+                  <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
                     <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                      <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">ID de Préstamo Asociado</span>
-                      <span className="text-base font-mono font-bold text-[#627D98]">{vm.selectedOperation.loanId}</span>
+                      <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tipo de Operación</span>
+                      <span className="text-2xl font-black text-[#627D98]">{vm.selectedOperation.operationType}</span>
                     </div>
-                  )}
 
-                  <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
-                    <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Fecha de Creación</span>
-                    <span className="text-lg font-bold text-[#627D98]">
-                      {vm.selectedOperation.createdAt ? new Date(vm.selectedOperation.createdAt).toLocaleString() : '-'}
-                    </span>
+                    <div className="flex justify-between items-start pb-6 border-b border-[#E2E8F0] gap-4">
+                      <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider whitespace-nowrap">Descripción</span>
+                      <span className="text-lg font-bold text-[#627D98] text-right break-words">{vm.selectedOperation.description || '-'}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                      <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Fecha de Creación</span>
+                      <span className="text-lg font-bold text-[#627D98]">
+                        {vm.selectedOperation.createdAt ? new Date(vm.selectedOperation.createdAt).toLocaleString() : '-'}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuantía</span>
+                      <span className="text-4xl font-black text-[#0A2540]">
+                        {vm.selectedOperation.operationDirection === 'CREDIT' ? '+' : ''}
+                        {vm.selectedOperation.operationDirection === 'DEBIT' ? '-' : ''}
+                        {vm.selectedOperation.amount?.toFixed(2) || '0.00'} {currency}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuantía</span>
-                    <span className="text-4xl font-black text-[#0A2540]">
-                      {vm.selectedOperation.amount?.toFixed(2)} {currency}
-                    </span>
-                  </div>
-                </div>
-
-                {/* HISTORIAL DE ESTADOS */}
-                {vm.selectedOperation.statusHistory && vm.selectedOperation.statusHistory.length > 0 && (
-                  <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6 text-left">
-                    <span className="text-base font-bold text-[#627D98] uppercase tracking-wider block mb-4">Historial de Estados</span>
-                    
-                    {vm.selectedOperation.statusHistory.length === 1 ? (
-                      <div className="flex flex-col gap-1.5 pl-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md shrink-0" />
-                            <span className="font-black text-xl text-[#0A2540]">{vm.selectedOperation.statusHistory[0].status}</span>
-                          </div>
-                          <span className="text-sm font-bold text-[#627D98]">
-                            {vm.selectedOperation.statusHistory[0].createdAt ? new Date(vm.selectedOperation.statusHistory[0].createdAt).toLocaleString() : ''}
-                          </span>
-                        </div>
-                        {vm.selectedOperation.statusHistory[0].reason && (
-                          <p className="text-sm text-slate-600 font-semibold pl-8">{vm.selectedOperation.statusHistory[0].reason}</p>
-                        )}
+                ) : (
+                  // ===================
+                  // VISTA DE OPERACIÓN 
+                  // ===================
+                  <>
+                    <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6">
+                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tipo de Operación</span>
+                        <span className="text-2xl font-black text-[#627D98]">{vm.selectedOperation.operationType}</span>
                       </div>
-                    ) : (
-                      <div className="pl-8 flex flex-col gap-8">
-                        {vm.selectedOperation.statusHistory.map((phase: any, index: number, arr: any[]) => (
-                          <div key={index} className="relative flex flex-col gap-1.5">
-                            {/* Línea conectora, se oculta en el último elemento para que no sobresalga */}
-                            {index !== arr.length - 1 && (
-                              <div className="absolute -left-[26px] top-3 bottom-[-40px] w-1 bg-[#E2E8F0] z-0" />
-                            )}
-                            {/* Punto */}
-                            <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md z-10" />
-                            
+
+                      {vm.selectedOperation.operationType === 'TRANSFER' && (
+                        <>
+                          <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                            <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuenta Destino</span>
+                            <span className="text-base font-mono font-bold text-[#627D98]">{vm.selectedOperation.targetBankAccountId}</span>
+                          </div>
+                          <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                            <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Concepto</span>
+                            <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.concept}</span>
+                          </div>
+                        </>
+                      )}
+
+                      {vm.selectedOperation.operationType === 'LOAN' && (
+                        <>
+                          <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                            <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Plazo / Frecuencia</span>
+                            <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.termPeriods} cuotas ({vm.selectedOperation.installmentFrequency})</span>
+                          </div>
+                          <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                            <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Tasa de Interés</span>
+                            <span className="text-xl font-bold text-[#627D98]">{vm.selectedOperation.interestRate}% TIN</span>
+                          </div>
+                        </>
+                      )}
+
+                      {vm.selectedOperation.operationType === 'INSTALLMENT' && (
+                        <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                          <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">ID de Préstamo Asociado</span>
+                          <span className="text-base font-mono font-bold text-[#627D98]">{vm.selectedOperation.loanId}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center pb-6 border-b border-[#E2E8F0]">
+                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Fecha de Creación</span>
+                        <span className="text-lg font-bold text-[#627D98]">
+                          {vm.selectedOperation.createdAt ? new Date(vm.selectedOperation.createdAt).toLocaleString() : '-'}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-bold text-[#627D98] uppercase tracking-wider">Cuantía</span>
+                        <span className="text-4xl font-black text-[#0A2540]">
+                          {vm.selectedOperation.amount?.toFixed(2)} {currency}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* HISTORIAL DE ESTADOS (Solo Operaciones) */}
+                    {vm.selectedOperation.statusHistory && vm.selectedOperation.statusHistory.length > 0 && (
+                      <div className="bg-[#F0F4F9] p-10 rounded-[40px] border border-[#E2E8F0] space-y-6 text-left">
+                        <span className="text-base font-bold text-[#627D98] uppercase tracking-wider block mb-4">Historial de Estados</span>
+                        
+                        {vm.selectedOperation.statusHistory.length === 1 ? (
+                          <div className="flex flex-col gap-1.5 pl-2">
                             <div className="flex items-center justify-between">
-                              <span className="font-black text-xl text-[#0A2540]">{phase.status}</span>
+                              <div className="flex items-center gap-4">
+                                <div className="w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md shrink-0" />
+                                <span className="font-black text-xl text-[#0A2540]">{vm.selectedOperation.statusHistory[0].status}</span>
+                              </div>
                               <span className="text-sm font-bold text-[#627D98]">
-                                {phase.createdAt ? new Date(phase.createdAt).toLocaleString() : ''}
+                                {vm.selectedOperation.statusHistory[0].createdAt ? new Date(vm.selectedOperation.statusHistory[0].createdAt).toLocaleString() : ''}
                               </span>
                             </div>
-                            {phase.reason && (
-                              <p className="text-sm text-slate-600 font-semibold">{phase.reason}</p>
+                            {vm.selectedOperation.statusHistory[0].reason && (
+                              <p className="text-sm text-slate-600 font-semibold pl-8">{vm.selectedOperation.statusHistory[0].reason}</p>
                             )}
                           </div>
-                        ))}
+                        ) : (
+                          <div className="pl-8 flex flex-col gap-8">
+                            {vm.selectedOperation.statusHistory.map((phase: any, index: number, arr: any[]) => (
+                              <div key={index} className="relative flex flex-col gap-1.5">
+                                {/* Línea conectora */}
+                                {index !== arr.length - 1 && (
+                                  <div className="absolute -left-[26px] top-3 bottom-[-40px] w-1 bg-[#E2E8F0] z-0" />
+                                )}
+                                {/* Punto azul original */}
+                                <div className="absolute -left-8 top-1.5 w-4 h-4 rounded-full bg-[#0066FF] border-4 border-white shadow-md z-10" />
+                                
+                                <div className="flex items-center justify-between">
+                                  <span className="font-black text-xl text-[#0A2540]">{phase.status}</span>
+                                  <span className="text-sm font-bold text-[#627D98]">
+                                    {phase.createdAt ? new Date(phase.createdAt).toLocaleString() : ''}
+                                  </span>
+                                </div>
+                                {phase.reason && (
+                                  <p className="text-sm text-slate-600 font-semibold">{phase.reason}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
-                )}
 
-                {/* BOTÓN DE DESCARGA DE INFORME */}
-                {activeOpId && (
-                  <div className="w-full pt-2">
-                    <Button
-                      variant="primary"
-                      className="w-full py-4 text-base font-bold shadow-sm cursor-pointer gap-2 rounded-2xl bg-[#0066FF] hover:bg-[#0052CC]"
-                      onClick={() => vm.handleDownloadStatement(activeOpId)}
-                    >
-                      <Download className="w-5 h-5" />
-                      Descargar informe de operación
-                    </Button>
-                  </div>
+                    {/* BOTÓN DE DESCARGA DE INFORME (Solo Operaciones) */}
+                    {activeOpId && (
+                      <div className="w-full pt-2">
+                        <Button
+                          variant="primary"
+                          className="w-full py-4 text-base font-bold shadow-sm cursor-pointer gap-2 rounded-2xl bg-[#0066FF] hover:bg-[#0052CC]"
+                          onClick={() => vm.handleDownloadStatement(activeOpId)}
+                        >
+                          <Download className="w-5 h-5" />
+                          Descargar informe de operación
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
               <div className="text-center py-12 text-[#627D98] text-lg font-semibold">
-                No se pudieron cargar los detalles de la operación.
+                No se pudieron cargar los detalles.
               </div>
             )}
           </div>
@@ -426,7 +435,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                 required 
                 placeholder="0.00" 
                 value={vm.depositAmount} 
-                onChange={handleAmountInputChange} 
+                onChange={vm.handleDepositAmountChange} 
                 className="text-8xl md:text-9xl font-black text-[#0A2540] text-center bg-transparent outline-none border-none ring-0 w-full tracking-tighter placeholder:text-slate-200 caret-transparent focus:caret-[#0066FF] cursor-text py-2" 
               />
               <span className="text-3xl font-bold text-[#0066FF] tracking-wider uppercase mt-6 select-none">
@@ -487,7 +496,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                   <div className="w-full text-left mt-2">
                     <span className="text-xs font-bold text-[#627D98] uppercase tracking-wider block mb-3">Tus contactos de confianza:</span>
                     <div className="grid grid-cols-1 gap-2.5 max-h-48 overflow-y-auto pr-1">
-                      {vm.trustedAccounts.map(acc => (
+                      {vm.trustedAccounts.map((acc: any) => (
                         <div 
                           key={acc.bankAccountId}
                           onClick={() => vm.setTransferTargetId(acc.bankAccountId!)}
@@ -525,7 +534,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                   onChange={e => vm.setTransferConcept(e.target.value)}
                   className="w-full h-16 px-6 text-center text-lg font-semibold bg-[#F0F4F9] rounded-2xl border border-[#E2E8F0] outline-none focus:border-[#0066FF]"
                 />
-                {isUuidValid(vm.transferTargetId) && (
+                {vm.isUuidValid(vm.transferTargetId) && (
                   <label className="flex items-center gap-3 cursor-pointer mt-2 animate-in fade-in duration-200">
                     <input 
                       type="checkbox"
@@ -548,7 +557,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
                   required 
                   placeholder="0.00" 
                   value={vm.transferAmount} 
-                  onChange={handleTransferAmountChange} 
+                  onChange={vm.handleTransferAmountChange} 
                   className="text-8xl md:text-9xl font-black text-[#0A2540] text-center bg-transparent outline-none border-none ring-0 w-full tracking-tighter placeholder:text-slate-200 caret-transparent focus:caret-[#0066FF] cursor-text py-2" 
                 />
                 <span className="text-3xl font-bold text-[#0066FF] tracking-wider uppercase mt-6 select-none">
@@ -592,7 +601,7 @@ export function ClientHomeView({ client, setActiveTab }: ClientHomeViewProps) {
               <Button 
                 variant="primary"
                 disabled={
-                  (vm.transferStep === 1 && !isUuidValid(vm.transferTargetId)) ||
+                  (vm.transferStep === 1 && !vm.isUuidValid(vm.transferTargetId)) ||
                   (vm.transferStep === 2 && !vm.transferConcept) ||
                   (vm.transferStep === 3 && (!vm.transferAmount || Number(vm.transferAmount) <= 0))
                 }

@@ -25,7 +25,7 @@ import type {
   GetMyOperationsParams,
   InstallmentResponse,
   LoanResponse,
-  PagedModelOperationEntryResponse,
+  PagedModelOperationResponse,
   TransferResponse
 } from '../model';
 
@@ -228,7 +228,7 @@ export const getMyOperations = (
 ) => {
 
 
-      return customInstance<PagedModelOperationEntryResponse>(
+      return customInstance<PagedModelOperationResponse>(
       {url: `/api/v1/operations/me`, method: 'GET',
         params, signal
     },

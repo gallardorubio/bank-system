@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useGetMyBankAccount } from '../../api/bank-account-controller/bank-account-controller';
+import { useState } from 'react';
+import { useGetMyBankAccount, useGetEntries } from '../../api/bank-account-controller/bank-account-controller';
 import { useGetMyOperations } from '../../api/operation-controller/operation-controller';
 import { useCreateDeposit } from '../../api/deposit-controller/deposit-controller';
 import { useCreateTransfer } from '../../api/transfer-controller/transfer-controller';
 import { useGetTrustedBankAccounts } from '../../api/client-controller/client-controller';
 import { customInstance } from '../../api/mutator/instance';
-import type { DepositRequest, TransferRequest, OperationEntryResponse } from '../../api/model';
+import type { DepositRequest, TransferRequest } from '../../api/model';
 
 export function useHomeVM() {
   const { data: bankAccount, isLoading: isLoadingAccount, refetch: refetchAccount } = useGetMyBankAccount();
@@ -13,16 +13,15 @@ export function useHomeVM() {
   
   const createDepositMutation = useCreateDeposit();
   const createTransferMutation = useCreateTransfer();
-
+  
   const [depositAmount, setDepositAmount] = useState('');
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositError, setDepositError] = useState<string | null>(null);
-
-  const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
+  
   const [selectedOperation, setSelectedOperation] = useState<any | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-
+  
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [transferStep, setTransferStep] = useState<1 | 2 | 3 | 4>(1);
   const [transferTargetId, setTransferTargetId] = useState('');
@@ -30,9 +29,8 @@ export function useHomeVM() {
   const [transferAmount, setTransferAmount] = useState('');
   const [saveAsTrusted, setSaveAsTrusted] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
-
-  // Estado local para mantener los estados enriquecidos de las operaciones
-  const [enrichedStatuses, setEnrichedStatuses] = useState<Record<string, string>>({});
+  
+  const [showFilters, setShowFilters] = useState(false);
 
   const [filters, setFilters] = useState({
     concept: '',
@@ -48,58 +46,53 @@ export function useHomeVM() {
     amount: '',
   });
 
-  const { 
-    data: operationsPage, 
-    isLoading: isLoadingOperations, 
-    refetch: refetchOperations 
+  // Operaciones: Sin filtros
+  const {
+    data: operationsPage,
+    isLoading: isLoadingOperations,
+    refetch: refetchOperations
   } = useGetMyOperations({
+    size: 50,
+  });
+
+  // Movimientos: Con filtros aplicados
+  const {
+    data: entriesPage,
+    isLoading: isLoadingEntries,
+    refetch: refetchEntries
+  } = useGetEntries({
     concept: appliedFilters.concept || undefined,
     target_client_name: appliedFilters.target_client_name || undefined,
     created_at: appliedFilters.created_at || undefined,
     amount: appliedFilters.amount ? Number(appliedFilters.amount) : undefined,
-    size: 20,
+    size: 50,
   });
 
-  const rawEntries = useMemo<OperationEntryResponse[]>(() => {
-    return operationsPage?.content || [];
-  }, [operationsPage?.content]);
+  const entries = entriesPage?.content || [];
+  const operations = operationsPage?.content || [];
 
-  // Enriquecer las operaciones en segundo plano para obtener su estado real
-  useEffect(() => {
-    if (!rawEntries.length) return;
+  const formatAmount = (val: any) => {
+    if (val === undefined || val === null) return '0.00';
+    return Number(val).toFixed(2);
+  };
 
-    const fetchStatuses = async () => {
-      const newStatuses: Record<string, string> = {};
-      for (const entry of rawEntries) {
-        const opId = entry.operationId;
-        if (!opId) continue;
+  const balanceValue = bankAccount?.balance !== undefined ? formatAmount(bankAccount.balance) : '0.00';
+  const currency = bankAccount?.currency || 'EUR';
 
-        let endpoint = `/api/v1/operations/${opId}`;
-        if (entry.operationType === 'DEPOSIT') endpoint = `/api/v1/deposits/${opId}`;
-        else if (entry.operationType === 'TRANSFER') endpoint = `/api/v1/transfers/${opId}`;
-        else if (entry.operationType === 'LOAN') endpoint = `/api/v1/loans/${opId}`;
+  const isUuidValid = (uuid: string) => {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid);
+  };
 
-        try {
-          const details: any = await customInstance({ url: endpoint, method: 'GET' });
-          if (details?.status) {
-            newStatuses[opId] = details.status;
-          }
-        } catch {
-          // Ignorar errores individuales de carga en lote
-        }
-      }
-      setEnrichedStatuses(prev => ({ ...prev, ...newStatuses }));
-    };
+  const handleAmountInputChange = (e: React.ChangeEvent<HTMLInputElement>, setter: (val: string) => void) => {
+    const val = e.target.value.replace(/[^0-9.]/g, '');
+    const parts = val.split('.');
+    if (parts.length > 2) return;
+    if (parts[1] && parts[1].length > 2) return;
+    setter(val);
+  };
 
-    fetchStatuses();
-  }, [rawEntries]);
-
-  const entries = useMemo(() => {
-    return rawEntries.map(entry => ({
-      ...entry,
-      status: entry.status || (entry.operationId ? enrichedStatuses[entry.operationId] : undefined)
-    }));
-  }, [rawEntries, enrichedStatuses]);
+  const handleDepositAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => handleAmountInputChange(e, setDepositAmount);
+  const handleTransferAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => handleAmountInputChange(e, setTransferAmount);
 
   const openDepositModal = () => {
     setDepositAmount('');
@@ -120,53 +113,41 @@ export function useHomeVM() {
       setDepositError('Introduce una cantidad válida');
       return;
     }
-
     setDepositError(null);
     const payload: DepositRequest = { amount: parsedAmount };
-
     try {
       await createDepositMutation.mutateAsync({ data: payload });
       closeDepositModal();
       refetchAccount();
       refetchOperations();
+      refetchEntries();
     } catch (err: any) {
       setDepositError(err?.response?.data?.detail || err?.message || 'Error al procesar el depósito');
     }
   };
 
-  const handleRowClick = async (entry: OperationEntryResponse) => {
-    if (!entry.operationId) return;
-    setSelectedOperationId(entry.operationId);
-    setIsLoadingDetails(true);
+  const handleRowClick = async (item: any) => {
     setIsDetailsModalOpen(true);
-    setSelectedOperation(null);
+    setIsLoadingDetails(true);
+    setSelectedOperation(item);
 
-    let endpoint = `/api/v1/operations/${entry.operationId}`;
-    if (entry.operationType === 'DEPOSIT') {
-      endpoint = `/api/v1/deposits/${entry.operationId}`;
-    } else if (entry.operationType === 'TRANSFER') {
-      endpoint = `/api/v1/transfers/${entry.operationId}`;
-    } else if (entry.operationType === 'LOAN') {
-      endpoint = `/api/v1/loans/${entry.operationId}`;
+    const opId = item.operationId || item.id;
+    if (!opId) {
+      setIsLoadingDetails(false);
+      return;
     }
 
+    let endpoint = `/api/v1/operations/${opId}`;
+    if (item.operationType === 'DEPOSIT') endpoint = `/api/v1/deposits/${opId}`;
+    else if (item.operationType === 'TRANSFER') endpoint = `/api/v1/transfers/${opId}`;
+    else if (item.operationType === 'LOAN') endpoint = `/api/v1/loans/${opId}`;
+    else if (item.operationType === 'INSTALLMENT') endpoint = `/api/v1/operations/${opId}`;
+
     try {
-      const details = await customInstance<any>({
-        url: endpoint,
-        method: 'GET',
-      });
-      setSelectedOperation({ ...details, operationType: entry.operationType });
+      const details = await customInstance<any>({ url: endpoint, method: 'GET' });
+      setSelectedOperation({ ...item, ...details });
     } catch (err) {
       console.error('Error al cargar detalles de la operación:', err);
-      try {
-        const fallbackDetails = await customInstance<any>({
-          url: `/api/v1/operations/${entry.operationId}`,
-          method: 'GET',
-        });
-        setSelectedOperation(fallbackDetails);
-      } catch (fallbackErr) {
-        console.error('Error en fallback de detalles:', fallbackErr);
-      }
     } finally {
       setIsLoadingDetails(false);
     }
@@ -175,8 +156,9 @@ export function useHomeVM() {
   const closeDetailsModal = () => {
     setIsDetailsModalOpen(false);
     setSelectedOperation(null);
-    setSelectedOperationId(null);
   };
+
+  const activeOpId = selectedOperation?.operationId || selectedOperation?.id;
 
   const openTransferModal = () => {
     setTransferStep(1);
@@ -204,7 +186,6 @@ export function useHomeVM() {
       setTransferError('Por favor, completa todos los campos correctamente.');
       return;
     }
-
     setTransferError(null);
     const payload: TransferRequest = {
       targetBankAccountId: transferTargetId,
@@ -212,12 +193,12 @@ export function useHomeVM() {
       amount: parsedAmount,
       saveAsTrusted,
     };
-
     try {
       await createTransferMutation.mutateAsync({ data: payload });
       closeTransferModal();
       refetchAccount();
       refetchOperations();
+      refetchEntries();
     } catch (err: any) {
       setTransferError(err?.response?.data?.detail || err?.message || 'Error al procesar la transferencia');
       setTransferStep(4);
@@ -228,16 +209,8 @@ export function useHomeVM() {
     setFilters(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const applyFilters = (e: React.FormEvent) => {
-    if (e && e.preventDefault) {
-      e.preventDefault();
-    }
-    setAppliedFilters({
-      concept: filters.concept,
-      target_client_name: filters.target_client_name,
-      created_at: filters.created_at,
-      amount: filters.amount,
-    });
+  const applyFilters = () => {
+    setAppliedFilters({ ...filters });
   };
 
   const clearFilters = () => {
@@ -246,16 +219,14 @@ export function useHomeVM() {
   };
 
   const handleDownloadStatement = async (id?: string | null) => {
-    const targetId = id || selectedOperationId || selectedOperation?.id;
+    const targetId = id || activeOpId;
     if (!targetId) return;
-
     try {
       const blob = await customInstance<Blob>({
         url: `/api/v1/operations/${targetId}/statement`,
         method: 'GET',
         responseType: 'blob',
       });
-      
       const url = window.URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
@@ -273,7 +244,8 @@ export function useHomeVM() {
     bankAccount,
     trustedAccounts: trustedAccounts || [],
     entries,
-    isLoading: isLoadingAccount || isLoadingOperations,
+    operations,
+    isLoading: isLoadingAccount || isLoadingOperations || isLoadingEntries,
     isDepositing: createDepositMutation.isPending,
     isTransferring: createTransferMutation.isPending,
     isDepositModalOpen,
@@ -281,12 +253,11 @@ export function useHomeVM() {
     depositError,
     openDepositModal,
     closeDepositModal,
-    setDepositAmount,
     handleConfirmDeposit,
     isDetailsModalOpen,
-    selectedOperationId,
-    selectedOperation,
     isLoadingDetails,
+    selectedOperation,
+    activeOpId,
     handleRowClick,
     closeDetailsModal,
     isTransferModalOpen,
@@ -305,9 +276,17 @@ export function useHomeVM() {
     closeTransferModal,
     handleConfirmTransfer,
     filters,
+    showFilters,
+    setShowFilters,
     handleFilterChange,
     applyFilters,
     clearFilters,
     handleDownloadStatement,
+    formatAmount,
+    balanceValue,
+    currency,
+    isUuidValid,
+    handleDepositAmountChange,
+    handleTransferAmountChange
   };
 }

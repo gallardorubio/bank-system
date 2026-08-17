@@ -5,6 +5,7 @@
  * Documentación de la API REST del Core Bancario
  * OpenAPI spec version: 0.0.1
  */
+import type { DepositResponseOperationType } from './depositResponseOperationType';
 import type { DepositResponseStatus } from './depositResponseStatus';
 import type { OperationResponse } from './operationResponse';
 import type { OperationStatusPhase } from './operationStatusPhase';
@@ -16,4 +17,5 @@ export type DepositResponse = OperationResponse & {
   status?: DepositResponseStatus;
   statusHistory?: OperationStatusPhase[];
   createdAt?: string;
+  operationType?: DepositResponseOperationType;
 };

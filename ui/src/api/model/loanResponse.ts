@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.0.1
  */
 import type { LoanResponseInstallmentFrequency } from './loanResponseInstallmentFrequency';
+import type { LoanResponseOperationType } from './loanResponseOperationType';
 import type { LoanResponseStatus } from './loanResponseStatus';
 import type { OperationResponse } from './operationResponse';
 import type { OperationStatusPhase } from './operationStatusPhase';
@@ -25,4 +26,5 @@ export type LoanResponse = OperationResponse & {
   nextInstallmentAmount?: number;
   nextInstallmentDate?: string;
   maturityDate?: string;
+  operationType?: LoanResponseOperationType;
 };
