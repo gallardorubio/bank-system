@@ -93,7 +93,6 @@
         <p>Bank System Core Service</p>
     </div>
 
-    <!-- Tabla Principal de la Operación -->
     <table>
         <tr>
             <th style="width: 22%;">ID Operación</th>
@@ -115,7 +114,6 @@
         </tr>
     </table>
 
-    <!-- Transferencia -->
     <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.transfer.dto.TransferResponse)}">
         <div class="section-title">Detalles de la transferencia</div>
         <table>
@@ -130,7 +128,6 @@
         </table>
     </div>
 
-    <!-- Préstamo -->
     <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.loan.dto.LoanResponse)}">
         <div class="section-title">Detalles del préstamo</div>
         <table>
@@ -155,7 +152,6 @@
         </table>
     </div>
 
-    <!-- Cuota (Installment) -->
     <div th:if="${op instanceof T(io.github.gallardorubio.banksystem.core.installment.dto.InstallmentResponse)}">
         <div class="section-title">Detalles del pago de cuota</div>
         <table>
@@ -166,7 +162,6 @@
         </table>
     </div>
 
-    <!-- Historial de cambios -->
     <div class="section-title">Historial de cambios de estado</div>
     <table>
         <thead>
