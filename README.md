@@ -4,6 +4,12 @@
 ██▄▄██ ██▀██ ███▄██ ██▄█▀ ▀▀▀▄▄▄ ▀███▀ ███▄▄   ██   ██▄▄  ██▀▄▀██ 
 ██▄▄█▀ ██▀██ ██ ▀██ ██ ██ █████▀   █   ▄▄██▀   ██   ██▄▄▄ ██   ██ 
 </pre>
+
+<p align="center">
+  <img src="docs/images/landing.png" alt="Pantalla de acceso" width="49%"/>
+  <img src="docs/images/client.png" alt="Vista de cliente" width="49%"/>
+</p>
+
 </div>
 
 # Documentación
