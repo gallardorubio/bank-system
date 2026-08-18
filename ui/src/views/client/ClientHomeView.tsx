@@ -22,10 +22,10 @@ export function ClientHomeView({ client, setActiveTab }: any) {
   };
 
   return (
-    <div className="flex flex-col gap-10 w-full pb-8 relative">
+    <div className="flex min-w-0 max-w-full flex-col gap-10 w-full pb-8 relative overflow-x-hidden">
       <div>
-        <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">Bienvenido de nuevo,</span>
-        <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">{client?.name || 'Cliente'}</h1>
+        <span className="text-xs sm:text-sm text-[#627D98] font-bold uppercase tracking-widest">Bienvenido de nuevo,</span>
+        <h1 className="text-3xl font-black text-[#0A2540] tracking-tighter mt-3 sm:text-4xl lg:text-5xl">{client?.name || 'Cliente'}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
@@ -39,9 +39,9 @@ export function ClientHomeView({ client, setActiveTab }: any) {
                 </span>
               )}
             </div>
-            <div className="text-7xl font-black mt-8 tracking-tighter flex items-baseline gap-3">
+            <div className="mt-8 flex flex-wrap items-baseline gap-2 text-[2.5rem] font-black tracking-tighter sm:text-5xl lg:text-7xl">
               <span>{balanceValue}</span>
-              <span className="text-3xl font-bold text-[#0066FF]">{currency}</span>
+              <span className="text-xl font-bold text-[#0066FF] sm:text-2xl lg:text-3xl">{currency}</span>
             </div>
           </div>
 

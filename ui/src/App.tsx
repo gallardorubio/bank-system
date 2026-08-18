@@ -71,28 +71,30 @@ export default function App() {
               onCancel={() => setIsRegistering(false)}
             />
           ) : (
-            <div className="p-16 flex flex-col justify-center gap-10">
-              <div className="space-y-3">
-                <h1 className="text-5xl font-black text-[#0A2540] tracking-tight">Acceso</h1>
-                <p className="text-lg text-[#627D98]">
-                  Ingresa a tu banca en línea o crea una cuenta en segundos.
-                </p>
-              </div>
-              <div className="flex flex-col gap-5">
-                <Button
-                  variant="primary"
-                  onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })}
-                  className="w-full py-4 text-base font-bold shadow-sm"
-                >
-                  Iniciar sesión
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => setIsRegistering(true)}
-                  className="w-full py-4 text-base font-bold"
-                >
-                  Crear cuenta
-                </Button>
+            <div className="flex h-full min-h-[420px] items-center justify-center p-6 sm:p-8 md:p-12">
+              <div className="w-full max-w-[500px] space-y-7">
+                <div className="space-y-4 text-left">
+                  <h1 className="text-[3rem] font-black leading-none tracking-[-0.04em] text-[#0A2540]">Acceso</h1>
+                  <p className="text-[1.05rem] leading-relaxed text-[#627D98]">
+                    Ingresa a tu banca en línea o crea una cuenta en segundos.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <Button
+                    variant="primary"
+                    onClick={() => auth.signinRedirect({ extraQueryParams: { lang: 'es' } })}
+                    className="w-full rounded-xl py-4 text-[1.05rem] font-bold shadow-sm"
+                  >
+                    Iniciar sesión
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setIsRegistering(true)}
+                    className="w-full rounded-xl py-4 text-[1.05rem] font-bold"
+                  >
+                    Crear cuenta
+                  </Button>
+                </div>
               </div>
             </div>
           )}

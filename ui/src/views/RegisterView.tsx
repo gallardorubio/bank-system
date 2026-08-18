@@ -68,7 +68,7 @@ export function RegisterView({ onSuccess, onCancel }: RegisterViewProps) {
   }
 
   return (
-    <div className="p-12 flex flex-col justify-between overflow-y-auto h-full">
+    <div className="flex h-full min-w-0 max-w-full flex-col justify-between overflow-y-auto p-6 sm:p-8 md:p-12">
       <div>
         <h1 className="text-4xl font-black text-[#0A2540] tracking-tight mb-2">Crear cuenta</h1>
         <p className="text-sm text-[#627D98] mb-8">

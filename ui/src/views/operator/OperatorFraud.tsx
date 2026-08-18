@@ -13,10 +13,10 @@ export function OperatorFraud() {
   return (
     <div className="flex flex-col gap-10 w-full pb-8 relative">
       <div>
-        <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">
+        <span className="text-xs sm:text-sm text-[#627D98] font-bold uppercase tracking-widest">
           Auditoría de Seguridad
         </span>
-        <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">
+        <h1 className="text-3xl font-black text-[#0A2540] tracking-tighter mt-3 sm:text-4xl lg:text-5xl">
           Fraude
         </h1>
       </div>

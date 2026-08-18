@@ -49,10 +49,10 @@ export function ClientLoansView() {
   };
 
   return (
-    <div className="flex flex-col gap-10 w-full pb-8 relative">
+    <div className="flex min-w-0 max-w-full flex-col gap-10 w-full pb-8 relative overflow-x-hidden">
       <div>
-        <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">Financiación</span>
-        <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">Préstamos</h1>
+        <span className="text-xs sm:text-sm text-[#627D98] font-bold uppercase tracking-widest">Financiación</span>
+        <h1 className="text-3xl font-black text-[#0A2540] tracking-tighter mt-3 sm:text-4xl lg:text-5xl">Préstamos</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
@@ -184,9 +184,9 @@ export function ClientLoansView() {
                 <Landmark className="w-5 h-5 text-white" />
               </div>
             </div>
-            <div className="text-7xl font-black mt-6 tracking-tighter text-white flex items-baseline gap-2.5">
-              <span className="leading-none">{isFinite(estimatedInstallment) ? estimatedInstallment.toFixed(2) : '0.00'}</span> 
-              <span className="text-3xl font-black text-[#0A2540]">EUR</span>
+            <div className="text-4xl font-black mt-6 tracking-tighter text-white flex flex-wrap items-baseline gap-2 sm:text-5xl lg:text-7xl">
+              <span className="leading-none">{isFinite(estimatedInstallment) ? estimatedInstallment.toFixed(2) : '0.00'}</span>
+              <span className="text-xl font-black text-[#0A2540] sm:text-2xl lg:text-3xl">EUR</span>
             </div>
           </div>
 

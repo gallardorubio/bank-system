@@ -15,12 +15,12 @@ export function OperatorEscalatedView() {
 
   return (
     <div className="flex flex-col gap-10 w-full pb-8 relative">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">
+          <span className="text-xs sm:text-sm text-[#627D98] font-bold uppercase tracking-widest">
             Resolución manual
           </span>
-          <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">
+          <h1 className="text-3xl font-black text-[#0A2540] tracking-tighter mt-3 sm:text-4xl lg:text-5xl">
             Escalados
           </h1>
         </div>
@@ -30,7 +30,7 @@ export function OperatorEscalatedView() {
             className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               vm.activeSubTab === 'deposits'
                 ? 'bg-white text-[#0A2540] shadow-sm'
-                : 'text-[#627D98] hover:text-[#0A2540]'
+                : 'text-[#627D98]'
             }`}
           >
             Depósitos ({vm.escalatedDeposits.length})
@@ -40,7 +40,7 @@ export function OperatorEscalatedView() {
             className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               vm.activeSubTab === 'loans'
                 ? 'bg-white text-[#0A2540] shadow-sm'
-                : 'text-[#627D98] hover:text-[#0A2540]'
+                : 'text-[#627D98]'
             }`}
           >
             Préstamos ({vm.escalatedLoans.length})

@@ -35,8 +35,8 @@ export function ClientProfileView() {
   return (
     <div className="flex flex-col gap-10 w-full pb-12">
       <div>
-        <span className="text-sm text-[#627D98] font-bold uppercase tracking-widest">CONFIGURACIÓN</span>
-        <h1 className="text-5xl font-black text-[#0A2540] tracking-tighter mt-3">Mi Perfil</h1>
+        <span className="text-xs sm:text-sm text-[#627D98] font-bold uppercase tracking-widest">CONFIGURACIÓN</span>
+        <h1 className="text-3xl font-black text-[#0A2540] tracking-tighter mt-3 sm:text-4xl lg:text-5xl">Mi Perfil</h1>
       </div>
 
       <Card className="p-8 w-full">
@@ -246,7 +246,7 @@ export function ClientProfileView() {
       </Card>
 
       <Card className="p-8 w-full">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#E8F0FE] flex items-center justify-center text-[#0066FF]">
               <Download className="w-5 h-5" />
@@ -254,11 +254,13 @@ export function ClientProfileView() {
             <h2 className="text-xl font-black text-[#0A2540]">Informe de cuenta</h2>
           </div>
 
-          <div className="flex gap-3 items-center">
-            <input type="date" value={vm.statementDates.start_date} onChange={e => vm.setEditStatementDates(prev => ({ ...prev, start_date: e.target.value }))} className="h-11 px-3 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] text-sm font-semibold outline-none" />
-            <input type="date" value={vm.statementDates.end_date} onChange={e => vm.setEditStatementDates(prev => ({ ...prev, end_date: e.target.value }))} className="h-11 px-3 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] text-sm font-semibold outline-none" />
-            <Button onClick={vm.handleDownloadStatement} disabled={vm.isDownloadingStatement} className="gap-2 px-6 py-3 text-sm font-bold cursor-pointer">
-              {vm.isDownloadingStatement ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Descargar
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end xl:max-w-[66%]">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <input type="date" value={vm.statementDates.start_date} onChange={e => vm.setEditStatementDates(prev => ({ ...prev, start_date: e.target.value }))} className="h-[46px] min-h-[46px] min-w-0 flex-1 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] px-3 text-sm font-semibold outline-none sm:w-40" />
+              <input type="date" value={vm.statementDates.end_date} onChange={e => vm.setEditStatementDates(prev => ({ ...prev, end_date: e.target.value }))} className="h-[46px] min-h-[46px] min-w-0 flex-1 rounded-xl border border-[#E2E8F0] bg-[#F0F4F9] px-3 text-sm font-semibold outline-none sm:w-40" />
+            </div>
+            <Button onClick={vm.handleDownloadStatement} disabled={vm.isDownloadingStatement} className="h-[46px] min-h-[46px] shrink-0 gap-2 px-5 text-sm font-bold leading-none sm:px-6">
+              {vm.isDownloadingStatement ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <Download className="h-4 w-4 shrink-0" />} Descargar
             </Button>
           </div>
         </div>
