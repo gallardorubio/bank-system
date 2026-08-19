@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:alpine
-    container_name: core-db
+    container_name: db
     ports:
       - "${POSTGRES_PORT}:5432"
     environment:
@@ -39,3 +39,36 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     depends_on:
       - kafka
+  core:
+    build:
+      context: ./services/core
+      dockerfile: Dockerfile
+    container_name: core
+    ports:
+      - "${CORE_PORT}:8080"
+    env_file:
+      - ./services/core/.env
+    depends_on:
+      - db
+      - kafka
+  agentic:
+    build:
+      context: ./services/agentic
+      dockerfile: Dockerfile
+    container_name: agentic
+    env_file:
+      - ./services/agentic/.env
+    depends_on:
+      - kafka
+      - core
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: ui
+    ports:
+      - "${UI_PORT}:80"
+    env_file:
+      - ./ui/.env
+    depends_on:
+      - core
